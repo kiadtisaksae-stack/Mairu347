@@ -1,0 +1,16 @@
+using UnityEngine;
+
+[System.Serializable]
+public class ItemData
+{
+    public string Name;
+    public int ItemID;
+    // เพิ่มคุณสมบัติอื่นๆ เช่น Icon, Type, Value
+
+    // Constructor เพื่อสร้างข้อมูลจาก Item Component
+    public ItemData(Item itemComponent)
+    {
+        this.Name = itemComponent.Name;
+        // กำหนดค่าอื่นๆ ตามต้องการ
+    }
+}
