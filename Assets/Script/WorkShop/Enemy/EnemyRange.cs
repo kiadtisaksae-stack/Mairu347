@@ -3,6 +3,10 @@ using UnityEngine;
 public class EnemyRange : Enemy
 {
     public float attackRange = 5f; // Range within which the enemy can attack
+    protected override EnemyType GetEnemyType()
+    {
+        return EnemyType.EnemyRange;
+    }
 
     private void Update()
     {

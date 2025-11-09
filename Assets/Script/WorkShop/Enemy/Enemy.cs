@@ -8,6 +8,11 @@ public class Enemy : Character
 {
     // ⚙️ ตัวแปรสถานะและตั้งค่า
     protected enum State { Idel, Chase, Attack, Death }
+    protected virtual EnemyType GetEnemyType()
+    {
+        // ค่า Default เผื่อไว้
+        return EnemyType.All;
+    }
 
     [Header("Attack Settings")]
     [SerializeField]
@@ -20,6 +25,25 @@ public class Enemy : Character
     protected Rigidbody rb;
     
     protected Player _targetPlayer;
+
+    [Header("Reward")]
+    [SerializeField]
+    private NetworkObject[] rewardItemPrefabs = new NetworkObject[3];
+    [Header("Drop Rate Weights (Total should be 100)")]
+    [Tooltip("Item 1 (Common)")]
+    [SerializeField]
+    private int dropWeight1 = 50;
+    [Tooltip("Item 2 (Uncommon)")]
+    [SerializeField]
+    private int dropWeight2 = 30;
+    [Tooltip("Item 3 (Rare)")]
+    [SerializeField]
+    private int dropWeight3 = 20;
+    [SerializeField]
+    private int rewardCount = 1;
+
+
+
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
@@ -49,6 +73,30 @@ public class Enemy : Character
             currentState = State.Chase;
         }
     }
+    public override void TakeDamage(int amount)
+    {
+        if (!IsServer)
+        {
+            return;
+        }
+
+        int actualDamage = Mathf.Clamp(amount - Deffent, 1, amount);
+        health -= actualDamage;
+
+
+        ShowDamageClientRpc(actualDamage, transform.position);
+
+        if (health <= 0)
+        {
+            
+            DropReward();
+            InvokeOnDestroy();
+            NotifyQuestProgressClientRpc(GetEnemyType());
+            GetComponent<NetworkObject>().Despawn();
+            
+        }
+    }
+
     public override void SetUP()
     {
         base.SetUP();
@@ -58,7 +106,54 @@ public class Enemy : Character
             Debug.LogError("Animator component not found on " + gameObject.name);
         }
     }
-    
+    protected virtual void DropReward()
+    {
+        if (!IsServer) return;
+
+        // ตรวจสอบความถูกต้องของ Array
+        if (rewardItemPrefabs.Length < 3 || rewardItemPrefabs[0] == null)
+        {
+            return;
+        }
+
+        Vector3 dropPosition = transform.position + Vector3.up * 0.2f; // Drop เหนือพื้นเล็กน้อย
+
+        for (int i = 0; i < rewardCount; i++)
+        {
+            NetworkObject selectedPrefab = GetRandomWeightedReward();
+
+            if (selectedPrefab != null)
+            {
+                NetworkObject droppedItem = Instantiate(selectedPrefab, dropPosition, Quaternion.identity);
+                droppedItem.Spawn(true);
+                Debug.Log($"[SERVER REWARD] Dropped item: {selectedPrefab.name}");
+            }
+        }
+    }
+    private NetworkObject GetRandomWeightedReward()
+    {
+        int totalWeight = dropWeight1 + dropWeight2 + dropWeight3;
+        if (totalWeight <= 0)
+        {
+            Debug.LogError("[REWARD ERROR] Total drop weight is zero or negative. Check inspector values.");
+            return rewardItemPrefabs[0];
+        }
+        int randomNumber = UnityEngine.Random.Range(0, totalWeight);
+
+        if (randomNumber < dropWeight1)
+        {
+            return rewardItemPrefabs[0];
+        }
+        else if (randomNumber < dropWeight1 + dropWeight2)
+        {
+            return rewardItemPrefabs[1];
+        }
+        else
+        {
+            return rewardItemPrefabs[2];
+        }
+    }
+
     protected virtual void Turn(Vector3 direction)
     {
         // ลบแกน Y ออกจากการหมุนเพื่อไม่ให้ศัตรูเงย/ก้มตามพื้น
@@ -93,6 +188,17 @@ public class Enemy : Character
         if (animator.GetBool("Attack") != isAttacking)
         {
             animator.SetBool("Attack", isAttacking);
+        }
+    }
+    [ClientRpc]
+    private void NotifyQuestProgressClientRpc(EnemyType type)
+    {
+        // โค้ดนี้จะรันบน Client ทุกคน
+        // เราต้องมั่นใจว่า QuestManager ที่เราเข้าถึงคือของ Local Player
+        if (NetworkManager.Singleton.LocalClient.PlayerObject.TryGetComponent(out QuestManager localQuestManager))
+        {
+            // Local Player รับทราบว่าศัตรูถูกฆ่า
+            localQuestManager.TrackEnemyKill(type);
         }
     }
 }

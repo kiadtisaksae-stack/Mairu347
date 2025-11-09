@@ -32,6 +32,14 @@ public class Character : Identity, Idestoryable
     protected Animator animator;
 
     public event Action<Idestoryable> OnDestory;
+    protected void InvokeOnDestroy()
+    {
+        OnDestory?.Invoke(this);
+    }
+
+
+    [Header("Quests")]
+    protected QuestManager questManager;
 
     // Netcode Lifecycle: OnNetworkSpawn/OnDespawn 
 
@@ -79,15 +87,21 @@ public class Character : Identity, Idestoryable
     
     public virtual void TakeDamage(int amount)
     {
-        
+        if (!IsServer)
+        {
+            // Client ไม่ควรเรียก TakeDamage ตรงๆ แต่คุณจัดการแล้ว
+            return;
+        }
 
         int actualDamage = Mathf.Clamp(amount - Deffent, 1, amount);
-        
-     
+        health -= actualDamage;
+
+
         ShowDamageClientRpc(actualDamage, transform.position); 
 
         if (health <= 0)
         {
+
             OnDestory?.Invoke(this);
             GetComponent<NetworkObject>().Despawn();
         }
@@ -99,13 +113,13 @@ public class Character : Identity, Idestoryable
         health += amount;
         HealClientRpc(amount, transform.position);
     }
+    
+    
 
     #region ---RPC Calls---
     [ClientRpc]
     public void ShowDamageClientRpc(int actualDamage, Vector3 damagePosition)
     {
-        if (!IsServer) return;
-        health -= actualDamage;
         if (animator != null)
         {
             animator.SetTrigger("Hit");

@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 // กำหนดให้เป็น sealed เพื่อป้องกันการสืบทอด

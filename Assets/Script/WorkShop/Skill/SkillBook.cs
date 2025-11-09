@@ -10,7 +10,6 @@ public class SkillBook : NetworkBehaviour
     private List<Skill> DulationSkills = new List<Skill>();
 
     private Player player;
-    private InputSystem_Actions inputActions;
 
     private void Start()
     {
@@ -22,24 +21,6 @@ public class SkillBook : NetworkBehaviour
         skillsSet.Add(new BuffSkillMoveSpeed());
     }
 
-    private void OnEnable()
-    {
-        if (inputActions == null)
-            inputActions = new InputSystem_Actions();
-
-        inputActions.Player.Enable();
-        inputActions.Player.Skill1.performed += ctx => UseSkill(0);
-        inputActions.Player.Skill2.performed += ctx => UseSkill(1);
-        inputActions.Player.Skill3.performed += ctx => UseSkill(2);
-    }
-
-    private void OnDisable()
-    {
-        inputActions.Player.Skill1.performed -= ctx => UseSkill(0);
-        inputActions.Player.Skill2.performed -= ctx => UseSkill(1);
-        inputActions.Player.Skill3.performed -= ctx => UseSkill(2);
-        inputActions.Player.Disable();
-    }
 
     void Update()
     {

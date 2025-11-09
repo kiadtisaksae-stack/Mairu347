@@ -2407,6 +2407,7 @@ GameObject:
   - component: {fileID: 9036980633323257398}
   - component: {fileID: 5983713991643269314}
   - component: {fileID: 9001242193128073599}
+  - component: {fileID: 1559682856190423886}
   - component: {fileID: 1377451366773954460}
   - component: {fileID: 1272070284696664651}
   - component: {fileID: 6431540717913110896}
@@ -2507,6 +2508,19 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &1559682856190423886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8189980434977739222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9952cd7771795274c85964b2a468e50a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::QuestManager
+  activeQuests: []
 --- !u!114 &1377451366773954460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2552,6 +2566,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a4f95f033d20e942af1bad578d37ed8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   skillEffects:
   - {fileID: 4593184484909914552, guid: 2e1e9506f5904a64b81744324fb7cd50, type: 3}
   - {fileID: 8771972552311404799, guid: bbf9e36a48d6c5648a13889afab076fd, type: 3}

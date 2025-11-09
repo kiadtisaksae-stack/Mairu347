@@ -5,6 +5,13 @@ using UnityEngine;
 [RequireComponent(typeof(SphereCollider))]
 public class Item : Identity
 {
+    private const float COLLECT_COOLDOWN_TIME = 2f;
+
+    private readonly NetworkVariable<bool> _isCollectable = new NetworkVariable<bool>(
+        true, // Default: collectable
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
     private Collider _collider;
     protected Collider itemcollider {
         get {
@@ -25,13 +32,22 @@ public class Item : Identity
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+        // Subscribe เพื่ออัปเดต Collider บนทุก Client เมื่อค่าเปลี่ยน
+        _isCollectable.OnValueChanged += OnCollectableStateChanged;
+
+        if (IsServer)
+        {
+            ApplyCollectCooldown();
+        }
+
+        // ตั้งค่าสถานะเริ่มต้นของ Collider บน Client ที่เข้ามาก่อน/หลัง
+        UpdateColliderState(_isCollectable.Value);
 
     }
     public override void OnNetworkDespawn()
     {
         base.OnNetworkDespawn();
 
-        // 💡 รับประกันการทำลาย GameObject หลังจากการ Despawn ของ Netcode
         if (gameObject != null)
         {
             Destroy(gameObject);
@@ -39,6 +55,40 @@ public class Item : Identity
 
     }
 
+    private void ApplyCollectCooldown()
+    {
+        if (!IsServer) return;
+
+        //Server ตั้งค่าเป็น false ทันที (ซิงค์ไปยัง Client ทุกคน)
+        _isCollectable.Value = false;
+
+        Invoke(nameof(SetCollectableTrue), COLLECT_COOLDOWN_TIME);
+    }
+    private void SetCollectableTrue()
+    {
+        if (IsServer)
+        {
+            _isCollectable.Value = true;
+        }
+    }
+    private void OnCollectableStateChanged(bool oldValue, bool newValue)
+    {
+        UpdateColliderState(newValue);
+    }
+
+    private void UpdateColliderState(bool isCollectable)
+    {
+        if (itemcollider != null)
+        {
+            // เปิด/ปิด Collider ตามสถานะที่ซิงค์มา
+            itemcollider.enabled = isCollectable;
+
+            if (isCollectable)
+            {
+                Debug.Log($"[ITEM] {Name} collider enabled (Collectable).");
+            }
+        }
+    }
     public Item() { 
     }
     public Item(Item item)
@@ -88,7 +138,7 @@ public class Item : Identity
             // ถ้าไม่ผ่านการตรวจสอบ ควรเปิด Collider คืน (ถ้ามี logic การเปิด)
             return; 
         }
-        
+        if (!_isCollectable.Value) return;
         // 2. Server เรียก Hook
         OnCollect(collector); 
 
