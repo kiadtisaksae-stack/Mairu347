@@ -5070,8 +5070,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawnManager
   ShowTopMostFoldoutHeaderGroup: 1
   enemyPrefabs:
-  - {fileID: 3370077113412415012, guid: b499ca1e6cd02499b838290badfc4049, type: 3}
-  - {fileID: 476983223883873469, guid: 3a41377d092534161950139da92ced6d, type: 3}
+  - {fileID: 3370077113412415012, guid: d238dd927501f364c9ce931587d7b2f0, type: 3}
+  - {fileID: 476983223883873469, guid: d4e6c5dc626e36a488a28d302ec7cf34, type: 3}
   minEnemiesPerPoint: 1
   maxEnemiesPerPoint: 3
   spawnRadius: 2
@@ -12364,7 +12364,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f083920478d6f744ca41f8744d19c158, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  playGame: {fileID: 0}
 --- !u!4 &2085899512
 Transform:
   m_ObjectHideFlags: 0
