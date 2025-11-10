@@ -368,7 +368,7 @@ public class Player : Character
             {
 
 
-                e.TakeDamage(Damage);
+                //e.TakeDamage(Damage);
 
                 Enemy enemy = e as Enemy;
                 if (enemy != null)
