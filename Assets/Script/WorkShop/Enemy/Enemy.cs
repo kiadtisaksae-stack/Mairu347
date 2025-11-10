@@ -1,12 +1,9 @@
 using UnityEngine;
-using Unity.Netcode; // สำหรับ OnNetworkSpawn และ Netcode
-// สมมติว่าคลาส Player และ Character มีอยู่จริง
-// และ Character สืบทอดมาจาก Identity ที่มี GetClosestPlayer()
+using Unity.Netcode; 
 
 [RequireComponent(typeof(Rigidbody))]
 public class Enemy : Character
 {
-    // ⚙️ ตัวแปรสถานะและตั้งค่า
     protected enum State { Idel, Chase, Attack, Death }
     protected virtual EnemyType GetEnemyType()
     {
@@ -130,6 +127,11 @@ public class Enemy : Character
             }
         }
     }
+    // logic for experience reward
+    protected virtual void ExperienceReward()
+    {
+
+    }
     private NetworkObject GetRandomWeightedReward()
     {
         int totalWeight = dropWeight1 + dropWeight2 + dropWeight3;
@@ -193,7 +195,6 @@ public class Enemy : Character
     [ClientRpc]
     private void NotifyQuestProgressClientRpc(EnemyType type)
     {
-        // โค้ดนี้จะรันบน Client ทุกคน
         // เราต้องมั่นใจว่า QuestManager ที่เราเข้าถึงคือของ Local Player
         if (NetworkManager.Singleton.LocalClient.PlayerObject.TryGetComponent(out QuestManager localQuestManager))
         {

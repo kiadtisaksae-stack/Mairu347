@@ -52,6 +52,7 @@ public class EnemySpawnManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+
         if (IsServer)
         {
             // Host/Server: เรียก Spawn ศัตรูเริ่มต้น
@@ -63,6 +64,14 @@ public class EnemySpawnManager : NetworkBehaviour
             destroyedEnemyIds.OnListChanged += HandleDestroyedEnemyListChanged;
         }
     }
+    public void OnTriggerSpawn()
+    {
+        if (IsServer)
+        {
+            SpawnInitialEnemies();
+        }
+    
+    }
 
     public override void OnNetworkDespawn()
     {
@@ -72,6 +81,7 @@ public class EnemySpawnManager : NetworkBehaviour
         }
         else
         {
+
             destroyedEnemyIds.OnListChanged -= HandleDestroyedEnemyListChanged;
         }
     }
