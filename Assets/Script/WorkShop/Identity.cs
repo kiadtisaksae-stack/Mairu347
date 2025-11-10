@@ -217,7 +217,7 @@ public class Identity : NetworkBehaviour
 
     private void FixedUpdate()
     {
-       
+        
         if (Time.time > lastCheckTime + updateCheckInterval)
         {
             lastCheckTime = Time.time;
@@ -226,6 +226,7 @@ public class Identity : NetworkBehaviour
 
         if (Time.time >= lastSaveTime + saveInterval)
         {
+            if (!IsOwner) return;
             lastSaveTime = Time.time;
             SendPositionToServerRpc(transform.position);
         }

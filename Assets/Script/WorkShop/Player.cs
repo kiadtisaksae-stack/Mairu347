@@ -20,11 +20,14 @@ public class Player : Character
     private Vector3 _serverPosition;
     private bool _needsPositionCorrection = false;
 
+    // UI Input Setters
     public void SetMoveInput(Vector2 input) => _uiMoveInput = input;
     public void SetJumpInput(bool input) => _uiJumpInput = input;
     public void SetSprintInput(bool input) => _uiSprintInput = input;
     public void SetInteractInput(bool input) => _isInteract = input;
     public void SetAttackInput(bool input) => _isAttacking = input;
+    // end UI Input Setters
+
     [Header("Hand setting")]
     public Transform RightHand;
     public Transform LeftHand;
@@ -49,7 +52,6 @@ public class Player : Character
 
     private InputSystem_Actions inputActions;
     private CharacterController characterController;
-    private string currentAnimation = " ";
     [Header("Animation Settings")]
     public List<string> attackAnimations;
     public List<GameObject> effect;
@@ -366,7 +368,7 @@ public class Player : Character
             {
 
 
-                e.TakeDamage(Damage);
+                //e.TakeDamage(Damage);
 
                 Enemy enemy = e as Enemy;
                 if (enemy != null)
