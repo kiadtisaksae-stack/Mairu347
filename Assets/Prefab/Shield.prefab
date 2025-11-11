@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7713640690957520733
+--- !u!1 &2464425561693916716
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,49 +8,49 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4519620091977639877}
-  - component: {fileID: 2257597234872456041}
-  - component: {fileID: 3994452024825579604}
-  - component: {fileID: 5168819827426784506}
-  - component: {fileID: 1675914715435459097}
-  - component: {fileID: 8824480645132288756}
+  - component: {fileID: 6327438904215198713}
+  - component: {fileID: 476921406400494191}
+  - component: {fileID: 3243225442521920017}
+  - component: {fileID: 4037163988619621039}
+  - component: {fileID: 4509346058655383584}
+  - component: {fileID: 4928528981810289238}
   m_Layer: 0
-  m_Name: OHS03PBR
+  m_Name: Shield
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4519620091977639877
+--- !u!4 &6327438904215198713
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7713640690957520733}
+  m_GameObject: {fileID: 2464425561693916716}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5, y: 0.6, z: -1.31}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &2257597234872456041
+--- !u!33 &476921406400494191
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7713640690957520733}
-  m_Mesh: {fileID: -4692214948189147205, guid: de392f919a34e4e4c94a6e77ef08a22d, type: 3}
---- !u!23 &3994452024825579604
+  m_GameObject: {fileID: 2464425561693916716}
+  m_Mesh: {fileID: 4364022679922356163, guid: 4f74d725d371c394ba3753952409c5ee, type: 3}
+--- !u!23 &3243225442521920017
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7713640690957520733}
+  m_GameObject: {fileID: 2464425561693916716}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -92,13 +92,13 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!135 &5168819827426784506
+--- !u!135 &4037163988619621039
 SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7713640690957520733}
+  m_GameObject: {fileID: 2464425561693916716}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -111,22 +111,22 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.70781434
-  m_Center: {x: -0.00000014901161, y: 0.50358963, z: -0.000000039115548}
---- !u!114 &1675914715435459097
+  m_Radius: 0.32322264
+  m_Center: {x: 0.000000014901161, y: -0.056953296, z: 0.07961763}
+--- !u!114 &4509346058655383584
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7713640690957520733}
+  m_GameObject: {fileID: 2464425561693916716}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3628269174
-  InScenePlacedSourceGlobalObjectIdHash: 0
+  GlobalObjectIdHash: 3527904094
+  InScenePlacedSourceGlobalObjectIdHash: 3769277837
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
@@ -138,19 +138,19 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &8824480645132288756
+--- !u!114 &4928528981810289238
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7713640690957520733}
+  m_GameObject: {fileID: 2464425561693916716}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3c610aa699bd934aa403244fc56b332, type: 3}
+  m_Script: {fileID: 11500000, guid: 59f3cdf4bf1efa443abbeb4340b96f01, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 0
-  sprite: {fileID: 21300004, guid: 1eaee135ce037439d925cee5e41ce026, type: 3}
-  itemName: Sword
-  baseDamage: 25
+  m_EditorClassIdentifier: Assembly-CSharp::Shield
+  ShowTopMostFoldoutHeaderGroup: 1
+  sprite: {fileID: 21300110, guid: 1eaee135ce037439d925cee5e41ce026, type: 3}
+  itemName: Shield
+  Diffent: 25
