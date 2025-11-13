@@ -1,7 +1,4 @@
-using Unity.Netcode;
 using UnityEngine;
-using Unity.Collections;
-using System.Runtime.InteropServices.WindowsRuntime;
 
 // Sword สือบทอดจาก Item
 public class Sword : Item
@@ -12,14 +9,15 @@ public class Sword : Item
     }
     [SerializeField]
     public int baseDamage = 25;
+    int Number = 0;
     public override void OnCollect(Player player)
     {
         // 1. ตรวจสอบ Server Authority
         if (!IsServer) return;
         base.OnCollect(player);
-        player.Damage += baseDamage; 
-        player.EquipItemVisualClientRpc(new FixedString32Bytes(Name));
-        player.AddItem(this); 
+        player.Damage += baseDamage;
+        player.AddItem(this);
+        Inventory.Instance.ActivateRightHandWeapon(Number);
     }
     
 }

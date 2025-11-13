@@ -43,13 +43,11 @@ public class UICanvasControllerInput : MonoBehaviour
         if (isSearching) yield break;
 
         isSearching = true;
-        Debug.Log("🔍 Searching for local player...");
 
         int attempts = 0;
         while (attempts < 50) // พยายามหา 5 วินาที
         {
             var players = FindObjectsOfType<Player>();
-            Debug.Log($"🔍 Found {players.Length} players in scene");
 
             foreach (var player in players)
             {
@@ -65,7 +63,6 @@ public class UICanvasControllerInput : MonoBehaviour
             }
 
             attempts++;
-            Debug.Log($"⏳ Waiting for local player... attempt {attempts}");
             yield return new WaitForSeconds(0.1f);
         }
 
@@ -86,7 +83,6 @@ public class UICanvasControllerInput : MonoBehaviour
         if (localPlayer != null)
         {
             localPlayer.SetAttackInput(isAttack);
-            Debug.Log($"🎮 UI Attack Input: {isAttack}");
         }
 
     }

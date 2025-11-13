@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,17 +52,25 @@ public class QuestManager : MonoBehaviour
     // ใช้ List ในการเก็บเควสที่ใช้งานอยู่
     public List<QuestData> activeQuests = new List<QuestData>();
     private InputSystem_Actions inputActions;
+=======
+﻿using System.Collections.Generic;
+using UnityEngine;
 
-    // 🎯 เควสที่ 1: ฆ่าศัตรู
-    private QuestData questKillEnemies = new QuestData
+public class QuestManager : MonoBehaviour
+{
+    public static QuestManager Instance { get; private set; }
+>>>>>>> Stashed changes
+
+    [Header("Active Quests")]
+    public List<QuestData> activeQuests = new List<QuestData>(); // เควสที่กำลังทำอยู่
+    private void Awake()
     {
-        questName = "การทดสอบนักรบ",
-        objectives = new List<QuestObjective>
+        if (Instance != null && Instance != this)
         {
-            new QuestObjective { enemyType = EnemyType.EnemyRange, objectiveDescription = "ตี Enemy Range 2 ตัว", requiredCount = 2, currentCount = 0 },
-            new QuestObjective { enemyType = EnemyType.EnemyMovetoPlayer, objectiveDescription = "ตี Enemy Move 2 ตัว", requiredCount = 2, currentCount = 0 },
-            new QuestObjective { enemyType = EnemyType.All, objectiveDescription = "ตีศัตรูรวม 5 ตัว", requiredCount = 5, currentCount = 0 }
+            Destroy(gameObject);
+            return;
         }
+<<<<<<< Updated upstream
     };
 
     // 🎯 เควสที่ 2: เก็บไอเทม
@@ -81,10 +90,17 @@ public class QuestManager : MonoBehaviour
         inputActions.Player.T.performed += ctx => SubmitQuests();
 
 
+=======
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+>>>>>>> Stashed changes
     }
+ 
 
-    void Update()
+    // เริ่มเควส (ส่ง SO ตรงมาเลย)
+    public void StartQuest(QuestData quest)
     {
+<<<<<<< Updated upstream
         //// 1. กด Q เพื่อรับเควส
         //if (Input.GetKeyDown(KeyCode.Q))
         //{
@@ -169,35 +185,51 @@ public class QuestManager : MonoBehaviour
         if (activeQuests.Count == 0)
         {
             Debug.LogWarning("❌ ไม่มีเควสที่ใช้งานอยู่ให้ส่ง!");
+=======
+        if (activeQuests.Contains(quest))
+        {
+            Debug.LogWarning($"❌ เควส {quest.questName} อยู่ใน active list แล้ว!");
+>>>>>>> Stashed changes
             return;
         }
 
-        List<QuestData> questsToComplete = new List<QuestData>();
+        quest.CurrentCount = 0;
+        activeQuests.Add(quest);
 
-        foreach (var quest in activeQuests.ToList()) // ใช้ ToList() เพื่อป้องกันการแก้ไข List ระหว่างวนซ้ำ
+        Debug.Log($"🎯 เริ่มเควส: {quest.questName} / ต้องทำ {quest.requestCount} ครั้ง");
+    }
+
+    // เพิ่มความคืบหน้า
+    public void AddProgress(QuestData quest, int amount = 1)
+    {
+        if (!activeQuests.Contains(quest))
         {
-            if (quest.isCompleted)
-            {
-                Debug.Log($"✅ **ส่งเควสสำเร็จ: {quest.questName}**");
-                questsToComplete.Add(quest);
-                quest.isActive = false;
-                // [TODO] เพิ่มโค้ดให้รางวัล
-            }
-            else
-            {
-                // เงื่อนไข: ถ้าไม่ครบ ให้ Debug
-                Debug.LogWarning($"⚠️ เควส **{quest.questName}** ยังไม่สำเร็จ:");
-                foreach (var obj in quest.objectives.Where(o => !o.isCompleted))
-                {
-                    Debug.Log($" - ขาด: {obj.objectiveDescription} ({obj.currentCount}/{obj.requiredCount})");
-                }
-            }
+            Debug.LogWarning($"❌ เควส {quest.questName} ยังไม่ได้เริ่ม!");
+            return;
         }
 
-        // ลบเควสที่เสร็จสิ้นออกจากรายการ
-        foreach (var completedQuest in questsToComplete)
+        quest.CurrentCount += amount;
+
+        CheckProgress(quest);
+    }
+
+    // ตรวจสอบครบ
+    private void CheckProgress(QuestData quest)
+    {
+        if (quest.CurrentCount >= quest.requestCount)
         {
-            activeQuests.Remove(completedQuest);
+            CompleteQuest(quest);
         }
     }
+<<<<<<< Updated upstream
 }
+=======
+
+    // เควสสำเร็จ
+    private void CompleteQuest(QuestData quest)
+    {
+        Debug.Log($"✅ เควสสำเร็จแล้ว: {quest.questName}");
+        activeQuests.Remove(quest);
+    }
+}
+>>>>>>> Stashed changes

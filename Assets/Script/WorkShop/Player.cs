@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using NUnit.Framework;
-using Unity.Collections;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
 public class Player : Character
@@ -12,13 +10,6 @@ public class Player : Character
     private Vector2 _uiMoveInput;
     private bool _uiJumpInput;
     private bool _uiSprintInput;
-    [Header("Network Movement Settings")]
-    [SerializeField] private float movementSyncInterval = 0.1f; // Sync 10 ครั้ง/วินาที
-    [SerializeField] private float positionCorrectionStrength = 5f;
-    
-    private float _lastMovementSyncTime = 0f;
-    private Vector3 _serverPosition;
-    private bool _needsPositionCorrection = false;
 
     // UI Input Setters
     public void SetMoveInput(Vector2 input) => _uiMoveInput = input;
@@ -27,20 +18,9 @@ public class Player : Character
     public void SetInteractInput(bool input) => _isInteract = input;
     public void SetAttackInput(bool input) => _isAttacking = input;
     // end UI Input Setters
-
-    [Header("Hand setting")]
-    public Transform RightHand;
-    public Transform LeftHand;
-    [Header("inventory")]
-    public List<ItemData> inventory = new List<ItemData>();
-    
-    [Header("Weapon & Equitpment")]
-    public List<GameObject> WeaponVisuals = new List<GameObject>();
-    public List<GameObject> equitpMentvis = new List<GameObject>();
     bool _isAttacking = false;
     bool _isInteract = false;
     [Header("Movement Settings")]
-    [SerializeField] private float sprintSpeed = 8f;
     [SerializeField] private float jumpForce = 8f;
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float rotationSmoothTime = 0.2f;
@@ -59,6 +39,8 @@ public class Player : Character
     public List<GameObject> effect;
 
     private bool isNetworkReady = false;
+
+    public QuestData questDataTest;
 
     private void Awake()
     {
@@ -82,6 +64,7 @@ public class Player : Character
         inputActions.Player.Sprint.canceled += ctx => _uiSprintInput= false;
         inputActions.Player.Jump.performed += ctx => _uiJumpInput = true;
         inputActions.Player.Jump.canceled += ctx => _uiJumpInput = false;
+        inputActions.Player.Q.performed += ctx => TestQuest();
     }
 
     private void OnDisable()
@@ -104,11 +87,6 @@ public class Player : Character
             {
                 isNetworkReady = true;
             }
-
-            Debug.Log($"✅ Owner player enabled - Client ID: {OwnerClientId}");
-
-            // ตั้งค่าเริ่มต้น
-            _serverPosition = transform.position;
         }
         else
         {
@@ -167,11 +145,14 @@ public class Player : Character
 
     public void Update()
     {
+
         if (!IsOwner) return;
         ApplyGravity();
-        
-        // 🚨 เรียก UpdateInFrontCache ใน Update ของ Player
         UpdateInFrontCache();
+    }
+    public void TestQuest()
+    {
+        QuestManager.Instance.StartQuest(questDataTest);
     }
     #region --- interactable Logic ---
     // 🚨 Override method นี้เพื่อใช้พารามิเตอร์ที่เหมาะสมกับ Player
@@ -276,16 +257,17 @@ public class Player : Character
     #region --- Inventory Logic ---
     public void AddItem(Item item)
     {
-    
+        bool isAlreadyActive = Inventory.Instance.WeaponRigthHand
+        .Any(w => w != null && w.activeSelf && w.name == item.Name);
+        if (isAlreadyActive) return;
+
         ItemData newItemData = new ItemData(item);
-        inventory.Add(newItemData);
-        if (IsOwner) 
+        Inventory.Instance.inventory.Add(newItemData);
+        
+        if (InventoryUI.Instance != null)
         {
-            if (InventoryUI.Instance != null)
-            {
                 
-                InventoryUI.Instance.UpdateUIOnItemCollect(newItemData, item.GetEquipment());
-            }
+            InventoryUI.Instance.UpdateUIOnItemCollect(newItemData, item.GetEquipment());
         }
     }
     #endregion
@@ -327,7 +309,6 @@ public class Player : Character
         if (!IsOwner) return;
         if (characterController == null)
         {
-            Debug.LogError("❌ CharacterController is null in ApplyGravity!");
             return;
         }
         bool isGrounded = characterController.isGrounded;
@@ -342,10 +323,6 @@ public class Player : Character
         if (jump && characterController.isGrounded)
         {
             velocity.y = jumpForce;   
-        }
-        else
-        {
-            
         }
     }
     #endregion
@@ -376,35 +353,7 @@ public class Player : Character
             _isAttacking = false;
         }
     }
-    public bool IsItemEquipped(string itemName)
-    {
-        foreach (GameObject weapon in WeaponVisuals)
-        {
-            if (weapon != null && weapon.activeSelf)
-            {
-                // 💡 แก้ไข: ใช้เฉพาะ .name.Contains() หรือเปรียบเทียบชื่อตรงๆ
-                if (weapon.name.Contains(itemName))
-                {
-                    return true;
-                }
-            }
-        }
-
-        // ตรวจสอบใน equitpMentvis (ถือเป็น LeftHand หรือ Equipment)
-        foreach (GameObject equipment in equitpMentvis)
-        {
-            if (equipment != null && equipment.activeSelf)
-            {
-                // 💡 แก้ไข: ใช้เฉพาะ .name.Contains()
-                if (equipment.name.Contains(itemName))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
+    
     [ServerRpc]
     public void RequestPlayAttackAnimServerRpc()
     {
@@ -450,89 +399,6 @@ public class Player : Character
         if (animator != null)
         {
             animator.SetFloat("Speed", speed);
-        }
-    }
-    [ServerRpc]
-    private void ServerRequestAnimationTriggerServerRpc(FixedString32Bytes triggerName)
-    {
-        // ตรวจสอบ Server
-        if (!IsServer) return;
-
-        // สั่งให้ Client เล่น Trigger
-        PlayAnimationTriggerClientRpc(triggerName);
-    }
-    [ClientRpc]
-    private void PlayAnimationTriggerClientRpc(FixedString32Bytes triggerName)
-    {
-        if (animator != null)
-        {
-            animator.SetTrigger(triggerName.ToString());
-        }
-    }
-    [ClientRpc]
-    public void EquipItemVisualClientRpc(FixedString32Bytes itemName)
-    {
-        // 1. Logic การจัดการ Visuals
-        HandleWeaponVisuals(itemName.ToString());
-        
-        // 2. Logic การแสดงผลดาเมจ Text (ถ้ามี)
-    }
-
-    // จัดการการสลับ Visuals 
-    private void HandleWeaponVisuals(string targetItemName)
-    {
-        if (RightHand == null) return;
-
-        bool foundAndEquipped = false;
-
-        foreach (GameObject weapon in WeaponVisuals)
-        {
-            if (weapon == null) continue;
-           
-
-            bool isTargetWeapon = weapon.name.Contains(targetItemName) || weapon.CompareTag(targetItemName);
-
-            if (isTargetWeapon)
-            {
-                weapon.SetActive(true);
-                foundAndEquipped = true;
-                Debug.Log($"Equipped: {weapon.name}");
-            }
-            else
-            {
-                weapon.SetActive(false);
-            }
-        }
-
-        if (!foundAndEquipped)
-        {
-            Debug.LogWarning($"Visual for item '{targetItemName}' not found in WeaponVisuals list.");
-        }
-    }
-    private void HandleEquitpment(string targetItemName)
-    {
-        if (LeftHand == null) return;
-        bool foundAndEquipped = false;
-        foreach (GameObject equitpment in equitpMentvis)
-        {
-            if (equitpment == null) continue;
-            bool isTargetequitp = equitpment.name.Contains(targetItemName) || equitpment.CompareTag(targetItemName);
-
-            if (isTargetequitp)
-            {
-                equitpment.SetActive(true);
-                foundAndEquipped = true;
-                Debug.Log($"Equipped: {equitpment.name}");
-            }
-            else
-            {
-                equitpment.SetActive(false);
-            }
-
-        }
-        if (!foundAndEquipped)
-        {
-            Debug.LogWarning($"Visual for item '{targetItemName}' not found in WeaponVisuals list.");
         }
     }
 
