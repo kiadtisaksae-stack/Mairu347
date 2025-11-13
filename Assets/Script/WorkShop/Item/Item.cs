@@ -65,31 +65,26 @@ public class Item : Identity
     public void HandleDestroyed()
     {
         if (!IsServer) return;
-        // 1. Host/Server เรียก Event เพื่อให้ Manager บันทึก ID
         OnCollected?.Invoke(NetworkObjectId);
-        // 2. สั่ง Despawn (จะเรียก OnNetworkDespawn บนทุกเครื่อง)
         NetworkObject.Despawn();
     }
     public void OnTriggerEnter(Collider other)
     {
-        // ต้องเป็น Server หรือ Owner ที่ต้องการส่ง RPC
-        if (NetworkManager.Singleton.IsClient)
-        {
-            if (other.tag == "Player")
-            {
-                Player collector = other.GetComponent<Player>();
+        if (!IsServer) return; // ✅ ให้ Server เป็นคนจัดการเท่านั้น
 
-                if (collector != null && collector.IsOwner) 
-                {
-                    RequestCollectServerRpc(collector.NetworkObject);
-                }
+        if (other.CompareTag("Player"))
+        {
+            Player collector = other.GetComponent<Player>();
+            if (collector != null)
+            {
+                OnCollect(collector);
+                HandleDestroyed();
             }
         }
     }
 
     public virtual void OnCollect(Player player)
     {
-        player.AddItem(this);
         Debug.Log($"Collected {Name}");
     }
 
@@ -98,34 +93,6 @@ public class Item : Identity
         Debug.Log($"Using {Name}");
     }
 
-    // *** SERVER SIDE: การตัดสินใจ (Called by Client) ***
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-    public void RequestCollectServerRpc(NetworkObjectReference collectorNetRef)
-    {
-        if (!IsServer) return;
 
-        if (!collectorNetRef.TryGet(out NetworkObject collectorNetObj)) return;
-        Player collector = collectorNetObj.GetComponent<Player>();
-
-        if (collector == null || !NetworkObject.IsSpawned) return;
-        
-        //ดึงชื่อ Item ใหม่เพื่อตรวจสอบ
-        string newItemName = Name;
-        if (collector.IsItemEquipped(newItemName))
-        {
-            //เขียนlogic text ได้
-            return; 
-        }
-        
-        OnCollect(collector);
-        LogCollectedClientRpc(new FixedString32Bytes(collector.Name), new FixedString32Bytes(Name));
-        HandleDestroyed();
-    }
-
-    [ClientRpc]
-    public virtual void LogCollectedClientRpc(FixedString32Bytes playerName, FixedString32Bytes itemName)
-    {
-        Debug.Log($"📢 Global Log: {playerName.ToString()} collected {itemName.ToString()}!");
-    }
 
 }
