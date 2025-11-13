@@ -1,21 +1,22 @@
+using Unity.Collections;
 using UnityEngine;
 
-public class Shield : Stuff, IInteractable
+public class Shield : Item
 {
- 
-    public GameObject shieldMesh;
-    public int Deffent = 10;
-    public bool isInteractable { get => isLock; set => isLock = value; }
-    public void Interact(Player player)
+    public override Equipment GetEquipment()
     {
-        if (isInteractable == true) {
-            Vector3 ShielddUp = new Vector3(0, 0, 180);
-            shieldMesh.transform.parent = player.LeftHand;
-            shieldMesh.transform.localPosition = Vector3.zero;
-            shieldMesh.transform.localRotation = Quaternion.Euler(ShielddUp);
-            player.Deffent += Deffent;
-            isInteractable = false;
-        }
-
+        return Equipment.Shield;
+    }
+    [SerializeField]
+    public int Diffent = 25;
+    int Number = 0;
+    public override void OnCollect(Player player)
+    {
+        // 1. ตรวจสอบ Server Authority
+        if (!IsServer) return;
+        base.OnCollect(player); 
+        player.Deffent += Diffent;
+        player.AddItem(this);
+        Inventory.Instance.ActivateLeftHandWeapon(Number);
     }
 }

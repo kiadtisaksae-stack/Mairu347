@@ -4,10 +4,6 @@ using UnityEngine;
 public class EnemyMovetoPlayer : Enemy
 {
     public float searchRadius = 5f;
-    protected override EnemyType GetEnemyType()
-    {
-        return EnemyType.EnemyMovetoPlayer;
-    }
     private void Update()
     {
         // 🚨 สำคัญ: ตรวจสอบเฉพาะบน Server/Host เท่านั้นที่ควรประมวลผล AI และการโจมตี

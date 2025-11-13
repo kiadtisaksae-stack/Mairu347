@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using NUnit.Framework;
-using Unity.Collections;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
 public class Player : Character
@@ -12,13 +10,6 @@ public class Player : Character
     private Vector2 _uiMoveInput;
     private bool _uiJumpInput;
     private bool _uiSprintInput;
-    [Header("Network Movement Settings")]
-    [SerializeField] private float movementSyncInterval = 0.1f; // Sync 10 ครั้ง/วินาที
-    [SerializeField] private float positionCorrectionStrength = 5f;
-    
-    private float _lastMovementSyncTime = 0f;
-    private Vector3 _serverPosition;
-    private bool _needsPositionCorrection = false;
 
     // UI Input Setters
     public void SetMoveInput(Vector2 input) => _uiMoveInput = input;
@@ -27,18 +18,9 @@ public class Player : Character
     public void SetInteractInput(bool input) => _isInteract = input;
     public void SetAttackInput(bool input) => _isAttacking = input;
     // end UI Input Setters
-
-    [Header("Hand setting")]
-    public Transform RightHand;
-    public Transform LeftHand;
-    [Header("inventory")]
-    public List<ItemData> inventory = new List<ItemData>();
-    [Header("Weapon")]
-    public List<GameObject> WeaponVisuals = new List<GameObject>();
     bool _isAttacking = false;
     bool _isInteract = false;
     [Header("Movement Settings")]
-    [SerializeField] private float sprintSpeed = 8f;
     [SerializeField] private float jumpForce = 8f;
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float rotationSmoothTime = 0.2f;
@@ -102,11 +84,6 @@ public class Player : Character
             {
                 isNetworkReady = true;
             }
-
-            Debug.Log($"✅ Owner player enabled - Client ID: {OwnerClientId}");
-
-            // ตั้งค่าเริ่มต้น
-            _serverPosition = transform.position;
         }
         else
         {
@@ -167,8 +144,6 @@ public class Player : Character
     {
         if (!IsOwner) return;
         ApplyGravity();
-        
-        // 🚨 เรียก UpdateInFrontCache ใน Update ของ Player
         UpdateInFrontCache();
     }
     #region --- interactable Logic ---
@@ -274,11 +249,18 @@ public class Player : Character
     #region --- Inventory Logic ---
     public void AddItem(Item item)
     {
-    
-        ItemData newItemData = new ItemData(item); 
-        inventory.Add(newItemData);
+        bool isAlreadyActive = Inventory.Instance.WeaponRigthHand
+        .Any(w => w != null && w.activeSelf && w.name == item.Name);
+        if (isAlreadyActive) return;
+
+        ItemData newItemData = new ItemData(item);
+        Inventory.Instance.inventory.Add(newItemData);
         
-        Debug.Log($"{Name} added {newItemData.Name} to inventory on Server.");
+        if (InventoryUI.Instance != null)
+        {
+                
+            InventoryUI.Instance.UpdateUIOnItemCollect(newItemData, item.GetEquipment());
+        }
     }
     #endregion
     #region --- Movement Logic ---
@@ -317,43 +299,30 @@ public class Player : Character
     private void ApplyGravity()
     {
         if (!IsOwner) return;
-
         if (characterController == null)
         {
-            Debug.LogError("❌ CharacterController is null in ApplyGravity!");
             return;
         }
-
         bool isGrounded = characterController.isGrounded;
         if (isGrounded && velocity.y < 0)
             velocity.y = -0.5f;
-
         velocity.y += gravity * Time.deltaTime;
         characterController.Move(velocity * Time.deltaTime);
     }
     public void Jump(bool jump)
     {
         if (!IsOwner) return;
-        
-
         if (jump && characterController.isGrounded)
         {
-            velocity.y = jumpForce;
-            
+            velocity.y = jumpForce;   
         }
-        else
-        {
-            
-        }
-    }   
+    }
     #endregion
     #region --- Attack Logic ---
     public void Attack(bool isAttacking)
     {
-
         if (isAttacking)
         {
-
             animator.SetTrigger("Attack");
             RequestPlayAttackAnimServerRpc();
 
@@ -366,10 +335,6 @@ public class Player : Character
             }
             else if (e != null)
             {
-
-
-                //e.TakeDamage(Damage);
-
                 Enemy enemy = e as Enemy;
                 if (enemy != null)
                 {
@@ -380,6 +345,7 @@ public class Player : Character
             _isAttacking = false;
         }
     }
+    
     [ServerRpc]
     public void RequestPlayAttackAnimServerRpc()
     {
@@ -418,68 +384,13 @@ public class Player : Character
     {
         UpdateAnimationClientRpc(speed);
     }
+
     [ClientRpc]
     private void UpdateAnimationClientRpc(float speed)
     {
         if (animator != null)
         {
             animator.SetFloat("Speed", speed);
-        }
-    }
-    [ServerRpc]
-    private void ServerRequestAnimationTriggerServerRpc(FixedString32Bytes triggerName)
-    {
-        // ตรวจสอบ Server
-        if (!IsServer) return;
-
-        // สั่งให้ Client เล่น Trigger
-        PlayAnimationTriggerClientRpc(triggerName);
-    }
-    [ClientRpc]
-    private void PlayAnimationTriggerClientRpc(FixedString32Bytes triggerName)
-    {
-        if (animator != null)
-        {
-            animator.SetTrigger(triggerName.ToString());
-        }
-    }
-    [ClientRpc]
-    public void EquipItemVisualClientRpc(FixedString32Bytes itemName)
-    {
-        // 1. Logic การจัดการ Visuals
-        HandleWeaponVisuals(itemName.ToString());
-        
-        // 2. Logic การแสดงผลดาเมจ Text (ถ้ามี)
-    }
-
-    // จัดการการสลับ Visuals 
-    private void HandleWeaponVisuals(string targetItemName)
-    {
-        if (RightHand == null) return;
-
-        bool foundAndEquipped = false;
-
-        foreach (GameObject weapon in WeaponVisuals)
-        {
-            if (weapon == null) continue;
-
-            bool isTargetWeapon = weapon.name.Contains(targetItemName) || weapon.CompareTag(targetItemName);
-
-            if (isTargetWeapon)
-            {
-                weapon.SetActive(true);
-                foundAndEquipped = true;
-                Debug.Log($"Equipped: {weapon.name}");
-            }
-            else
-            {
-                weapon.SetActive(false);
-            }
-        }
-
-        if (!foundAndEquipped)
-        {
-             Debug.LogWarning($"Visual for item '{targetItemName}' not found in WeaponVisuals list.");
         }
     }
 
