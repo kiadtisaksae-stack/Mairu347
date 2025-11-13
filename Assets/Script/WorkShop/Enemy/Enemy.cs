@@ -39,7 +39,9 @@ public class Enemy : Character
     [SerializeField]
     private int rewardCount = 1;
 
-
+    [Header("Xp Drop")]
+    public int xpValue = 50;
+    public float xpShareRadius = 15f;
 
     public override void OnNetworkSpawn()
     {
@@ -80,12 +82,11 @@ public class Enemy : Character
         int actualDamage = Mathf.Clamp(amount - Deffent, 1, amount);
         health -= actualDamage;
 
-
         ShowDamageClientRpc(actualDamage, transform.position);
 
         if (health <= 0)
         {
-            
+            ShareXpInRadius();
             DropReward();
             InvokeOnDestroy();
             NotifyQuestProgressClientRpc(GetEnemyType());
@@ -127,11 +128,23 @@ public class Enemy : Character
             }
         }
     }
-    // logic for experience reward
-    protected virtual void ExperienceReward()
-    {
 
+    private void ShareXpInRadius()
+    {
+        PlayerLevel[] allPlayers = FindObjectsOfType<PlayerLevel>();
+        foreach (PlayerLevel player in allPlayers)
+        {
+            float distance = Vector3.Distance(transform.position, player.transform.position);
+
+            if (distance <= xpShareRadius)
+            {
+                int averageXp = xpValue / allPlayers.Length;
+                player.AddExperience(averageXp);
+            }
+        }
     }
+
+
     private NetworkObject GetRandomWeightedReward()
     {
         int totalWeight = dropWeight1 + dropWeight2 + dropWeight3;
