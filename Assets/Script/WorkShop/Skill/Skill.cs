@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class Skill
@@ -6,7 +7,12 @@ public abstract class Skill
     public string skillName;
     public float cooldownTime;
     public float lastUsedTime = float.MinValue; 
-    public float timer; 
+    public float timer;
+
+    [Header("Skill Tree System")]
+    public string skillID;
+    public int skillPointCost;
+    public List<Skill> prerequisites;
 
 
     public abstract void Activate(Character character);

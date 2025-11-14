@@ -12242,6 +12242,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f083920478d6f744ca41f8744d19c158, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
+  playGame: {fileID: 0}
 --- !u!4 &2085899512
 Transform:
   m_ObjectHideFlags: 0

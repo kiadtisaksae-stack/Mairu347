@@ -17,16 +17,12 @@ public class PlayerLevel : MonoBehaviour
     void Start()
     {
         xpToNextLevel = baseXPRequirement;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        GameManager.Instance.UpdateLevelText(currentLevel);
     }
     public void AddExperience(int XpAmount)
     {
         currentXp += XpAmount;
+        GameManager.Instance.UpdateExpBar(currentXp , xpToNextLevel);
         while (currentXp >= xpToNextLevel)
         {
             LevelUp();
@@ -38,6 +34,8 @@ public class PlayerLevel : MonoBehaviour
         currentLevel++;
         currentXp -= xpToNextLevel;
         CalculateNextLevelXP();
+        GameManager.Instance.UpdateExpBar(currentXp, xpToNextLevel);
+        GameManager.Instance.UpdateLevelText(currentLevel);
         Debug.Log("Level Up");
         if (OnLevelUp != null)
         {
@@ -48,5 +46,10 @@ public class PlayerLevel : MonoBehaviour
     private void CalculateNextLevelXP()
     {
         xpToNextLevel = (int)(baseXPRequirement * Mathf.Pow(currentLevel, xpMultiplierPerLevel));
+    }
+
+    public float GetExperiencePercentage()
+    {
+        return (float)currentXp/ (float)xpToNextLevel;
     }
 }

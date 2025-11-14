@@ -75,7 +75,7 @@ public class Enemy : Character
             currentState = State.Chase;
         }
     }
-    public override void TakeDamage(int amount)
+    public override void TakeDamage(int amount )
     {
         if (!IsServer)
         {
@@ -94,7 +94,6 @@ public class Enemy : Character
             InvokeOnDestroy();
             NotifyQuestProgressClientRpc(GetEnemyType());
             GetComponent<NetworkObject>().Despawn();
-            
         }
     }
 
