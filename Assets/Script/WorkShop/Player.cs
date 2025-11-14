@@ -64,9 +64,11 @@ public class Player : Character
         inputActions.Player.Sprint.canceled += ctx => _uiSprintInput= false;
         inputActions.Player.Jump.performed += ctx => _uiJumpInput = true;
         inputActions.Player.Jump.canceled += ctx => _uiJumpInput = false;
+        //inputActions.Player.Esc.performed += ctx => GameManager.Instance.TogglePause();
         inputActions.Player.Q.performed += ctx => TestQuest();
     }
 
+    
     private void OnDisable()
     {
         inputActions?.Player.Disable();
@@ -369,6 +371,22 @@ public class Player : Character
         }
     }
     #endregion
+
+
+    public override void TakeDamage(int amount)
+    {
+        base.TakeDamage(amount);
+        GameManager.Instance.UpdateHealthBar(health, maxHealth);
+    }
+
+    public override void Heal(int amount)
+    {
+        base.Heal(amount);
+        GameManager.Instance.UpdateHealthBar(health, maxHealth);
+    }
+
+
+
     [ServerRpc]
     public void DealDamageServerRpc(ulong targetNetworkObjectId, int damage)
     {
