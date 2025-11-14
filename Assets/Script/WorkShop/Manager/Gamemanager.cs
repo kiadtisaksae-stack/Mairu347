@@ -34,6 +34,11 @@ public sealed class GameManager : MonoBehaviour
     public Slider HPBar;
     public InputSystem_Actions inputActions;
 
+
+    public Slider xpBar;
+    public TMP_Text xpText;
+    public TMP_Text levelText;
+
     // 3. Private Constructor Logic (ใช้ Awake() แทน Constructor ปกติใน Unity)
     private void Awake()
     {
@@ -76,6 +81,28 @@ public sealed class GameManager : MonoBehaviour
             Debug.LogWarning("HPBar reference is missing in GameManager.");
         }
     }
+
+
+    public void UpdateXpBar(int currentXp , int maxXp)
+    {
+        if (xpBar != null)
+        {
+            xpBar.maxValue = maxXp;
+            xpBar.value = currentXp;
+            xpText.text = currentXp + "/" + maxXp;
+        }
+        else
+        {
+            Debug.LogWarning("XpBar reference is missing in GameManager.");
+        }
+    }
+
+    public void UpdateLevel(int level)
+    {
+        levelText.text = "Level : " + level;
+    }
+
+
     public void AddScore(int amount)
     {
         currentScore += amount;

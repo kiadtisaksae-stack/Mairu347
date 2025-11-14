@@ -420,6 +420,20 @@ public class Player : Character
         }
     }
     #endregion
+
+    public override void TakeDamage(int amount)
+    {
+        base.TakeDamage(amount);
+        GameManager.Instance.UpdateHealthBar(health, maxHealth);
+    }
+
+    public override void Heal(int amount)
+    {
+        base.Heal(amount);
+        GameManager.Instance.UpdateHealthBar(health, maxHealth);
+    }
+
+
     [ServerRpc]
     public void DealDamageServerRpc(ulong targetNetworkObjectId, int damage)
     {
