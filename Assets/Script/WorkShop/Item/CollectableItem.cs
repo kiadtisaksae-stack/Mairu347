@@ -3,6 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 public class CollectableItem : Item
 {
+
     public int value = 10;
     
     public override void OnCollect(Player player)
@@ -10,6 +11,11 @@ public class CollectableItem : Item
     
         // ตัวอย่าง: เพิ่มคะแนนให้กับผู้เล่น
         player.AddItem(this);
+        if(QuestManager.Instance.activeQuests != null)
+        {
+            //QuestManager.Instance.AddProgress(quest,1);
+        }
+
         
     }
 
