@@ -106,9 +106,15 @@
                     "initialStateCheck": false
                 },
                 {
+<<<<<<< HEAD
                     "name": "Esc",
                     "type": "Button",
                     "id": "c9f08b22-4850-4919-9ffc-5d96fcdb8e3e",
+=======
+                    "name": "Inventory",
+                    "type": "Button",
+                    "id": "4a91fe37-3d35-4171-9f16-d30bae16feb1",
+>>>>>>> 2bfcd1088a50f37897c1bbb9c3a5a72f4f470c7c
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -514,12 +520,21 @@
                 },
                 {
                     "name": "",
+<<<<<<< HEAD
                     "id": "880baa1f-674a-4e8d-8fbf-ca4e6a3115b3",
                     "path": "<Keyboard>/escape",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "Esc",
+=======
+                    "id": "662459dd-b8ed-4b68-98d6-82d2ad8afca7",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Inventory",
+>>>>>>> 2bfcd1088a50f37897c1bbb9c3a5a72f4f470c7c
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

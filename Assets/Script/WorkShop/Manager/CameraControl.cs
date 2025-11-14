@@ -10,7 +10,10 @@ public class CameraControl : MonoBehaviour
 
     void OnEnable()
     {
-        NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        }
     }
 
     void OnDisable()
@@ -26,19 +29,18 @@ public class CameraControl : MonoBehaviour
 
     void Update()
     {
-        TryFindLocalPlayer();
+        if (target == null)
+        {
+            TryFindLocalPlayer();
+        }
     }
-
     private void TryFindLocalPlayer()
     {
-        // ✅ ถ้าเจอแล้ว ไม่ต้องหาอีก
         if (target != null) return;
 
-        // ✅ หาเฉพาะ Player ที่เป็น Owner ของเครื่องนี้
         foreach (var player in FindObjectsByType<Player>(FindObjectsSortMode.None))
         {
             var netObj = player.GetComponent<NetworkObject>();
-
             if (netObj != null && netObj.IsOwner)
             {
                 target = player.transform;
@@ -46,9 +48,6 @@ public class CameraControl : MonoBehaviour
                 return;
             }
         }
-
-        // ยังไม่เจอ แสดงสถานะรอ
-        // Debug.Log("[Camera] Waiting for local player spawn...");
     }
 
     void FixedUpdate()

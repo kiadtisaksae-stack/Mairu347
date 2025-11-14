@@ -20,18 +20,23 @@ public class Player : Character
     private Vector3 _serverPosition;
     private bool _needsPositionCorrection = false;
 
+    // UI Input Setters
     public void SetMoveInput(Vector2 input) => _uiMoveInput = input;
     public void SetJumpInput(bool input) => _uiJumpInput = input;
     public void SetSprintInput(bool input) => _uiSprintInput = input;
     public void SetInteractInput(bool input) => _isInteract = input;
     public void SetAttackInput(bool input) => _isAttacking = input;
+    // end UI Input Setters
+
     [Header("Hand setting")]
     public Transform RightHand;
     public Transform LeftHand;
     [Header("inventory")]
     public List<ItemData> inventory = new List<ItemData>();
-    [Header("Weapon")]
+    
+    [Header("Weapon & Equitpment")]
     public List<GameObject> WeaponVisuals = new List<GameObject>();
+    public List<GameObject> equitpMentvis = new List<GameObject>();
     bool _isAttacking = false;
     bool _isInteract = false;
     [Header("Movement Settings")]
@@ -49,7 +54,6 @@ public class Player : Character
 
     private InputSystem_Actions inputActions;
     private CharacterController characterController;
-    private string currentAnimation = " ";
     [Header("Animation Settings")]
     public List<string> attackAnimations;
     public List<GameObject> effect;
@@ -275,10 +279,16 @@ public class Player : Character
     public void AddItem(Item item)
     {
     
-        ItemData newItemData = new ItemData(item); 
+        ItemData newItemData = new ItemData(item);
         inventory.Add(newItemData);
-        
-        Debug.Log($"{Name} added {newItemData.Name} to inventory on Server.");
+        if (IsOwner) 
+        {
+            if (InventoryUI.Instance != null)
+            {
+                
+                InventoryUI.Instance.UpdateUIOnItemCollect(newItemData, item.GetEquipment());
+            }
+        }
     }
     #endregion
     #region --- Movement Logic ---
@@ -317,43 +327,35 @@ public class Player : Character
     private void ApplyGravity()
     {
         if (!IsOwner) return;
-
         if (characterController == null)
         {
             Debug.LogError("❌ CharacterController is null in ApplyGravity!");
             return;
         }
-
         bool isGrounded = characterController.isGrounded;
         if (isGrounded && velocity.y < 0)
             velocity.y = -0.5f;
-
         velocity.y += gravity * Time.deltaTime;
         characterController.Move(velocity * Time.deltaTime);
     }
     public void Jump(bool jump)
     {
         if (!IsOwner) return;
-        
-
         if (jump && characterController.isGrounded)
         {
-            velocity.y = jumpForce;
-            
+            velocity.y = jumpForce;   
         }
         else
         {
             
         }
-    }   
+    }
     #endregion
     #region --- Attack Logic ---
     public void Attack(bool isAttacking)
     {
-
         if (isAttacking)
         {
-
             animator.SetTrigger("Attack");
             RequestPlayAttackAnimServerRpc();
 
@@ -366,10 +368,6 @@ public class Player : Character
             }
             else if (e != null)
             {
-
-
-                e.TakeDamage(Damage);
-
                 Enemy enemy = e as Enemy;
                 if (enemy != null)
                 {
@@ -379,6 +377,35 @@ public class Player : Character
             }
             _isAttacking = false;
         }
+    }
+    public bool IsItemEquipped(string itemName)
+    {
+        foreach (GameObject weapon in WeaponVisuals)
+        {
+            if (weapon != null && weapon.activeSelf)
+            {
+                // 💡 แก้ไข: ใช้เฉพาะ .name.Contains() หรือเปรียบเทียบชื่อตรงๆ
+                if (weapon.name.Contains(itemName))
+                {
+                    return true;
+                }
+            }
+        }
+
+        // ตรวจสอบใน equitpMentvis (ถือเป็น LeftHand หรือ Equipment)
+        foreach (GameObject equipment in equitpMentvis)
+        {
+            if (equipment != null && equipment.activeSelf)
+            {
+                // 💡 แก้ไข: ใช้เฉพาะ .name.Contains()
+                if (equipment.name.Contains(itemName))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
     [ServerRpc]
     public void RequestPlayAttackAnimServerRpc()
@@ -434,6 +461,7 @@ public class Player : Character
     {
         UpdateAnimationClientRpc(speed);
     }
+
     [ClientRpc]
     private void UpdateAnimationClientRpc(float speed)
     {
@@ -478,6 +506,7 @@ public class Player : Character
         foreach (GameObject weapon in WeaponVisuals)
         {
             if (weapon == null) continue;
+           
 
             bool isTargetWeapon = weapon.name.Contains(targetItemName) || weapon.CompareTag(targetItemName);
 
@@ -495,7 +524,33 @@ public class Player : Character
 
         if (!foundAndEquipped)
         {
-             Debug.LogWarning($"Visual for item '{targetItemName}' not found in WeaponVisuals list.");
+            Debug.LogWarning($"Visual for item '{targetItemName}' not found in WeaponVisuals list.");
+        }
+    }
+    private void HandleEquitpment(string targetItemName)
+    {
+        if (LeftHand == null) return;
+        bool foundAndEquipped = false;
+        foreach (GameObject equitpment in equitpMentvis)
+        {
+            if (equitpment == null) continue;
+            bool isTargetequitp = equitpment.name.Contains(targetItemName) || equitpment.CompareTag(targetItemName);
+
+            if (isTargetequitp)
+            {
+                equitpment.SetActive(true);
+                foundAndEquipped = true;
+                Debug.Log($"Equipped: {equitpment.name}");
+            }
+            else
+            {
+                equitpment.SetActive(false);
+            }
+
+        }
+        if (!foundAndEquipped)
+        {
+            Debug.LogWarning($"Visual for item '{targetItemName}' not found in WeaponVisuals list.");
         }
     }
 
