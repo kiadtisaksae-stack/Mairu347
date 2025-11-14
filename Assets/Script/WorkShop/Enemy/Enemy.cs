@@ -5,12 +5,6 @@ using Unity.Netcode;
 public class Enemy : Character
 {
     protected enum State { Idel, Chase, Attack, Death }
-    protected virtual EnemyType GetEnemyType()
-    {
-        // ค่า Default เผื่อไว้
-        return EnemyType.All;
-    }
-
     [Header("Attack Settings")]
     [SerializeField]
     protected float TimeToAttack = 1f;
@@ -89,7 +83,6 @@ public class Enemy : Character
             ShareXpInRadius();
             DropReward();
             InvokeOnDestroy();
-            NotifyQuestProgressClientRpc(GetEnemyType());
             GetComponent<NetworkObject>().Despawn();
         }
     }
@@ -202,16 +195,6 @@ public class Enemy : Character
         if (animator.GetBool("Attack") != isAttacking)
         {
             animator.SetBool("Attack", isAttacking);
-        }
-    }
-    [ClientRpc]
-    private void NotifyQuestProgressClientRpc(EnemyType type)
-    {
-        // เราต้องมั่นใจว่า QuestManager ที่เราเข้าถึงคือของ Local Player
-        if (NetworkManager.Singleton.LocalClient.PlayerObject.TryGetComponent(out QuestManager localQuestManager))
-        {
-            // Local Player รับทราบว่าศัตรูถูกฆ่า
-            localQuestManager.TrackEnemyKill(type);
         }
     }
 }
