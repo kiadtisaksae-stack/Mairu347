@@ -6,11 +6,6 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class Player : Character
 {
-    [Header("Movement Con")]
-    private Vector2 _uiMoveInput;
-    private bool _uiJumpInput;
-    private bool _uiSprintInput;
-
     // UI Input Setters
     public void SetMoveInput(Vector2 input) => _uiMoveInput = input;
     public void SetJumpInput(bool input) => _uiJumpInput = input;
@@ -18,6 +13,18 @@ public class Player : Character
     public void SetInteractInput(bool input) => _isInteract = input;
     public void SetAttackInput(bool input) => _isAttacking = input;
     // end UI Input Setters
+    [Header("Equipment")]
+    public List<GameObject> WeaponRigthHand;
+    public List<GameObject> WeaponLeftHand;
+    public List<GameObject> HeadEquitp;
+    public List<GameObject> BodyEquitp;
+    public List<GameObject> LegEquitp;
+    [Header("Movement Con")]
+    private Vector2 _uiMoveInput;
+    private bool _uiJumpInput;
+    private bool _uiSprintInput;
+
+    
     bool _isAttacking = false;
     bool _isInteract = false;
     [Header("Movement Settings")]
@@ -41,6 +48,8 @@ public class Player : Character
     private bool isNetworkReady = false;
 
     public QuestData questDataTest;
+    [Header("Inventory")]
+    public InventoryCanvas iventory;
 
     private void Awake()
     {
@@ -83,15 +92,18 @@ public class Player : Character
             UICanvasControllerInput.RegisterLocalPlayer(this);
             inputActions?.Player.Enable();
 
-            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+            // Link InventoryCanvas ของผู้เล่น
+            iventory = FindFirstObjectByType<InventoryCanvas>();
+            if (iventory != null)
             {
-                isNetworkReady = true;
+                iventory.playerController = this;
             }
+
+            isNetworkReady = NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening;
         }
         else
         {
             enabled = false;
-            Debug.Log($"👀 Other player disabled - Client ID: {OwnerClientId}");
         }
 
         health = maxHealth;
@@ -149,6 +161,10 @@ public class Player : Character
         if (!IsOwner) return;
         ApplyGravity();
         UpdateInFrontCache();
+        EquipBody();
+        EquipWeapon();
+        EquipHead();
+        EquipLeg();
     }
     public void TestQuest()
     {
@@ -254,20 +270,122 @@ public class Player : Character
         }
     }
     #endregion
-    #region --- Inventory Logic ---
-    public void AddItem(Item item)
+    #region --- Equipment ---
+    public void EquipHead()
     {
-        bool isAlreadyActive = Inventory.Instance.WeaponRigthHand
-        .Any(w => w != null && w.activeSelf && w.name == item.Name);
-        if (isAlreadyActive) return;
+        ItemSO itemToEquip = iventory.headSlot.item;
 
-        ItemData newItemData = new ItemData(item);
-        Inventory.Instance.inventory.Add(newItemData);
-        
-        if (InventoryUI.Instance != null)
+        // ตรวจสอบว่ามี ItemSO หรือไม่ (headSlot อาจว่างเปล่า)
+        if (itemToEquip == null || itemToEquip.itemName == null)
         {
-                
-            InventoryUI.Instance.UpdateUIOnItemCollect(newItemData, item.GetEquipment());
+            // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+            foreach (var head in HeadEquitp)
+            {
+                if (head != null)
+                {
+                    head.SetActive(false);
+                }
+            }
+            return;
+        }
+
+        foreach (var head in HeadEquitp)
+        {
+            if (head != null)
+            {
+                head.SetActive(head.name.Contains(itemToEquip.itemName));
+            }
+        }
+    }
+    public void EquipBody()
+    {
+        ItemSO itemToEquip = iventory.bodySlot.item;
+        // ตรวจสอบว่ามี ItemSO หรือไม่ (bodySlot อาจว่างเปล่า)
+        if (itemToEquip == null || itemToEquip.itemName == null)
+        {
+            // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+            foreach (var body in BodyEquitp)
+            {
+                if (body != null)
+                {
+                    body.SetActive(false);
+                }
+            }
+            return;
+        }
+        foreach (var body in BodyEquitp)
+        {
+            if (body != null)
+            {
+                body.SetActive(body.name.Contains(itemToEquip.itemName));
+            }
+        }
+    }
+    public void EquipLeg()
+    {
+        ItemSO itemToEquip = iventory.legSlot.item;
+        // ตรวจสอบว่ามี ItemSO หรือไม่ (legSlot อาจว่างเปล่า)
+        if (itemToEquip == null || itemToEquip.itemName == null)
+        {
+            // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+            foreach (var leg in LegEquitp)
+            {
+                if (leg != null)
+                {
+                    leg.SetActive(false);
+                }
+            }
+            return;
+        }
+        foreach (var leg in LegEquitp)
+        {
+            if (leg != null)
+            {
+                leg.SetActive(leg.name.Contains(itemToEquip.itemName));
+            }
+        }
+    }
+    public void EquipWeapon()
+    {
+        ItemSO itemToEquip = iventory.rightHandSlots.item;
+        ItemSO itemToEquipLeft = iventory.leftHandSlots.item;
+        // ตรวจสอบว่ามี ItemSO หรือไม่ (weaponSlot อาจว่างเปล่า)
+        if (itemToEquip == null || itemToEquip.itemName == null)
+        {
+            // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+            foreach (var weapon in WeaponRigthHand)
+            {
+                if (weapon != null)
+                {
+                    weapon.SetActive(false);
+                }
+            }
+            return;
+        }
+        if (itemToEquipLeft == null || itemToEquipLeft.itemName == null)
+        {
+            // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+            foreach (var weapon in WeaponLeftHand)
+            {
+                if (weapon != null)
+                {
+                    weapon.SetActive(false);
+                }
+            }
+        }
+        foreach (var weapon in WeaponRigthHand)
+        {
+            if (weapon != null)
+            {
+                weapon.SetActive(weapon.name.Contains(itemToEquip.itemName));
+            }
+        }
+        foreach (var weapon in WeaponLeftHand)
+        {
+            if (weapon != null)
+            {
+                weapon.SetActive(weapon.name.Contains(itemToEquipLeft.itemName));
+            }
         }
     }
     #endregion

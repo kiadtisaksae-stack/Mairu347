@@ -73,7 +73,7 @@ public class Enemy : Character
             return;
         }
 
-        int actualDamage = Mathf.Clamp(amount - Deffent, 1, amount);
+        int actualDamage = Mathf.Clamp(amount - Defence, 1, amount);
         health -= actualDamage;
 
         ShowDamageClientRpc(actualDamage, transform.position);

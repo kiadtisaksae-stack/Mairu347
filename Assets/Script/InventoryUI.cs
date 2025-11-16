@@ -26,7 +26,7 @@ public class InventoryUI : MonoBehaviour
     [Header("Equipment Slots & Swap")]
     [Tooltip("ช่อง Equipment 5 ช่องตามลำดับ: Head, Weapon, Shield, Armor, Boots")]
     public GameObject[] listEquitpment; 
-    private List<InventorySlot> inventorySlots = new List<InventorySlot>();
+    private List<InventorySlots> inventorySlots = new List<InventorySlots>();
     private ItemData itemWaitingForSwap; 
     
     private void Awake()
@@ -82,7 +82,7 @@ public class InventoryUI : MonoBehaviour
             
             if (slotComp == null) continue;
 
-            InventorySlot slot = new InventorySlot
+            InventorySlots slot = new InventorySlots
             {
                 SlotObject = slotObj,
                 ItemIcon = slotComp.ItemIcon,
@@ -105,7 +105,7 @@ public class InventoryUI : MonoBehaviour
             
             if (slotComp == null) continue;
 
-            InventorySlot slot = new InventorySlot
+            InventorySlots slot = new InventorySlots
             {
                 SlotObject = slotObj,
                 ItemIcon = slotComp.ItemIcon,
@@ -134,7 +134,7 @@ public class InventoryUI : MonoBehaviour
         // --- Logic สำหรับ Stackable Item (Equipment.None) ---
         for (int i = 0; i < inventorySlots.Count; i++)
         {
-            InventorySlot slot = inventorySlots[i];
+            InventorySlots slot = inventorySlots[i];
             
             // 💡 ถ้าชื่อ Item ซ้ำ และเป็น Slot ทั่วไป (Stackable)
             if (slot.CurrentItemName == newItemData.Name && slot.SlotType == Equipment.None)
@@ -148,7 +148,7 @@ public class InventoryUI : MonoBehaviour
         // 2. ถ้าไม่ซ้ำ: หา Slot ว่าง (Non-Equipment Slot)
         for (int i = 0; i < inventorySlots.Count; i++)
         {
-            InventorySlot slot = inventorySlots[i];
+            InventorySlots slot = inventorySlots[i];
             
             if (string.IsNullOrEmpty(slot.CurrentItemName) && slot.SlotType == Equipment.None)
             {
@@ -166,7 +166,7 @@ public class InventoryUI : MonoBehaviour
     
     private void HandleEquipmentCollect(ItemData newItemData, Equipment itemType)
     {
-        InventorySlot targetSlot = FindEquipmentSlot(itemType);
+        InventorySlots targetSlot = FindEquipmentSlot(itemType);
         
         if (targetSlot == null)
         {
@@ -186,10 +186,10 @@ public class InventoryUI : MonoBehaviour
     // 💡 Helper Functions
     // ----------------------------------------------------
 
-    private InventorySlot FindEquipmentSlot(Equipment type)
+    private InventorySlots FindEquipmentSlot(Equipment type)
     {
         // ค้นหา Slot ที่ตรงกับ Equipment Type
-        foreach (InventorySlot slot in inventorySlots)
+        foreach (InventorySlots slot in inventorySlots)
         {
             if (slot.SlotType == type)
             {
@@ -199,7 +199,7 @@ public class InventoryUI : MonoBehaviour
         return null;
     }
     
-    private void ApplyItemToSlot(InventorySlot slot, ItemData itemData)
+    private void ApplyItemToSlot(InventorySlots slot, ItemData itemData)
     {
         slot.CurrentItemName = itemData.Name;
         slot.CurrentCount = 1; 
