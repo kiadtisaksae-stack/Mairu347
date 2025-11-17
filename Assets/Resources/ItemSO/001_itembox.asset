@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: 001_itembox
   m_EditorClassIdentifier: 
   icon: {fileID: 21300000, guid: b24d3b67af8d04032bf5f86e064b7f5a, type: 3}
-  tybe: 2
+  tybe: 5
   id: 1
   Damage: 50
   Deffent: 0

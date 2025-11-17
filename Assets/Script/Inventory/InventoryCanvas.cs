@@ -15,16 +15,20 @@ public class InventoryCanvas : MonoBehaviour
     [Space(5)]
     public int slotAmount = 16;
     public InventorySlot[] inventorySlot;
-    public Transform headPanel;
-    public Transform rightPanel;
-    public Transform leftPanel;
-    public Transform bodyPanel;
-    public Transform legPanel;
-    public InventorySlot headSlot;
-    public InventorySlot rightHandSlots;
-    public InventorySlot leftHandSlots;
-    public InventorySlot bodySlot;
-    public InventorySlot legSlot;
+    public GameObject headPrefab;
+    public HeadSlot headSlot; // **เปลี่ยนเป็น HeadSlot**
+
+    public GameObject rightPrefab;
+    public RigthHand rightHandSlots; // **เปลี่ยนเป็น RightHandSlot**
+
+    public GameObject leftPrefab;
+    public LeftHand leftHandSlots; // **เปลี่ยนเป็น LeftHandSlot**
+
+    public GameObject bodyPrefab;
+    public BodySlot bodySlot; // **เปลี่ยนเป็น BodySlot**
+
+    public GameObject legPrefab;
+public LegSlot legSlot; // **เปลี่ยนเป็น LegSlot**
 
 
     [Header("Selection")]
@@ -39,7 +43,6 @@ public class InventoryCanvas : MonoBehaviour
     public Player playerController;
     private int openAndCloseCount = 0;
 
- 
 
 
     void Start()
@@ -49,14 +52,9 @@ public class InventoryCanvas : MonoBehaviour
         playerController = FindFirstObjectByType<Player>();
         InventoryPanel.gameObject.SetActive(false);
         CreateInventorylot();
-        CreateheadSlotSlot();
-        CreaterightHandSlotSlot();
-        CreateleftHandSlotSlot();
-        CreatebodySlotSlot();
-        CreatelegSlotSlot();
-
-
+        SetupEquipmentSlots();
         SetupButtonListeners();
+        
     }
     void Update()
     {
@@ -91,72 +89,38 @@ public class InventoryCanvas : MonoBehaviour
             inveSlot.SetThisSlot(Empty_Item, 0);
         }
     }
-    // 💡 1. สร้างช่อง HEAD
-    public void CreateheadSlotSlot()
+    private void SetupEquipmentSlots()
     {
-        if (headPanel == null || slotPrefab == null) return;
-        Transform slotTransform = Instantiate(slotPrefab, headPanel);
-        headSlot = slotTransform.GetComponent<InventorySlot>();
+        // กำหนดค่าเริ่มต้นและอ้างอิงกลับไปยัง InventoryCanvas
         if (headSlot != null)
         {
             headSlot.iventory = this;
             headSlot.SetThisSlot(Empty_Item, 0);
-
         }
-    }
-
-    // 💡 2. สร้างช่อง RIGHT HAND
-    public void CreaterightHandSlotSlot()
-    {
-        if (rightPanel == null || slotPrefab == null) return;
-        Transform slotTransform = Instantiate(slotPrefab, rightPanel);
-        rightHandSlots = slotTransform.GetComponent<InventorySlot>();
-        if (rightHandSlots != null)
-        {
-            rightHandSlots.iventory = this;
-            rightHandSlots.SetThisSlot(Empty_Item, 0);
-        }
-    }
-
-    // 💡 3. สร้างช่อง LEFT HAND
-    public void CreateleftHandSlotSlot()
-    {
-        if (leftPanel == null || slotPrefab == null) return;
-        Transform slotTransform = Instantiate(slotPrefab, leftPanel);
-        leftHandSlots = slotTransform.GetComponent<InventorySlot>();
-        if (leftHandSlots != null)
-        {
-            leftHandSlots.iventory = this;
-            leftHandSlots.SetThisSlot(Empty_Item, 0);
-        }
-    }
-
-    // 💡 4. สร้างช่อง BODY
-    public void CreatebodySlotSlot()
-    {
-        if (bodyPanel == null || slotPrefab == null) return;
-        Transform slotTransform = Instantiate(slotPrefab, bodyPanel);
-        bodySlot = slotTransform.GetComponent<InventorySlot>();
+        // ทำซ้ำสำหรับ bodySlot, legSlot, rightHandSlots, leftHandSlots
         if (bodySlot != null)
         {
             bodySlot.iventory = this;
             bodySlot.SetThisSlot(Empty_Item, 0);
         }
-    }
-
-    // 💡 5. สร้างช่อง LEG
-    public void CreatelegSlotSlot()
-    {
-        if (legPanel == null || slotPrefab == null) return;
-        Transform slotTransform = Instantiate(slotPrefab, legPanel);
-        legSlot = slotTransform.GetComponent<InventorySlot>();
-        if (legSlot != null)
+        if(rightHandSlots != null)
+        {
+            rightHandSlots.iventory = this;
+            rightHandSlots.SetThisSlot(Empty_Item,0);
+        }
+        if(leftHandSlots != null)
+        {
+            leftHandSlots.iventory = this;
+            leftHandSlots.SetThisSlot(Empty_Item, 0);
+        
+        }
+        if(legSlot != null)
         {
             legSlot.iventory = this;
             legSlot.SetThisSlot(Empty_Item, 0);
         }
     }
-
+    
     #endregion
 
     #region Selection Management

@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class ItemSO : ScriptableObject
 {
+    
     public Sprite icon;
     public int tybe ;
     public int id;

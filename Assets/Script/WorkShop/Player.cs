@@ -161,10 +161,6 @@ public class Player : Character
         if (!IsOwner) return;
         ApplyGravity();
         UpdateInFrontCache();
-        EquipBody();
-        EquipWeapon();
-        EquipHead();
-        EquipLeg();
     }
     public void TestQuest()
     {
