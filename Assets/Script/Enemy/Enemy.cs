@@ -4,6 +4,8 @@ using Unity.Netcode;
 [RequireComponent(typeof(Rigidbody))]
 public class Enemy : Character
 {
+    [Header("Enemy Type")]
+    public EnemyType enemyType;
     protected enum State { Idel, Chase, Attack, Death }
     [Header("Attack Settings")]
     [SerializeField]
@@ -68,10 +70,7 @@ public class Enemy : Character
     }
     public override void TakeDamage(int amount)
     {
-        if (!IsServer)
-        {
-            return;
-        }
+        if (!IsServer) return;
 
         int actualDamage = Mathf.Clamp(amount - Deffent, 1, amount);
         health -= actualDamage;
@@ -80,11 +79,16 @@ public class Enemy : Character
 
         if (health <= 0)
         {
+            // ✅ แจ้ง Quest Manager ก่อนทำลาย
+            if (QuestManager.Instance != null && enemyType != null)
+            {
+                QuestManager.Instance.OnEnemyKilled(enemyType);
+            }
+
             ShareXpInRadius();
             DropReward();
             InvokeOnDestroy();
             GetComponent<NetworkObject>().Despawn();
-            
         }
     }
 

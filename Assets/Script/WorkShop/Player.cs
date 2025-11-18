@@ -41,6 +41,12 @@ public class Player : Character
     private bool isNetworkReady = false;
 
     public QuestData questDataTest;
+<<<<<<< Updated upstream
+=======
+    [Header("Inventory")]
+    public InventoryCanvas iventory;
+    private PlayerData myData;
+>>>>>>> Stashed changes
 
     private void Awake()
     {
@@ -79,6 +85,7 @@ public class Player : Character
 
         if (IsOwner)
         {
+            LoadMyData();
             enabled = true;
             UICanvasControllerInput.RegisterLocalPlayer(this);
             inputActions?.Player.Enable();
@@ -99,6 +106,10 @@ public class Player : Character
 
     public override void OnNetworkDespawn()
     {
+        if (IsOwner)
+        {
+            SaveMyData();
+        }
         base.OnNetworkDespawn();
         inputActions?.Player.Disable();
         isNetworkReady = false;
@@ -154,6 +165,47 @@ public class Player : Character
     {
         QuestManager.Instance.StartQuest(questDataTest);
     }
+    #region save load data
+    public void SaveMyData()
+    {
+        if (!IsOwner) return;
+
+        myData = new PlayerData(
+            health,
+            maxHealth,
+            Damage,
+            Defence
+        );
+
+        if (PlayerDataNetwork.Instance != null)
+        {
+            PlayerDataNetwork.Instance.SavePlayerData(OwnerClientId, myData);
+        }
+    }
+
+    // ✅ โหลดข้อมูลของตัวเอง
+    private void LoadMyData()
+    {
+        if (!IsOwner) return;
+
+        if (PlayerDataNetwork.Instance != null)
+        {
+            PlayerData savedData = PlayerDataNetwork.Instance.LoadPlayerData(OwnerClientId);
+            if (savedData != null)
+            {
+                ApplyMyData(savedData);
+            }
+        }
+    }
+
+    // ✅ นำข้อมูลมาใช้
+    private void ApplyMyData(PlayerData data)
+    {
+        // ✅ ตั้งค่าโดยตรงผ่าน Property ที่มีอยู่แล้ว
+        health = data.health;
+    }
+
+    #endregion
     #region --- interactable Logic ---
     // 🚨 Override method นี้เพื่อใช้พารามิเตอร์ที่เหมาะสมกับ Player
     public override RaycastHit GetClosestInfornt()

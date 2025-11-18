@@ -1,8 +1,9 @@
-using UnityEngine;
+﻿using System.Numerics;
 
-[CreateAssetMenu(fileName = "PlayerData", menuName = "Game/Player Data")]
-public class PlayerData : ScriptableObject
+[System.Serializable]
+public class PlayerData
 {
+<<<<<<< Updated upstream
     public static PlayerData Instance;
 
     public string playerName = "Default";
@@ -127,3 +128,18 @@ public class PlayerData : ScriptableObject
 //        }
 //    }
 //}
+=======
+    public int health;
+    public int maxHealth;
+    public int damage;
+    public int defence;
+ 
+    public PlayerData(int health, int maxHealth, int damage, int defence)
+    {
+        this.health = health;
+        this.maxHealth = maxHealth;
+        this.damage = damage;
+        this.defence = defence;
+    }
+}
+>>>>>>> Stashed changes
