@@ -28,7 +28,9 @@ public class Character : Identity, Idestoryable
     // MaxHealth Property Readonly
     public int maxHealth { get => _networkMaxHealth.Value; }
     public int Damage = 10;
-    public int Deffent = 10;
+    public int baseDamage = 10;
+    public int Defence = 10;
+    public int baseDefence = 10;
     public float movementSpeed;
     protected Animator animator;
 
@@ -82,7 +84,7 @@ public class Character : Identity, Idestoryable
             return;
         }
 
-        int actualDamage = Mathf.Clamp(amount - Deffent, 1, amount);
+        int actualDamage = Mathf.Clamp(amount - Defence, 1, amount);
         health -= actualDamage;
 
 

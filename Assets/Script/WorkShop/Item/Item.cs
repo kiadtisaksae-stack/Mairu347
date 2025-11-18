@@ -1,21 +1,16 @@
-using UnityEngine;
+using TMPro;
 using Unity.Netcode;
-using System.Collections.Generic;
-using Unity.Collections;
-using System;
-using UnityEngine.UI;
+using UnityEngine;
 
 [RequireComponent(typeof(SphereCollider))]
 public class Item : Identity
 {
-    public virtual Equipment GetEquipment()
-    {
-        return Equipment.None;
-    }
-    public event Action<ulong> OnCollected;
+    public ItemSO item;
+    public NetworkVariable<int> amount = new NetworkVariable<int>(1,
+    NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public TextMeshProUGUI amountText;
     private Collider _collider;
-    public Sprite sprite;
-    public string itemName;
+
     protected Collider itemcollider
     {
         get
@@ -28,7 +23,7 @@ public class Item : Identity
             return _collider;
         }
     }
-   
+
 
     public override void SetUP()
     {
@@ -38,7 +33,7 @@ public class Item : Identity
         {
             _collider.isTrigger = true;
         }
-        this.Name = itemName;
+        this.Name = item.itemName;
     }
     public override void OnNetworkSpawn()
     {
@@ -47,6 +42,10 @@ public class Item : Identity
         {
             itemcollider.enabled = true;
         }
+        if (amountText) amountText.text = amount.Value.ToString();
+
+        // สับสคริบการเปลี่ยนแปลงค่า amount
+        amount.OnValueChanged += OnAmountChanged;
     }
 
     public override void OnNetworkDespawn()
@@ -61,36 +60,94 @@ public class Item : Identity
     // ----------------------------------------------------
     // 💣 Destruction Logic (Server Authority)
     // ----------------------------------------------------
-
+    private void OnAmountChanged(int previousValue, int newValue)
+    {
+        // อัพเดต UI เมื่อค่า amount เปลี่ยนแปลง
+        if (amountText) amountText.text = newValue.ToString();
+    }
     public void HandleDestroyed()
     {
         if (!IsServer) return;
-        OnCollected?.Invoke(NetworkObjectId);
         NetworkObject.Despawn();
     }
     public void OnTriggerEnter(Collider other)
     {
-        if (!IsServer) return; // ✅ ให้ Server เป็นคนจัดการเท่านั้น
+        if (isOnLive.Value == false) return;
 
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && other.GetComponent<NetworkObject>().IsOwner)
         {
-            Player collector = other.GetComponent<Player>();
-            if (collector != null)
-            {
-                OnCollect(collector);
-                HandleDestroyed();
-            }
+            GetComponent<Collider>().enabled = false;
+
+            PickupItem(other.GetComponent<NetworkObject>().OwnerClientId);
         }
     }
 
-    public virtual void OnCollect(Player player)
+    private void PickupItem(ulong playerId)
     {
-        Debug.Log($"Collected {Name}");
+        AddItemToInventoryLocal();
+
+        if (IsServer)
+        {
+            isOnLive.Value = true;
+            NetworkObject.Despawn(true);
+        }
+        else
+        {
+            MarkAsPickedUpServerRpc();
+        }
     }
 
-    public virtual void Use(Player player)
+    [ServerRpc(RequireOwnership = false)]
+    private void MarkAsPickedUpServerRpc()
     {
-        Debug.Log($"Using {Name}");
+        if (isOnLive.Value) return;
+        isOnLive.Value = true;
+        NetworkObject.Despawn(true);
+    }
+
+    private void AddItemToInventoryLocal()
+    {
+        InventoryCanvas invCanvas = FindFirstObjectByType<InventoryCanvas>();
+        if (invCanvas != null)
+        {
+            invCanvas.AddItem(item, amount.Value);
+            Debug.Log("Local pickup: " + item.itemName + " x" + amount.Value);
+
+            // ✅ แจ้ง Quest Manager
+            if (QuestManager.Instance != null)
+            {
+                QuestManager.Instance.OnItemCollected(item);
+            }
+
+            // ปิดการแสดงผลทันที (client-side prediction)
+            gameObject.SetActive(false);
+        }
+    }
+
+    public void SetAmount(int newAmount)
+    {
+        amount.Value = newAmount;
+        if (amountText) amountText.text = amount.Value.ToString();
+    }
+
+    public void RandomAmount()
+    {
+        if (IsServer)
+        {
+            amount.Value = Random.Range(1, item.maxStack + 1);
+            if (amountText) amountText.text = amount.Value.ToString();
+        }
+        else
+        {
+            RandomAmountServerRpc();
+        }
+
+    }
+    [ServerRpc(RequireOwnership = false)]
+    private void RandomAmountServerRpc()
+    {
+        amount.Value = Random.Range(1, item.maxStack + 1);
+
     }
 
 

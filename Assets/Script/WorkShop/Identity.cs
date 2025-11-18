@@ -12,7 +12,9 @@ public class Identity : NetworkBehaviour
         default,
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server); // ⬅️ เปลี่ยนเป็น Server Write
-    
+    protected NetworkVariable<bool> isOnLive = new NetworkVariable<bool>(true);
+
+
 
     public string Name
     {
@@ -232,7 +234,10 @@ public class Identity : NetworkBehaviour
         }
     }
 
-    public virtual void SetUP() { }
+    public virtual void SetUP() 
+    {
+        isOnLive.Value = true;
+    }
 
     protected void UpdateInFrontCache()
     {
@@ -245,6 +250,7 @@ public class Identity : NetworkBehaviour
         {
             _cachedIdentityInFront = null;
         }
+        
     }
 
     public virtual RaycastHit GetClosestInfornt()
