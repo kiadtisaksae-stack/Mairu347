@@ -58,17 +58,6 @@ public class QuestManager : MonoBehaviour
     }
 
     // ตรวจสอบเมื่อผู้เล่นฆ่ามอนสเตอร์
-    public void OnEnemyKilled(EnemyType killedEnemy)
-    {
-        foreach (QuestData quest in activeQuests)
-        {
-            if (quest.questType == QuestType.KillEnemy &&
-                (quest.targetEnemyType == killedEnemy || quest.targetEnemyId == killedEnemy.enemyId))
-            {
-                AddProgress(quest, 1);
-            }
-        }
-    }
 
     // เพิ่มความคืบหน้า
     public void AddProgress(QuestData quest, int amount = 1)

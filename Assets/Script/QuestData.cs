@@ -26,7 +26,6 @@ public class QuestData : ScriptableObject
     public int targetItemId;
 
     // สำหรับเควสฆ่ามอนสเตอร์
-    public EnemyType targetEnemyType;
     public int targetEnemyId;
 
     [Header("Rewards")]
