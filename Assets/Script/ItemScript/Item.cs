@@ -113,6 +113,12 @@ public class Item : Identity
             invCanvas.AddItem(item, amount.Value);
             Debug.Log("Local pickup: " + item.itemName + " x" + amount.Value);
 
+            // ✅ แจ้ง Quest Manager
+            if (QuestManager.Instance != null)
+            {
+                QuestManager.Instance.OnItemCollected(item);
+            }
+
             // ปิดการแสดงผลทันที (client-side prediction)
             gameObject.SetActive(false);
         }
