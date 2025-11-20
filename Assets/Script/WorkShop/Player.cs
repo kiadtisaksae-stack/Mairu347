@@ -552,7 +552,18 @@ public class Player : Character
             _isAttacking = false;
         }
     }
-    
+    public override void TakeDamage(int amount)
+    {
+        base.TakeDamage(amount);
+        GameManager.Instance.UpdateHealthBar(health, maxHealth);
+    }
+
+    public override void Heal(int amount)
+    {
+        base.Heal(amount);
+        GameManager.Instance.UpdateHealthBar(health, maxHealth);
+    }
+
     [ServerRpc]
     public void RequestPlayAttackAnimServerRpc()
     {

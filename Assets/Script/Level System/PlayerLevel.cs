@@ -4,7 +4,7 @@ using UnityEngine.Events;
 public class PlayerLevel : MonoBehaviour
 {
     public int currentXp;
-    public int currentLevel;
+    public int currentLevel = 1;
     public int xpToNextLevel;
 
     public int baseXPRequirement = 100;
@@ -17,6 +17,9 @@ public class PlayerLevel : MonoBehaviour
     void Start()
     {
         xpToNextLevel = baseXPRequirement;
+        GameManager.Instance.UpdateXpbar(currentXp, xpToNextLevel);
+        GameManager.Instance.UpdateLevel(currentLevel);
+
     }
 
     // Update is called once per frame
@@ -27,6 +30,7 @@ public class PlayerLevel : MonoBehaviour
     public void AddExperience(int XpAmount)
     {
         currentXp += XpAmount;
+        GameManager.Instance.UpdateXpbar(currentXp , xpToNextLevel);
         while (currentXp >= xpToNextLevel)
         {
             LevelUp();
@@ -39,10 +43,8 @@ public class PlayerLevel : MonoBehaviour
         currentXp -= xpToNextLevel;
         CalculateNextLevelXP();
         Debug.Log("Level Up");
-        if (OnLevelUp != null)
-        {
-            OnLevelUp?.Invoke();
-        }
+        GameManager.Instance.UpdateLevel(currentLevel);
+        OnLevelUp?.Invoke();
     }
 
     private void CalculateNextLevelXP()
