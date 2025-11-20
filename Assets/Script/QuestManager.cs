@@ -47,10 +47,10 @@ public class QuestManager : MonoBehaviour
     // ตรวจสอบเมื่อผู้เล่นเก็บไอเทม
     public void OnItemCollected(ItemSO collectedItem)
     {
-        foreach (QuestData quest in activeQuests)
+        foreach (QuestData quest in activeQuests.ToArray())
         {
             if (quest.questType == QuestType.CollectItem &&
-                (quest.targetItem == collectedItem || quest.targetItemId == collectedItem.id))
+                (quest.targetItem == collectedItem))
             {
                 AddProgress(quest, 1);
             }
@@ -60,7 +60,7 @@ public class QuestManager : MonoBehaviour
     // ตรวจสอบเมื่อผู้เล่นฆ่ามอนสเตอร์
     public void OnEnemyKilled(EnemyType killedEnemy)
     {
-        foreach (QuestData quest in activeQuests)
+        foreach (QuestData quest in activeQuests.ToArray())
         {
             if (quest.questType == QuestType.KillEnemy &&
                 (quest.targetEnemyType == killedEnemy || quest.targetEnemyId == killedEnemy.enemyId))

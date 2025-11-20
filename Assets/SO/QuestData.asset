@@ -12,6 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f165d79d5dd2493cba0ee0ea14de7ca, type: 3}
   m_Name: QuestData
   m_EditorClassIdentifier: Assembly-CSharp::QuestData
-  questName: FindKey
+  questName: TestQuest
+  description: 
+  questType: 1
   requestCount: 2
-  CurrentCount: 0
+  currentCount: 0
+  targetItem: {fileID: 0}
+  targetItemId: 0
+  targetEnemyType: {fileID: 11400000, guid: 62ac6cd23f6bc4e4ca63bfedd942f418, type: 2}
+  targetEnemyId: 0
+  rewardItems:
+  - {fileID: 11400000, guid: 318bb7a3cfef46643897d4ebf68cd50e, type: 2}
+  rewardExp: 0
+  rewardGold: 0
+  nextQuest: {fileID: 0}

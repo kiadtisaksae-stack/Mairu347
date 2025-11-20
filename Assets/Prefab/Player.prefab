@@ -1081,7 +1081,6 @@ GameObject:
   - component: {fileID: 5672250165849626674}
   - component: {fileID: 3839554453414025792}
   - component: {fileID: 5390413345020266115}
-  - component: {fileID: 6772585381143469664}
   - component: {fileID: 4628790404709995395}
   - component: {fileID: 8198086993632942249}
   - component: {fileID: 6018432373680173155}
@@ -1182,29 +1181,6 @@ MonoBehaviour:
     TriggerNameHash: 1080829965
     TransitionIndex: 0
   m_Animator: {fileID: 5672250165849626674}
---- !u!114 &6772585381143469664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3932494527518700318}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9952cd7771795274c85964b2a468e50a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::QuestManager
-  activeQuests: []
-  completedQuests: []
-  OnQuestStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  OnQuestProgressUpdated:
-    m_PersistentCalls:
-      m_Calls: []
-  OnQuestCompleted:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &4628790404709995395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1654,7 +1630,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4121923948263542230
 Transform:
   m_ObjectHideFlags: 0
