@@ -16,9 +16,9 @@ public class SkillBook : NetworkBehaviour
         player = GetComponent<Player>();
 
         // ✅ เตรียมสกิล
-        skillsSet.Add(new FireballSkill());
-        skillsSet.Add(new HealSkill());
-        skillsSet.Add(new BuffSkillMoveSpeed());
+        //skillsSet.Add(new FireballSkill());
+        //skillsSet.Add(new HealSkill());
+        //skillsSet.Add(new BuffSkillMoveSpeed());
     }
 
 
@@ -67,7 +67,7 @@ public class SkillBook : NetworkBehaviour
         }
 
         // Spawn Effect
-        GameObject g = Instantiate(skillEffects[index], transform.position, Quaternion.identity, transform);
+        GameObject g = Instantiate(skill.skillPrefab , transform.position, Quaternion.identity, transform);
         Destroy(g, 2);
 
         // Run Skill Action
