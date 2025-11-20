@@ -1081,6 +1081,7 @@ GameObject:
   - component: {fileID: 5672250165849626674}
   - component: {fileID: 3839554453414025792}
   - component: {fileID: 5390413345020266115}
+  - component: {fileID: 2354575311635794660}
   - component: {fileID: 4628790404709995395}
   - component: {fileID: 8198086993632942249}
   - component: {fileID: 6018432373680173155}
@@ -1181,6 +1182,26 @@ MonoBehaviour:
     TriggerNameHash: 1080829965
     TransitionIndex: 0
   m_Animator: {fileID: 5672250165849626674}
+--- !u!114 &2354575311635794660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3932494527518700318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8b2f40dea43049429b67bb701073863, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerLevel
+  currentXp: 0
+  currentLevel: 1
+  xpToNextLevel: 0
+  baseXPRequirement: 100
+  xpMultiplierPerLevel: 1.5
+  OnLevelUp:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &4628790404709995395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1231,6 +1252,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  skillsSet: []
   skillEffects:
   - {fileID: 4593184484909914552, guid: 2e1e9506f5904a64b81744324fb7cd50, type: 3}
   - {fileID: 8771972552311404799, guid: bbf9e36a48d6c5648a13889afab076fd, type: 3}
@@ -2310,32 +2332,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7373633381669835747}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3243197021
-  InScenePlacedSourceGlobalObjectIdHash: 3243197021
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 0
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
---- !u!114 &1262167040716180398
-MonoBehaviour:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4078408523622734906}
-  m_Layer: 7
-  m_Name: lowerarm_r
+  m_Layer: 0
+  m_Name: 
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3330,3 +3331,15 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 946417562566829707, guid: d9932423e09ccf9429307668b3dae6a1, type: 3}
   m_PrefabInstance: {fileID: 3108848722885079974}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1262167040716180398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: lowerarm_r
+  m_EditorClassIdentifier: 

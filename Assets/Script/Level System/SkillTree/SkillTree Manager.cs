@@ -16,7 +16,7 @@ public class SkillTreeManager : MonoBehaviour
     {
         instance = this;
         playerLevel = FindAnyObjectByType<PlayerLevel>();
-      
+
     }
 
     private void OnEnable()
@@ -56,13 +56,13 @@ public class SkillTreeManager : MonoBehaviour
 
         if (unlockSkills.Contains(skill))
         {
-            return false; 
+            return false;
         }
 
         return true;
     }
 
-    public bool Unlock(Skill skill ,SkillBook skillBook)
+    public bool Unlock(Skill skill, SkillBook skillBook)
     {
         if (!CanUnLock(skill))
         {
@@ -77,5 +77,4 @@ public class SkillTreeManager : MonoBehaviour
         OnSkillTreeChanged?.Invoke();
         return true;
     }
-
 }
