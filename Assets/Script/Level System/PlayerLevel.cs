@@ -50,5 +50,6 @@ public class PlayerLevel : MonoBehaviour
     private void CalculateNextLevelXP()
     {
         xpToNextLevel = (int)(baseXPRequirement * Mathf.Pow(currentLevel, xpMultiplierPerLevel));
+        GameManager.Instance.UpdateXpbar(currentXp, xpToNextLevel);
     }
 }
