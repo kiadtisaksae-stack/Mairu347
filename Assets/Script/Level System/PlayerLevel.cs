@@ -46,7 +46,7 @@ public class PlayerLevel : MonoBehaviour
         Debug.Log("Level Up");
         if (OnLevelUp != null)
         {
-            OnLevelUp.Invoke();
+            OnLevelUp?.Invoke();
         }
     }
 

@@ -1,12 +1,21 @@
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
-public abstract class Skill
+public abstract class Skill : ScriptableObject
 {
     public string skillName;
     public float cooldownTime;
     public float lastUsedTime = float.MinValue; 
-    public float timer; 
+    public float timer;
+
+    public int skillPointCost;
+    public List<Skill> skillrequire;
+
+    public Sprite skillIcon;
+    public GameObject skillPrefab;
 
 
     public abstract void Activate(Character character);
