@@ -6,6 +6,7 @@ public class Character : Identity, Idestoryable
 {
     private readonly NetworkVariable<int> _networkHealth = new(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private readonly NetworkVariable<int> _networkMaxHealth = new(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    protected float sprintSpeed = 8f;
 
     public int health
     {
@@ -27,7 +28,9 @@ public class Character : Identity, Idestoryable
     // MaxHealth Property Readonly
     public int maxHealth { get => _networkMaxHealth.Value; }
     public int Damage = 10;
-    public int Deffent = 10;
+    public int baseDamage = 10;
+    public int Defence = 10;
+    public int baseDefence = 10;
     public float movementSpeed;
     protected Animator animator;
 
@@ -54,24 +57,13 @@ public class Character : Identity, Idestoryable
             _networkHealth.Value = _initialMaxHealth;
         }
         
-        _networkHealth.OnValueChanged += HandleHealthChanged;
     }
 
     public override void OnNetworkDespawn()
     {
         base.OnNetworkDespawn();
-        _networkHealth.OnValueChanged -= HandleHealthChanged;
     }
     
-    private void HandleHealthChanged(int previousValue, int newValue)
-    {
-        
-        if (newValue <= 0)
-        {
-            // Logic Client die
-        }
-    }
-
   
     // TakeDamage & Heal
     public override void SetUP()
@@ -89,11 +81,10 @@ public class Character : Identity, Idestoryable
     {
         if (!IsServer)
         {
-            // Client ไม่ควรเรียก TakeDamage ตรงๆ แต่คุณจัดการแล้ว
             return;
         }
 
-        int actualDamage = Mathf.Clamp(amount - Deffent, 1, amount);
+        int actualDamage = Mathf.Clamp(amount - Defence, 1, amount);
         health -= actualDamage;
 
 
@@ -101,9 +92,8 @@ public class Character : Identity, Idestoryable
 
         if (health <= 0)
         {
-
             OnDestory?.Invoke(this);
-            GetComponent<NetworkObject>().Despawn();
+            Die();
         }
     }
     
@@ -113,7 +103,13 @@ public class Character : Identity, Idestoryable
         health += amount;
         HealClientRpc(amount, transform.position);
     }
-    
+    protected virtual void Die()
+    {
+        if (NetworkObject != null && NetworkObject.IsSpawned)
+            NetworkObject.Despawn();
+        else
+            Destroy(gameObject);
+    }
     
 
     #region ---RPC Calls---
@@ -122,10 +118,8 @@ public class Character : Identity, Idestoryable
     {
         if (animator != null)
         {
-            animator.SetTrigger("Hit");
+            //
         }
-
-        Debug.Log($"Client {NetworkManager.Singleton.LocalClientId} sees {gameObject.name} take {actualDamage} damage at {damagePosition}");
 
     }
     [ClientRpc]
@@ -134,7 +128,7 @@ public class Character : Identity, Idestoryable
 
         if (animator != null)
         {
-            animator.SetTrigger("Heal");
+            //
         }
 
         Debug.Log($"Client {NetworkManager.Singleton.LocalClientId} sees {gameObject.name} heal {amount} at {healPosition}");

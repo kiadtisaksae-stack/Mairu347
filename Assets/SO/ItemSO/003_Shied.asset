@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3b00fa1858ef6442aadb8279d289895, type: 3}
+  m_Name: 003_Shied
+  m_EditorClassIdentifier: 
+  icon: {fileID: 21300000, guid: 45ee67771bc63e940bac6a14fc3da957, type: 3}
+  tybe: 5
+  id: 3
+  Damage: 0
+  Deffent: 20
+  itemName: Shield
+  description: as
+  maxStack: 1
+  gamePrefab: {fileID: 2464425561693916716, guid: 5c7f715dd173a494caaf0c28d32e9482, type: 3}

@@ -76,12 +76,7 @@ public class ItemSpawnManager : NetworkBehaviour
 
             itemNetObj.Spawn();
 
-            // 3. ติดตาม Event การถูกเก็บ (OnCollectRequest)
-            if (itemObj.TryGetComponent(out Item itemComponent))
-            {
-                // (ต้องมีการเพิ่ม Event OnCollected ใน Item.cs)
-                itemComponent.OnCollected += HandleItemCollected;
-            }
+            
         }
     }
 

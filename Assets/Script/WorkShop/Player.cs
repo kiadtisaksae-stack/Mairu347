@@ -1,25 +1,11 @@
 ﻿using System.Collections.Generic;
-using NUnit.Framework;
-using Unity.Collections;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
 public class Player : Character
 {
-    [Header("Movement Con")]
-    private Vector2 _uiMoveInput;
-    private bool _uiJumpInput;
-    private bool _uiSprintInput;
-    [Header("Network Movement Settings")]
-    [SerializeField] private float movementSyncInterval = 0.1f; // Sync 10 ครั้ง/วินาที
-    [SerializeField] private float positionCorrectionStrength = 5f;
-    
-    private float _lastMovementSyncTime = 0f;
-    private Vector3 _serverPosition;
-    private bool _needsPositionCorrection = false;
-
     // UI Input Setters
     public void SetMoveInput(Vector2 input) => _uiMoveInput = input;
     public void SetJumpInput(bool input) => _uiJumpInput = input;
@@ -27,20 +13,21 @@ public class Player : Character
     public void SetInteractInput(bool input) => _isInteract = input;
     public void SetAttackInput(bool input) => _isAttacking = input;
     // end UI Input Setters
+    [Header("Equipment")]
+    public List<GameObject> WeaponRigthHand;
+    public List<GameObject> WeaponLeftHand;
+    public List<GameObject> HeadEquitp;
+    public List<GameObject> BodyEquitp;
+    public List<GameObject> LegEquitp;
+    [Header("Movement Con")]
+    private Vector2 _uiMoveInput;
+    private bool _uiJumpInput;
+    private bool _uiSprintInput;
 
-    [Header("Hand setting")]
-    public Transform RightHand;
-    public Transform LeftHand;
-    [Header("inventory")]
-    public List<ItemData> inventory = new List<ItemData>();
     
-    [Header("Weapon & Equitpment")]
-    public List<GameObject> WeaponVisuals = new List<GameObject>();
-    public List<GameObject> equitpMentvis = new List<GameObject>();
     bool _isAttacking = false;
     bool _isInteract = false;
     [Header("Movement Settings")]
-    [SerializeField] private float sprintSpeed = 8f;
     [SerializeField] private float jumpForce = 8f;
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float rotationSmoothTime = 0.2f;
@@ -52,6 +39,7 @@ public class Player : Character
     [SerializeField] private float attackCooldown = 1f;
     [SerializeField] private float comboResetTime = 1f;
 
+
     private InputSystem_Actions inputActions;
     private CharacterController characterController;
     [Header("Animation Settings")]
@@ -59,6 +47,11 @@ public class Player : Character
     public List<GameObject> effect;
 
     private bool isNetworkReady = false;
+
+    public QuestData questDataTest;
+    [Header("Inventory")]
+    public InventoryCanvas iventory;
+    private PlayerData myData;
 
     private void Awake()
     {
@@ -82,6 +75,7 @@ public class Player : Character
         inputActions.Player.Sprint.canceled += ctx => _uiSprintInput= false;
         inputActions.Player.Jump.performed += ctx => _uiJumpInput = true;
         inputActions.Player.Jump.canceled += ctx => _uiJumpInput = false;
+        inputActions.Player.Q.performed += ctx => TestQuest();
     }
 
     private void OnDisable()
@@ -96,24 +90,23 @@ public class Player : Character
 
         if (IsOwner)
         {
+            LoadMyData();
             enabled = true;
             UICanvasControllerInput.RegisterLocalPlayer(this);
             inputActions?.Player.Enable();
 
-            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+            // Link InventoryCanvas ของผู้เล่น
+            iventory = FindFirstObjectByType<InventoryCanvas>();
+            if (iventory != null)
             {
-                isNetworkReady = true;
+                iventory.playerController = this;
             }
 
-            Debug.Log($"✅ Owner player enabled - Client ID: {OwnerClientId}");
-
-            // ตั้งค่าเริ่มต้น
-            _serverPosition = transform.position;
+            isNetworkReady = NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening;
         }
         else
         {
             enabled = false;
-            Debug.Log($"👀 Other player disabled - Client ID: {OwnerClientId}");
         }
 
         health = maxHealth;
@@ -121,6 +114,10 @@ public class Player : Character
 
     public override void OnNetworkDespawn()
     {
+        if (IsOwner)
+        {
+            SaveMyData();
+        }
         base.OnNetworkDespawn();
         inputActions?.Player.Disable();
         isNetworkReady = false;
@@ -167,12 +164,56 @@ public class Player : Character
 
     public void Update()
     {
+
         if (!IsOwner) return;
         ApplyGravity();
-        
-        // 🚨 เรียก UpdateInFrontCache ใน Update ของ Player
         UpdateInFrontCache();
     }
+    public void TestQuest()
+    {
+        QuestManager.Instance.StartQuest(questDataTest);
+    }
+    #region save load data
+    public void SaveMyData()
+    {
+        if (!IsOwner) return;
+
+        myData = new PlayerData(
+            health,
+            maxHealth,
+            Damage,
+            Defence
+        );
+
+        if (PlayerDataNetwork.Instance != null)
+        {
+            PlayerDataNetwork.Instance.SavePlayerData(OwnerClientId, myData);
+        }
+    }
+
+    // ✅ โหลดข้อมูลของตัวเอง
+    private void LoadMyData()
+    {
+        if (!IsOwner) return;
+
+        if (PlayerDataNetwork.Instance != null)
+        {
+            PlayerData savedData = PlayerDataNetwork.Instance.LoadPlayerData(OwnerClientId);
+            if (savedData != null)
+            {
+                ApplyMyData(savedData);
+            }
+        }
+    }
+
+    // ✅ นำข้อมูลมาใช้
+    private void ApplyMyData(PlayerData data)
+    {
+        // ✅ ตั้งค่าโดยตรงผ่าน Property ที่มีอยู่แล้ว
+        health = data.health;
+    }
+
+    #endregion
     #region --- interactable Logic ---
     // 🚨 Override method นี้เพื่อใช้พารามิเตอร์ที่เหมาะสมกับ Player
     public override RaycastHit GetClosestInfornt()
@@ -273,20 +314,167 @@ public class Player : Character
         }
     }
     #endregion
-    #region --- Inventory Logic ---
-    public void AddItem(Item item)
+    #region --- Equipment ---
+    public void EquipHead()
     {
-    
-        ItemData newItemData = new ItemData(item);
-        inventory.Add(newItemData);
-        if (IsOwner) 
+        ItemSO itemToEquip = iventory.headSlot.item;
+
+        // ตรวจสอบว่ามี ItemSO หรือไม่ (headSlot อาจว่างเปล่า)
+        if (itemToEquip == null || itemToEquip.itemName == null)
         {
-            if (InventoryUI.Instance != null)
+            // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+            foreach (var head in HeadEquitp)
             {
-                
-                InventoryUI.Instance.UpdateUIOnItemCollect(newItemData, item.GetEquipment());
+                if (head != null)
+                {
+                    head.SetActive(false);
+                }
+            }
+            return;
+        }
+
+        foreach (var head in HeadEquitp)
+        {
+            if (head != null)
+            {
+                head.SetActive(head.name.Contains(itemToEquip.itemName));
             }
         }
+    }
+    public void EquipBody()
+    {
+        ItemSO itemToEquip = iventory.bodySlot.item;
+        // ตรวจสอบว่ามี ItemSO หรือไม่ (bodySlot อาจว่างเปล่า)
+        if (itemToEquip == null || itemToEquip.itemName == null)
+        {
+            // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+            foreach (var body in BodyEquitp)
+            {
+                if (body != null)
+                {
+                    body.SetActive(false);
+                }
+            }
+            return;
+        }
+        foreach (var body in BodyEquitp)
+        {
+            if (body != null)
+            {
+                body.SetActive(body.name.Contains(itemToEquip.itemName));
+            }
+        }
+    }
+    public void EquipLeg()
+    {
+        ItemSO itemToEquip = iventory.legSlot.item;
+        // ตรวจสอบว่ามี ItemSO หรือไม่ (legSlot อาจว่างเปล่า)
+        if (itemToEquip == null || itemToEquip.itemName == null)
+        {
+            // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+            foreach (var leg in LegEquitp)
+            {
+                if (leg != null)
+                {
+                    leg.SetActive(false);
+                }
+            }
+            return;
+        }
+        foreach (var leg in LegEquitp)
+        {
+            if (leg != null)
+            {
+                leg.SetActive(leg.name.Contains(itemToEquip.itemName));
+            }
+        }
+    }
+    public void EquipWeapon()
+    {
+        ItemSO itemToEquip = iventory.rightHandSlots.item;
+        ItemSO itemToEquipLeft = iventory.leftHandSlots.item;
+        // ตรวจสอบว่ามี ItemSO หรือไม่ (weaponSlot อาจว่างเปล่า)
+        if (itemToEquip == null || itemToEquip.itemName == null)
+        {
+            // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+            foreach (var weapon in WeaponRigthHand)
+            {
+                if (weapon != null)
+                {
+                    weapon.SetActive(false);
+                }
+            }
+            return;
+        }
+        if (itemToEquipLeft == null || itemToEquipLeft.itemName == null)
+        {
+            // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+            foreach (var weapon in WeaponLeftHand)
+            {
+                if (weapon != null)
+                {
+                    weapon.SetActive(false);
+                }
+            }
+        }
+        foreach (var weapon in WeaponRigthHand)
+        {
+            if (weapon != null)
+            {
+                weapon.SetActive(weapon.name.Contains(itemToEquip.itemName));
+            }
+        }
+        foreach (var weapon in WeaponLeftHand)
+        {
+            if (weapon != null)
+            {
+                weapon.SetActive(weapon.name.Contains(itemToEquipLeft.itemName));
+            }
+        }
+    }
+    public void UpdateEquipmentStats()
+    {
+        if (!IsOwner) return;
+
+        int equipmentDamage = 0;
+        int equipmentDefence = 0;
+
+        // ✅ คำนวณค่าจาก Equipment ที่สวมใส่
+        equipmentDamage += GetSlotDamage(iventory.headSlot);
+        equipmentDefence += GetSlotDefence(iventory.headSlot);
+
+        equipmentDamage += GetSlotDamage(iventory.bodySlot);
+        equipmentDefence += GetSlotDefence(iventory.bodySlot);
+
+        equipmentDamage += GetSlotDamage(iventory.legSlot);
+        equipmentDefence += GetSlotDefence(iventory.legSlot);
+
+        equipmentDamage += GetSlotDamage(iventory.rightHandSlots);
+        equipmentDefence += GetSlotDefence(iventory.rightHandSlots);
+
+        equipmentDamage += GetSlotDamage(iventory.leftHandSlots);
+        equipmentDefence += GetSlotDefence(iventory.leftHandSlots);
+
+        // ✅ อัพเดตค่าสถานะ
+        UpdateStatsServerRpc(baseDamage + equipmentDamage, baseDefence + equipmentDefence);
+    }
+
+    private int GetSlotDamage(InventorySlot slot)
+    {
+        return (slot != null && slot.item != iventory.Empty_Item) ? slot.item.Damage : 0;
+    }
+
+    private int GetSlotDefence(InventorySlot slot)
+    {
+        return (slot != null && slot.item != iventory.Empty_Item) ? slot.item.Deffent : 0;
+    }
+
+    [ServerRpc]
+    private void UpdateStatsServerRpc(int newDamage, int newDefence)
+    {
+        Damage = newDamage;
+        Defence = newDefence;
+        Debug.Log($"🛡️ อัพเดตสเตตัส: DMG={Damage}, DEF={Defence}");
     }
     #endregion
     #region --- Movement Logic ---
@@ -327,7 +515,6 @@ public class Player : Character
         if (!IsOwner) return;
         if (characterController == null)
         {
-            Debug.LogError("❌ CharacterController is null in ApplyGravity!");
             return;
         }
         bool isGrounded = characterController.isGrounded;
@@ -342,10 +529,6 @@ public class Player : Character
         if (jump && characterController.isGrounded)
         {
             velocity.y = jumpForce;   
-        }
-        else
-        {
-            
         }
     }
     #endregion
@@ -376,35 +559,7 @@ public class Player : Character
             _isAttacking = false;
         }
     }
-    public bool IsItemEquipped(string itemName)
-    {
-        foreach (GameObject weapon in WeaponVisuals)
-        {
-            if (weapon != null && weapon.activeSelf)
-            {
-                // 💡 แก้ไข: ใช้เฉพาะ .name.Contains() หรือเปรียบเทียบชื่อตรงๆ
-                if (weapon.name.Contains(itemName))
-                {
-                    return true;
-                }
-            }
-        }
-
-        // ตรวจสอบใน equitpMentvis (ถือเป็น LeftHand หรือ Equipment)
-        foreach (GameObject equipment in equitpMentvis)
-        {
-            if (equipment != null && equipment.activeSelf)
-            {
-                // 💡 แก้ไข: ใช้เฉพาะ .name.Contains()
-                if (equipment.name.Contains(itemName))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
+    
     [ServerRpc]
     public void RequestPlayAttackAnimServerRpc()
     {
@@ -420,20 +575,6 @@ public class Player : Character
         }
     }
     #endregion
-
-    public override void TakeDamage(int amount)
-    {
-        base.TakeDamage(amount);
-        GameManager.Instance.UpdateHealthBar(health, maxHealth);
-    }
-
-    public override void Heal(int amount)
-    {
-        base.Heal(amount);
-        GameManager.Instance.UpdateHealthBar(health, maxHealth);
-    }
-
-
     [ServerRpc]
     public void DealDamageServerRpc(ulong targetNetworkObjectId, int damage)
     {
@@ -464,89 +605,6 @@ public class Player : Character
         if (animator != null)
         {
             animator.SetFloat("Speed", speed);
-        }
-    }
-    [ServerRpc]
-    private void ServerRequestAnimationTriggerServerRpc(FixedString32Bytes triggerName)
-    {
-        // ตรวจสอบ Server
-        if (!IsServer) return;
-
-        // สั่งให้ Client เล่น Trigger
-        PlayAnimationTriggerClientRpc(triggerName);
-    }
-    [ClientRpc]
-    private void PlayAnimationTriggerClientRpc(FixedString32Bytes triggerName)
-    {
-        if (animator != null)
-        {
-            animator.SetTrigger(triggerName.ToString());
-        }
-    }
-    [ClientRpc]
-    public void EquipItemVisualClientRpc(FixedString32Bytes itemName)
-    {
-        // 1. Logic การจัดการ Visuals
-        HandleWeaponVisuals(itemName.ToString());
-        
-        // 2. Logic การแสดงผลดาเมจ Text (ถ้ามี)
-    }
-
-    // จัดการการสลับ Visuals 
-    private void HandleWeaponVisuals(string targetItemName)
-    {
-        if (RightHand == null) return;
-
-        bool foundAndEquipped = false;
-
-        foreach (GameObject weapon in WeaponVisuals)
-        {
-            if (weapon == null) continue;
-           
-
-            bool isTargetWeapon = weapon.name.Contains(targetItemName) || weapon.CompareTag(targetItemName);
-
-            if (isTargetWeapon)
-            {
-                weapon.SetActive(true);
-                foundAndEquipped = true;
-                Debug.Log($"Equipped: {weapon.name}");
-            }
-            else
-            {
-                weapon.SetActive(false);
-            }
-        }
-
-        if (!foundAndEquipped)
-        {
-            Debug.LogWarning($"Visual for item '{targetItemName}' not found in WeaponVisuals list.");
-        }
-    }
-    private void HandleEquitpment(string targetItemName)
-    {
-        if (LeftHand == null) return;
-        bool foundAndEquipped = false;
-        foreach (GameObject equitpment in equitpMentvis)
-        {
-            if (equitpment == null) continue;
-            bool isTargetequitp = equitpment.name.Contains(targetItemName) || equitpment.CompareTag(targetItemName);
-
-            if (isTargetequitp)
-            {
-                equitpment.SetActive(true);
-                foundAndEquipped = true;
-                Debug.Log($"Equipped: {equitpment.name}");
-            }
-            else
-            {
-                equitpment.SetActive(false);
-            }
-
-        }
-        if (!foundAndEquipped)
-        {
-            Debug.LogWarning($"Visual for item '{targetItemName}' not found in WeaponVisuals list.");
         }
     }
 

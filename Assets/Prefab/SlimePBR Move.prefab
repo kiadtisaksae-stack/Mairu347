@@ -351,7 +351,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1395894930
+  GlobalObjectIdHash: 2852264170
   InScenePlacedSourceGlobalObjectIdHash: 2852264170
   DeferredDespawnTick: 0
   Ownership: 1
@@ -379,18 +379,23 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   _initialMaxHealth: 200
   Damage: 2
-  Deffent: 10
+  baseDamage: 10
+  Defence: 10
+  baseDefence: 10
   movementSpeed: 3
+  enemyType: {fileID: 0}
   TimeToAttack: 1
   AttackRange: 1.5
   rewardItemPrefabs:
-  - {fileID: 2747071521373983741, guid: b10a6830af28a194692e08215720d397, type: 3}
-  - {fileID: 2549536917501342440, guid: 43374e1d38550234687793562e2d236d, type: 3}
-  - {fileID: 1675914715435459097, guid: b5849f71a048235429e530343990502c, type: 3}
+  - {fileID: 4085178008262843607, guid: 43374e1d38550234687793562e2d236d, type: 3}
+  - {fileID: 4116771651019849451, guid: dd2d1ee2d12dc8c4093505c8772d5f1f, type: 3}
+  - {fileID: 819387871131794206, guid: b02af064469aabe419031c3c87c383bd, type: 3}
   dropWeight1: 50
   dropWeight2: 30
   dropWeight3: 20
   rewardCount: 1
+  xpValue: 50
+  xpShareRadius: 15
   searchRadius: 5
 --- !u!114 &8386189085793417468
 MonoBehaviour:
