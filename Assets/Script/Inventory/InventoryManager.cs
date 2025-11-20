@@ -1,23 +1,27 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class InventoryManager : MonoBehaviour
 {
-    public static InventoryManager instance;
-    public GameObject inventoryPanel;
-    public GameObject BagPack;
- 
-    private void Awake()
+    public GameObject inventoryPanel; 
+    public GameObject BagPack; 
+    public Button questBtn;
+    public GameObject questPanel; 
+
+    void Start()
     {
-        if (instance == null)
+        if (questBtn != null)
         {
-            instance = this;
+            questBtn.onClick.AddListener(onClickQuestBtn);
         }
-        else
-        {
-            Destroy(gameObject);
-        }
-        DontDestroyOnLoad(gameObject);
     }
 
-    
+    public void onClickQuestBtn()
+    {
+        if (questPanel != null)
+        {
+            bool isCurrentlyActive = questPanel.activeSelf;
+            questPanel.SetActive(!isCurrentlyActive);
+        }
+    }
 }

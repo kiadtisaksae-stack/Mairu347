@@ -42,6 +42,7 @@ public class Enemy : Character
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+        this.Name = enemyType.enemyName;
     }
     private void FixedUpdate()
     {

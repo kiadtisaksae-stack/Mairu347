@@ -185,10 +185,6 @@ public class Player : Character
             Defence
         );
 
-        if (PlayerDataNetwork.Instance != null)
-        {
-            PlayerDataNetwork.Instance.SavePlayerData(OwnerClientId, myData);
-        }
     }
 
     // ✅ โหลดข้อมูลของตัวเอง
@@ -196,14 +192,11 @@ public class Player : Character
     {
         if (!IsOwner) return;
 
-        if (PlayerDataNetwork.Instance != null)
-        {
-            PlayerData savedData = PlayerDataNetwork.Instance.LoadPlayerData(OwnerClientId);
-            if (savedData != null)
-            {
-                ApplyMyData(savedData);
-            }
-        }
+        // PlayerData saveData = 
+        // if (savedData != null)
+        // {
+        //     ApplyMyData(savedData);
+        // }
     }
 
     // ✅ นำข้อมูลมาใช้

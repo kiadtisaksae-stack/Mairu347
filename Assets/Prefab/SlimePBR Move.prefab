@@ -383,7 +383,7 @@ MonoBehaviour:
   Defence: 10
   baseDefence: 10
   movementSpeed: 3
-  enemyType: {fileID: 0}
+  enemyType: {fileID: 11400000, guid: 62ac6cd23f6bc4e4ca63bfedd942f418, type: 2}
   TimeToAttack: 1
   AttackRange: 1.5
   rewardItemPrefabs:
