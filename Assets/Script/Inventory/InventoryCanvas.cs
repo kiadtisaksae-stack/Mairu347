@@ -49,7 +49,6 @@ public class InventoryCanvas : MonoBehaviour
     {
         inventoryCanvas = GetComponent<Canvas>();
         gridLayoutGroup = SlotPanel.GetComponent<GridLayoutGroup>();
-        playerController = FindFirstObjectByType<Player>();
         InventoryPanel.gameObject.SetActive(false);
         CreateInventorylot();
         SetupEquipmentSlots();

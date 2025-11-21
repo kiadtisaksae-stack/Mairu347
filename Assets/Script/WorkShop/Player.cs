@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
@@ -47,6 +48,7 @@ public class Player : Character
     public List<GameObject> effect;
 
     private bool isNetworkReady = false;
+    private bool isTeleporting = false;
 
     public QuestData questDataTest;
     [Header("Inventory")]
@@ -114,6 +116,10 @@ public class Player : Character
 
     public override void OnNetworkDespawn()
     {
+        if (TeleportManager.Instance != null)
+        {
+            TeleportManager.Instance.UnregisterPlayer(this);
+        }
         if (IsOwner)
         {
             SaveMyData();
@@ -467,8 +473,8 @@ public class Player : Character
     {
         Damage = newDamage;
         Defence = newDefence;
-        Debug.Log($"🛡️ อัพเดตสเตตัส: DMG={Damage}, DEF={Defence}");
     }
+
     #endregion
     #region --- Movement Logic ---
     private void Move()
@@ -555,13 +561,19 @@ public class Player : Character
     public override void TakeDamage(int amount)
     {
         base.TakeDamage(amount);
-        GameManager.Instance.UpdateHealthBar(health, maxHealth);
+        if (IsOwner)
+        {
+            GameManager.Instance.UpdateHealthBar(health, maxHealth);
+        }
     }
 
     public override void Heal(int amount)
     {
         base.Heal(amount);
-        GameManager.Instance.UpdateHealthBar(health, maxHealth);
+        if (IsOwner)
+        {
+            GameManager.Instance.UpdateHealthBar(health, maxHealth);
+        }
     }
 
     [ServerRpc]
@@ -579,6 +591,37 @@ public class Player : Character
         }
     }
     #endregion
+    #region Teleportation Logic
+    public void SimpleTeleport(Vector3 newPosition, Quaternion newRotation)
+    {
+        if (isTeleporting) return;
+
+        StartCoroutine(TeleportCoroutine(newPosition, newRotation));
+    }
+
+    private IEnumerator TeleportCoroutine(Vector3 newPosition, Quaternion newRotation)
+    {
+        isTeleporting = true;
+
+        if (characterController != null)
+            characterController.enabled = false;
+
+
+        transform.position = newPosition;
+        transform.rotation = newRotation;
+
+        // ✅ รอ 1 frame
+        yield return null;
+
+        if (characterController != null)
+            characterController.enabled = true;
+
+        isTeleporting = false;
+
+        Debug.Log($"📍 Teleported to {newPosition}");
+    }
+    #endregion
+    #region RPC Methods
     [ServerRpc]
     public void DealDamageServerRpc(ulong targetNetworkObjectId, int damage)
     {
@@ -611,5 +654,6 @@ public class Player : Character
             animator.SetFloat("Speed", speed);
         }
     }
+    #endregion
 
 }
