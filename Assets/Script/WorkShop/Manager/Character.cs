@@ -88,8 +88,12 @@ public class Character : Identity, Idestoryable
         health -= actualDamage;
 
 
-        ShowDamageClientRpc(actualDamage, transform.position); 
-
+        ShowDamageClientRpc(actualDamage, transform.position);
+        if (TryGetComponent<NetworkObject>(out var netObject))
+        {
+            UpdateHealthUIForOwnerClientRpc(health, maxHealth,
+                new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { netObject.OwnerClientId } } });
+        }
         if (health <= 0)
         {
             OnDestory?.Invoke(this);
@@ -110,9 +114,18 @@ public class Character : Identity, Idestoryable
         else
             Destroy(gameObject);
     }
-    
+
 
     #region ---RPC Calls---
+    [ClientRpc]
+    private void UpdateHealthUIForOwnerClientRpc(int currentHealth, int currentMaxHealth, ClientRpcParams rpcParams = default)
+    {
+        if (this is Player)
+        {
+            GameManager.Instance.UpdateHealthBar(currentHealth, currentMaxHealth);
+            Debug.Log($"🩸 Client UI Updated: {currentHealth}/{currentMaxHealth}");
+        }
+    }
     [ClientRpc]
     public void ShowDamageClientRpc(int actualDamage, Vector3 damagePosition)
     {

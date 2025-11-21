@@ -72,11 +72,13 @@ public class Item : Identity
     }
     public void OnTriggerEnter(Collider other)
     {
-        if (isOnLive.Value == false) return;
+        if (isOnLive.Value == false) return; // Item ถูกเก็บไปแล้ว
 
         if (other.CompareTag("Player") && other.GetComponent<NetworkObject>().IsOwner)
         {
             GetComponent<Collider>().enabled = false;
+
+            gameObject.SetActive(false);
 
             PickupItem(other.GetComponent<NetworkObject>().OwnerClientId);
         }
@@ -88,7 +90,7 @@ public class Item : Identity
 
         if (IsServer)
         {
-            isOnLive.Value = true;
+            isOnLive.Value = false;
             NetworkObject.Despawn(true);
         }
         else
@@ -97,11 +99,11 @@ public class Item : Identity
         }
     }
 
-    [ServerRpc(RequireOwnership = false)]
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void MarkAsPickedUpServerRpc()
     {
-        if (isOnLive.Value) return;
-        isOnLive.Value = true;
+        if (isOnLive.Value == false) return;
+        isOnLive.Value = false;
         NetworkObject.Despawn(true);
     }
 
@@ -143,7 +145,7 @@ public class Item : Identity
         }
 
     }
-    [ServerRpc(RequireOwnership = false)]
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void RandomAmountServerRpc()
     {
         amount.Value = Random.Range(1, item.maxStack + 1);

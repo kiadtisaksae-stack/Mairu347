@@ -76,8 +76,6 @@ public class Enemy : Character
         int actualDamage = Mathf.Clamp(amount - Defence, 1, amount);
         health -= actualDamage;
 
-        ShowDamageClientRpc(actualDamage, transform.position);
-
         if (health <= 0)
         {
             // ✅ แจ้ง Quest Manager ก่อนทำลาย
@@ -129,13 +127,14 @@ public class Enemy : Character
 
     private void ShareXpInRadius()
     {
-        PlayerLevel[] allPlayers = FindObjectsOfType<PlayerLevel>();
+        PlayerLevel[] allPlayers = FindObjectsByType<PlayerLevel>(FindObjectsSortMode.None);
         foreach (PlayerLevel player in allPlayers)
         {
             float distance = Vector3.Distance(transform.position, player.transform.position);
 
             if (distance <= xpShareRadius)
             {
+                if (allPlayers.Length == 0) return;
                 int averageXp = xpValue / allPlayers.Length;
                 player.AddExperience(averageXp);
             }
