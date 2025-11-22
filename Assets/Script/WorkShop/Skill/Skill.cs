@@ -17,7 +17,7 @@ public abstract class Skill : ScriptableObject
     public Sprite skillIcon;
     public GameObject skillPrefab;
 
-
+    
     public abstract void Activate(Character character);
     public abstract void Deactivate(Character character);
     public abstract void UpdateSkill(Character character);
