@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -31,15 +30,9 @@ public class Player : Character
     [Header("Movement Settings")]
     [SerializeField] private float jumpForce = 8f;
     [SerializeField] private float gravity = -20f;
-    [SerializeField] private float rotationSmoothTime = 0.2f;
+    
 
     private Vector3 velocity;
-
-    [Header("Attack Settings")]
-    [SerializeField] private float attackRange = 2f;
-    [SerializeField] private float attackCooldown = 1f;
-    [SerializeField] private float comboResetTime = 1f;
-
 
     private InputSystem_Actions inputActions;
     private CharacterController characterController;
