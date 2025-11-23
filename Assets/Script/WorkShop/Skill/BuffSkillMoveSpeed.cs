@@ -4,10 +4,11 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "BuffSkillMoveSpeed", menuName = "Skills/BuffSkillMoveSpeed")]
 public class BuffSkillMoveSpeed : Skill
 {
-    float SpeedIncreaseAmount = 5f; // จำนวนที่เพิ่มความเร็ว
+    [Header("Skill Ability")]
+    public float SpeedIncreaseAmount = 5f; // จำนวนที่เพิ่มความเร็ว
     float OriginalSpeed; // ความเร็วเดิมของตัวละคร
     float TargetSpeed;
-    public float Duration { get; set; }
+    public float Duration;
     public BuffSkillMoveSpeed()
     {
         this.skillName = "Speed Boost";
