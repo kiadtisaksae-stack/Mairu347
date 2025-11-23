@@ -5,6 +5,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "FireballSkill", menuName = "Skills/FireballSkill")]
 public class FireballSkill : Skill
 {
+    [Header("Skill Ability")]
+
+    public int damage = 50;
     public float searchRadius = 5;
 
     // ต้อง Override เมธอด Activate() ตามที่ Abstract Class กำหนด
@@ -16,14 +19,14 @@ public class FireballSkill : Skill
     public override void Activate(Character character)
     {
         
-        Debug.Log(character.Name +" Casting Fireball! Deals 50 damage.");
+        Debug.Log(character.Name + " Casting Fireball! Deals" + damage + " damage.");
 
         Enemy[] target = GetEnemysInRange(character);
         if (target.Length>0)
         {
             foreach (var enemy in target)
             {
-                enemy.TakeDamage(50);
+                enemy.TakeDamage(damage);
                 Debug.Log($"{character.Name} casts {skillName} on {enemy.Name}, dealing 50 damage!");
 
             }

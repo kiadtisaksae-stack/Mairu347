@@ -12,7 +12,7 @@ public class SkillTreeManager : MonoBehaviour
     public System.Action OnSkillTreeChanged;
 
     public GameObject skillTreeUI;
-    private bool isActive = false;
+    private bool isActive;
     public TMP_Text skillPointText;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
@@ -21,6 +21,7 @@ public class SkillTreeManager : MonoBehaviour
         instance = this;
         playerLevel = FindFirstObjectByType<PlayerLevel>();
         UpdateSkillPointText();
+        skillTreeUI.SetActive(false);
     }
 
     private void OnEnable()
