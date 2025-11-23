@@ -41,7 +41,6 @@ public class InventoryCanvas : MonoBehaviour
     public Canvas inventoryCanvas;
     private InputSystem_Actions inputActions;
     public Player playerController;
-    private int openAndCloseCount = 0;
 
 
 
@@ -291,15 +290,7 @@ public class InventoryCanvas : MonoBehaviour
         if (selectedSlots.Count > 0)
         {
             NetworkPlayerManager playerManager = FindOwnerPlayerManager();
-            if (playerManager != null && ItemSpawner.Instance != null)
-            {
-                ItemSpawner.Instance.SpawnItem(
-                    selectedSlots[0].item,
-                    selectedSlots[0].stack,
-                    playerManager.transform.position
-                );
-                RemoveItem(selectedSlots[0]);
-            }
+            
         }
     }
     
@@ -313,11 +304,7 @@ public class InventoryCanvas : MonoBehaviour
     public void DropItem(ItemSO item, int amount)
     {
         NetworkPlayerManager playerManager = FindOwnerPlayerManager();
-        if (playerManager != null && ItemSpawner.Instance != null)
-        {
-            Vector3 dropPosition = playerManager.transform.position + Vector3.forward * 2;
-            ItemSpawner.Instance.SpawnItem(item, amount, dropPosition);
-        }
+       
     }
 
     public void RemoveItem(InventorySlot slot)
