@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class SkillTreeManager : MonoBehaviour
@@ -10,13 +11,16 @@ public class SkillTreeManager : MonoBehaviour
     public static SkillTreeManager instance;
     public System.Action OnSkillTreeChanged;
 
+    public GameObject skillTreeUI;
+    private bool isActive = false;
+    public TMP_Text skillPointText;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
     void Start()
     {
         instance = this;
-        playerLevel = FindAnyObjectByType<PlayerLevel>();
-
+        playerLevel = FindFirstObjectByType<PlayerLevel>();
+        UpdateSkillPointText();
     }
 
     private void OnEnable()
@@ -36,17 +40,18 @@ public class SkillTreeManager : MonoBehaviour
     public void AddSkillPoint()
     {
         currentskillPoint++;
+        UpdateSkillPointText();
         OnSkillTreeChanged?.Invoke();
     }
 
     public bool CanUnLock(Skill skill)
     {
-        if (currentskillPoint < skill.skillPointCost)
+        if (currentskillPoint < skill.skillPointCost) //skillpoint
         {
             return false;
         }
 
-        foreach (Skill prereq in skill.skillrequire)
+        foreach (Skill prereq in skill.skillrequire) //skill ก่อนหน้า
         {
             if (!unlockSkills.Contains(prereq))
             {
@@ -54,7 +59,7 @@ public class SkillTreeManager : MonoBehaviour
             }
         }
 
-        if (unlockSkills.Contains(skill))
+        if (unlockSkills.Contains(skill)) //unlock 
         {
             return false;
         }
@@ -71,10 +76,25 @@ public class SkillTreeManager : MonoBehaviour
         }
 
         currentskillPoint -= skill.skillPointCost;
+        UpdateSkillPointText();
         unlockSkills.Add(skill);
-        skillBook.skillsSet.Add(skill);
+        skillBook.skillsSet.Add(skill); //add skillbook
+        skill.ResetCooldown();
         Debug.Log(skill.name + " unlock!");
         OnSkillTreeChanged?.Invoke();
         return true;
     }
+
+
+    public void UpdateSkillPointText()
+    {
+        skillPointText.text = "Skill Point : " + currentskillPoint;
+    }
+
+    public void ActiveSkillTreeUI()
+    {
+        isActive = !isActive;
+        skillTreeUI.SetActive(isActive);
+    }
+
 }

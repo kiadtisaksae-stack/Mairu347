@@ -23,7 +23,7 @@ public class SkillTreeUI : MonoBehaviour
         skillButton = GetComponent<Button>();
         skillIcon = GetComponent<Image>();
         skillButton.onClick.AddListener(OnSkillClicked);
-        skillBook = FindAnyObjectByType<SkillBook>();
+        skillBook = FindFirstObjectByType<SkillBook>();
         UpdateVisual();
         SkillTreeManager.instance.OnSkillTreeChanged += UpdateVisual;
    
@@ -60,7 +60,7 @@ public class SkillTreeUI : MonoBehaviour
         }
         else
         {
-            skillIcon.color = lockedColor;
+            skillIcon.color = lockedColor; //unlock
             if (borderIcon != null) borderIcon.color = lockedColor;
             skillButton.interactable = false;
         }
