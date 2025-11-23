@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Linq;
 
 public class DialogueManager : MonoBehaviour
 {
@@ -18,9 +19,12 @@ public class DialogueManager : MonoBehaviour
     [Header("Button Objects")]
     public GameObject continueButton1; 
     public GameObject continueButton2;
+    public Button questGiveBtn;
+    public Button sendQuestBtn;
+
     public GameObject quitButton;
 
-    [Header("Button Texts (Text ã¹ÅÙ¡¢Í§»ØèÁ)")]
+    [Header("Button Texts (Text ï¿½ï¿½Ù¡ï¿½Í§ï¿½ï¿½ï¿½ï¿½)")]
     public TextMeshProUGUI button1Text;
     public TextMeshProUGUI button2Text;
 
@@ -29,6 +33,8 @@ public class DialogueManager : MonoBehaviour
 
 
     [HideInInspector] public bool isTalking = false;
+    [HideInInspector] public bool isHaveQuest = false;
+
     [HideInInspector] public NPCInteractable currentNearbyNPC;
 
     private Queue<DialogueStep> stepsQueue;
@@ -45,7 +51,38 @@ public class DialogueManager : MonoBehaviour
         dialogueCanvasPanel.SetActive(false);
 
         quitButton.GetComponent<Button>().onClick.AddListener(EndDialogue);
+        questGiveBtn.onClick.AddListener(QuestGiver);
+        sendQuestBtn.onClick.AddListener(SendQuest);
     }
+    public void QuestGiver()
+    {
+        QuestManager.Instance.StartQuest(currentNearbyNPC.questData);
+        dialogueText.text = currentNearbyNPC.questDataText;
+        
+    }
+    public void SendQuest()
+    {
+        QuestData[] newData = QuestManager.Instance.activeQuests.ToArray();
+        if(newData.Any(q => q.questName == currentNearbyNPC.questData.questName))
+        {
+            QuestManager.Instance.CheckProgress(currentNearbyNPC.questData);
+            if(currentNearbyNPC.questData.currentCount == currentNearbyNPC.questData.requestCount)
+            {
+                dialogueText.text = currentNearbyNPC.QuestcompletedText;
+            }
+            else
+            {
+                dialogueText.text = " Haha Try to Do Quest FF";
+                
+            }
+        }
+        else
+        {
+            dialogueText.text = " Check Your Quest & Progress";
+        }
+        
+    }
+    
 
     // --- for interact button ---
     public void PressInteractButton()

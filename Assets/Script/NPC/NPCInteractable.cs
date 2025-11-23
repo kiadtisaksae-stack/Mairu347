@@ -11,17 +11,27 @@ public class DialogueStep
     public Sprite npcFace;    
     public Sprite playerFace;
 
+
     [Header("ButtonText")]
     public string button1Text; 
     public string button2Text;
+    public string questToGive;
 
     [Header("Quitable")]
     public bool canQuitHere;      // Quitable
     public bool endsConversation; // Endconversation
+    
 }
 
 public class NPCInteractable : MonoBehaviour
 {
+    [Header("QuestGiver")]
+    public QuestData questData;
+    [TextArea(3,5)]
+    public string questDataText;
+
+    [TextArea(3,5)]
+    public string QuestcompletedText;
     [Header("NPC Setting")]
     public string npcName;
     public AudioClip npcVoiceSound;
@@ -66,6 +76,7 @@ public class NPCInteractable : MonoBehaviour
                 DialogueManager.instance.currentNearbyNPC = null;
             }
             ShowIcon(false);
+            DialogueManager.instance.EndDialogue();
         }
     }
 }

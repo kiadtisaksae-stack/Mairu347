@@ -1,4 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -11,6 +14,7 @@ public class QuestManager : MonoBehaviour
 
     [Header("Completed Quests")]
     public List<QuestData> completedQuests = new List<QuestData>();
+    public TextMeshProUGUI giveRewardText;
 
     // Events สำหรับแจ้งเตือน UI
     public UnityEvent<QuestData> OnQuestStarted;
@@ -26,6 +30,10 @@ public class QuestManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+    }
+    void Start()
+    {
+        giveRewardText.gameObject.SetActive(false);
     }
 
     // เริ่มเควส
@@ -85,11 +93,10 @@ public class QuestManager : MonoBehaviour
         Debug.Log($"📊 เควส {quest.questName}: {quest.currentCount}/{quest.requestCount}");
         OnQuestProgressUpdated?.Invoke(quest);
 
-        CheckProgress(quest);
     }
 
     // ตรวจสอบครบ
-    private void CheckProgress(QuestData quest)
+    public void CheckProgress(QuestData quest)
     {
         if (quest.currentCount >= quest.requestCount)
         {
@@ -128,7 +135,9 @@ public class QuestManager : MonoBehaviour
             if (playerLevel != null)
             {
                 playerLevel.AddExperience(quest.rewardExp);
-                Debug.Log($"🎁 ได้รับ EXP: {quest.rewardExp}");
+                giveRewardText.text = " Get Exp = " + quest.rewardExp;
+                StartCoroutine(CloseAfterTime(giveRewardText.gameObject, 3f)); 
+                
             }
         }
 
@@ -141,7 +150,8 @@ public class QuestManager : MonoBehaviour
                 foreach (ItemSO rewardItem in quest.rewardItems)
                 {
                     inventory.AddItem(rewardItem, 1);
-                    Debug.Log($"🎁 ได้รับไอเทม: {rewardItem.itemName}");
+                    giveRewardText.text = " Get Item = " + rewardItem.itemName;
+                    StartCoroutine(CloseAfterTime(giveRewardText.gameObject, 3f)); 
                 }
             }
         }
@@ -156,5 +166,11 @@ public class QuestManager : MonoBehaviour
     public bool IsQuestCompleted(QuestData quest)
     {
         return completedQuests.Contains(quest);
+    }
+    public IEnumerator CloseAfterTime(GameObject obj, float delay)
+    {
+        giveRewardText.gameObject.SetActive(true);
+        yield return new WaitForSeconds(delay);
+        obj.SetActive(false);   // ปิด object
     }
 }
