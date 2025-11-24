@@ -193,7 +193,6 @@ public class Enemy : Character
     protected virtual void Move(Vector3 direction)
     {
         rb.linearVelocity = new Vector3(direction.x * movementSpeed, rb.linearVelocity.y, direction.z * movementSpeed);
-        SetAnimationRun(true);
     }
     
     protected virtual void Attack(Player _player) 
@@ -217,6 +216,9 @@ public class Enemy : Character
     }
     protected void SetAnimationRun(bool isRun)
     {
-        
+        if(animator.GetBool("Run") != isRun)
+        {
+            animator.SetBool("Run", isRun);
+        }
     }
 }
