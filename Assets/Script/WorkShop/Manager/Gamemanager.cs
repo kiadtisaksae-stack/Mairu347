@@ -1,13 +1,13 @@
-using TMPro;
+๏ปฟusing TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-// กำหนดให้เป็น sealed เพื่อป้องกันการสืบทอด
+// ยกร“รยนยดรฃรรฉร ยปรงยน sealed ร ยพร—รจรยปรฉรยงยกร‘ยนยกร’รรร—ยบยทรยด
 public sealed class GameManager : MonoBehaviour 
 {
     // 1. Private Static Field (The Singleton Instance)
-    // ใช้ backing field เพื่อควบคุมการเข้าถึง
+    // รฃยชรฉ backing field ร ยพร—รจรยครยบยครรยกร’รร ยขรฉร’ยถร–ยง
     private static GameManager _instance;
 
     // 2. Public Static Property (Global Access Point)
@@ -15,7 +15,7 @@ public sealed class GameManager : MonoBehaviour
     {
         get
         {
-            // ถ้า Instance ยังเป็น null (กรณีถูกเรียกใช้ก่อน Awake)
+            // ยถรฉร’ Instance รร‘ยงร ยปรงยน null (ยกรยณร•ยถรยกร รร•รยกรฃยชรฉยกรจรยน Awake)
             if (_instance == null)
             {
                 Debug.LogError("GameManager instance is null! Is it in the scene?");
@@ -23,7 +23,9 @@ public sealed class GameManager : MonoBehaviour
             return _instance;
         }
     }
-
+    [Header("Player Stats")]
+    public TextMeshProUGUI playerDamage;
+    public TextMeshProUGUI playerDefence;
     [Header("Game State")]
     public int currentScore = 0;
     public bool isGamePaused = false;
@@ -39,23 +41,23 @@ public sealed class GameManager : MonoBehaviour
     public TMP_Text XpText;
     public TMP_Text LevelText;
 
-    // 3. Private Constructor Logic (ใช้ Awake() แทน Constructor ปกติใน Unity)
+    // 3. Private Constructor Logic (รฃยชรฉ Awake() รกยทยน Constructor ยปยกยตร”รฃยน Unity)
     private void Awake()
     {
-        // ตรวจสอบว่ามี Instance อยู่แล้วหรือไม่
+        // ยตรรยจรรยบรรจร’รร• Instance รรรรจรกร…รฉรรรร—รรครรจ
         if (_instance == null)
         {
-            // กำหนดให้ Instance นี้เป็น Singleton
+            // ยกร“รยนยดรฃรรฉ Instance ยนร•รฉร ยปรงยน Singleton
             _instance = this;
 
-            // ป้องกันไม่ให้ Object นี้ถูกทำลายเมื่อมีการโหลด Scene ใหม่
+            // ยปรฉรยงยกร‘ยนรครรจรฃรรฉ Object ยนร•รฉยถรยกยทร“ร…ร’รร รร—รจรรร•ยกร’รรขรร…ยด Scene รฃรรรจ
             DontDestroyOnLoad(gameObject);
 
             Debug.Log("GameManager Singleton Initialized.");
         }
         else
         {
-            // ถ้ามี Instance อื่นอยู่แล้ว (มาจาก Scene ก่อนหน้า) ให้ทำลายตัวเองทิ้ง
+            // ยถรฉร’รร• Instance รร—รจยนรรรรจรกร…รฉร (รร’ยจร’ยก Scene ยกรจรยนรยนรฉร’) รฃรรฉยทร“ร…ร’รยตร‘รร รยงยทร”รฉยง
             Debug.Log("Duplicate GameManager found. Destroying self.");
             Destroy(gameObject);
         }
@@ -66,6 +68,17 @@ public sealed class GameManager : MonoBehaviour
     {
         inputActions = new InputSystem_Actions();
         inputActions.UI.Cancel.performed += ctx => TogglePause();
+    }
+    public void UpdateStatus(int damage, int defence)
+    {
+        if (playerDamage != null)
+        {
+            playerDamage.text = damage.ToString();
+        }
+        if (playerDefence != null)
+        {
+            playerDefence.text = defence.ToString();
+        }
     }
 
     public void UpdateHealthBar(int currentHealth, int maxHealth)
@@ -86,7 +99,7 @@ public sealed class GameManager : MonoBehaviour
         currentScore += amount;
         scoreText.text = currentScore.ToString();
         Debug.Log($"Score updated: {currentScore}");
-        // โค้ดสำหรับอัปเดต UI, บันทึกคะแนน ฯลฯ
+        // รขยครฉยดรร“รรร‘ยบรร‘ยปร ยดยต UI, ยบร‘ยนยทร–ยกยครรกยนยน รร…ร
     }
 
     public void TogglePause()
@@ -116,4 +129,5 @@ public sealed class GameManager : MonoBehaviour
     {
         
     }
+
 }

@@ -84,6 +84,7 @@ public class Character : Identity, Idestoryable
     
     public virtual void TakeDamage(int amount)
     {
+        if(isOnLive.Value == false) return;
         if (!IsServer)
         {
             return;
@@ -101,7 +102,6 @@ public class Character : Identity, Idestoryable
         }
         if (health <= 0)
         {
-            OnDestory?.Invoke(this);
             Die();
         }
     }
@@ -112,13 +112,26 @@ public class Character : Identity, Idestoryable
         health += amount;
         HealClientRpc(amount, transform.position);
     }
-    protected virtual void Die()
+    public virtual void Die()
     {
+        OnDestory?.Invoke(this);
+
         if (NetworkObject != null && NetworkObject.IsSpawned)
             NetworkObject.Despawn();
         else
             Destroy(gameObject);
     }
+
+    public virtual void Revive(Vector3 spawnPoint)
+    {
+        if (!IsServer) return;
+
+        isOnLive.Value = true;
+        transform.position = spawnPoint;
+        health = maxHealth;
+        OnReviveClientRpc(spawnPoint);
+    }
+
 
 
     #region ---RPC Calls---
@@ -152,6 +165,44 @@ public class Character : Identity, Idestoryable
         Debug.Log($"Client {NetworkManager.Singleton.LocalClientId} sees {gameObject.name} heal {amount} at {healPosition}");
 
 
+    }
+    [ClientRpc]
+    protected void OnDieClientRpc()
+    {
+        var cc = GetComponent<CharacterController>();
+        if (cc) cc.enabled = false;
+
+        var anim = GetComponent<Animator>();
+        if (anim) anim.SetTrigger("Die");
+
+        // ถ้าใช้ script เดินให้ปิด
+        //var player = GetComponent<Player>();
+        //if (player) player.enabled = false;
+    }
+    [ClientRpc]
+    private void OnReviveClientRpc(Vector3 spawnPoint)
+    {
+        var cc = GetComponent<CharacterController>();
+        if (cc)
+        {
+            cc.enabled = false; // ต้องปิดก่อนย้ายตำแหน่ง
+            transform.position = spawnPoint;
+            cc.enabled = true;
+        }
+        else
+        {
+            transform.position = spawnPoint;
+        }
+
+        var anim = GetComponent<Animator>();
+        if (anim)
+        {
+            anim.Rebind();
+            anim.Update(0f); // reset state ของ Animator
+        }
+
+        //var move = GetComponent<PlayerMovement>();
+        //if (move) move.enabled = true;
     }
     #endregion
 }
