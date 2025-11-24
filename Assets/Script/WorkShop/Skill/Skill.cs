@@ -10,10 +10,11 @@ public abstract class Skill : ScriptableObject
     public float cooldownTime;
     public float lastUsedTime = float.MinValue; 
     public float timer;
-
+    public bool isDomain;
+    [Header("Skill Tree Cost")]
     public int skillPointCost;
     public List<Skill> skillrequire;
-
+    [Header("Skill Visual")]
     public Sprite skillIcon;
     public GameObject skillPrefab;
 

@@ -68,14 +68,28 @@ public class SkillBook : NetworkBehaviour
 
         // Spawn Effect
         GameObject g = Instantiate(skill.skillPrefab , transform.position, Quaternion.identity, transform);
-        Destroy(g, 2);
 
+        if (skill.isDomain)
+        {
+            g.transform.parent = null;
+        }
+  
         // Run Skill Action
         skill.Activate(player);
         skill.TimeStampSkill(Time.time);
 
         if (skill.timer > 0)
+        {
             DulationSkills.Add(skill);
+            Destroy(g, skill.timer);
+        }
+        else
+        {
+            Destroy(g, 2);
+        }
+       
+
+
     }
 
     private void OnDrawGizmos()

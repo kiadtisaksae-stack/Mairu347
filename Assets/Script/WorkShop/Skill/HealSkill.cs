@@ -4,6 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "HealSkill", menuName = "Skills/HealSkill")]
 public class HealSkill : Skill
 {
+    [Header("Skill Ability")]
     public int healingAmountPerSecond = 5;
 
     private float healAccumulator = 0f;
@@ -14,7 +15,7 @@ public class HealSkill : Skill
         this.Duration = 5f; 
     }
 
-    public float Duration { get; set; }
+    public float Duration;
 
     public override void Activate(Character character)
     {
