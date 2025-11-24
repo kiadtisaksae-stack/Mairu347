@@ -14,6 +14,7 @@ public class QuestData : ScriptableObject
     [Header("Basic Info")]
     public string questName;
     public string description;
+    public string CompletedText;
     public QuestType questType;
 
     [Header("Requirements")]

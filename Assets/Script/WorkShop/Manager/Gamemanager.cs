@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -26,6 +27,9 @@ public sealed class GameManager : MonoBehaviour
     [Header("Player Stats")]
     public TextMeshProUGUI playerDamage;
     public TextMeshProUGUI playerDefence;
+    [Header("Quest UI Slots")]
+    public List<TextMeshProUGUI> questTextSlots = new List<TextMeshProUGUI>();
+    public List< QuestData > questDatas = new List<QuestData>();
     [Header("Game State")]
     public int currentScore = 0;
     public bool isGamePaused = false;
@@ -68,6 +72,43 @@ public sealed class GameManager : MonoBehaviour
     {
         inputActions = new InputSystem_Actions();
         inputActions.UI.Cancel.performed += ctx => TogglePause();
+    }
+    public void UpdateQuestUI(QuestData questData)
+    {
+        questDatas.Add(questData);
+        RefreshQuestUI();
+    }
+    public void ClearQuest(QuestData questData)
+    {
+        for (int i = questDatas.Count - 1; i >= 0; i--)
+        {
+            if (questDatas[i].questName == questData.questName)
+            {
+                questDatas.RemoveAt(i);
+            }
+        }
+
+        RefreshQuestUI();
+    }
+    public void RefreshQuestUI()
+    {
+        // วนลูปช่อง UI ตามจำนวนที่มี
+        for (int i = 0; i < questTextSlots.Count; i++)
+        {
+            if (i < questDatas.Count)
+            {
+                // แสดงข้อความเควสตามลำดับ index
+                questTextSlots[i].text = questDatas[i].questName + " (" +
+                                        questDatas[i].currentCount + "/" +
+                                        questDatas[i].requestCount + ")";
+                questTextSlots[i].gameObject.SetActive(true);
+            }
+            else
+            {
+                // ถ้าไม่มีเควสในช่องนี้ ให้ซ่อน
+                questTextSlots[i].text = "None Quest";
+            }
+        }
     }
     public void UpdateStatus(int damage, int defence)
     {

@@ -27,11 +27,8 @@ public class NPCInteractable : MonoBehaviour
 {
     [Header("QuestGiver")]
     public QuestData questData;
-    [TextArea(3,5)]
-    public string questDataText;
-
-    [TextArea(3,5)]
-    public string QuestcompletedText;
+    [HideInInspector]public string questDataText;
+    [HideInInspector]public string QuestcompletedText;
     [Header("NPC Setting")]
     public string npcName;
     public AudioClip npcVoiceSound;
@@ -45,6 +42,8 @@ public class NPCInteractable : MonoBehaviour
     private void Start()
     {
         if (speechIcon != null) speechIcon.SetActive(false);
+        questDataText = questData.description;
+        QuestcompletedText = questData.CompletedText;
     }
 
     public void TriggerDialogue()
