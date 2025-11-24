@@ -1,7 +1,11 @@
 using UnityEngine;
-using Unity.Netcode; 
+using Unity.Netcode;
+using Unity.Netcode.Components;
 
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(SphereCollider))]
+[RequireComponent(typeof(NetworkRigidbody))]
+
 public class Enemy : Character
 {
     [Header("Enemy Type")]
@@ -12,10 +16,12 @@ public class Enemy : Character
     protected float TimeToAttack = 1f;
     [SerializeField]
     protected float AttackRange = 1.5f; // ระยะโจมตี
+    protected bool isRun = false;
     
     protected State currentState = State.Idel;
     protected float timer = 0f;
     protected Rigidbody rb;
+    protected SphereCollider sphereCollider;
     
     protected Player _targetPlayer;
 
@@ -41,8 +47,14 @@ public class Enemy : Character
 
     public override void OnNetworkSpawn()
     {
-        base.OnNetworkSpawn();
+        
+        this._initialMaxHealth =  enemyType._initialMaxHealth;
         this.Name = enemyType.enemyName;
+        this.Defence = enemyType.Defence;
+        this.Damage = enemyType.Damage;
+        this.movementSpeed = enemyType.movementSpeed;
+        base.OnNetworkSpawn();
+
     }
     private void FixedUpdate()
     {
@@ -95,6 +107,7 @@ public class Enemy : Character
     {
         base.SetUP();
         rb = GetComponent<Rigidbody>();
+        sphereCollider = GetComponent<SphereCollider>();
         if (animator == null)
         {
             Debug.LogError("Animator component not found on " + gameObject.name);
@@ -180,7 +193,7 @@ public class Enemy : Character
     protected virtual void Move(Vector3 direction)
     {
         rb.linearVelocity = new Vector3(direction.x * movementSpeed, rb.linearVelocity.y, direction.z * movementSpeed);
-        animator.SetFloat("Speed", rb.linearVelocity.magnitude);
+        SetAnimationRun(true);
     }
     
     protected virtual void Attack(Player _player) 
@@ -201,5 +214,9 @@ public class Enemy : Character
         {
             animator.SetBool("Attack", isAttacking);
         }
+    }
+    protected void SetAnimationRun(bool isRun)
+    {
+        
     }
 }
