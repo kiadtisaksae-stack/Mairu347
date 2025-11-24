@@ -60,7 +60,7 @@ public class SkillTreeUI : MonoBehaviour
         }
         else
         {
-            skillIcon.color = lockedColor; //unlock
+            skillIcon.color = lockedColor; //lock
             if (borderIcon != null) borderIcon.color = lockedColor;
             skillButton.interactable = false;
         }
