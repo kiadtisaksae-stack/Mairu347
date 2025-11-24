@@ -10,10 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7f165d79d5dd2493cba0ee0ea14de7ca, type: 3}
-  m_Name: QuestData
+  m_Name: QkillSlime
   m_EditorClassIdentifier: Assembly-CSharp::QuestData
-  questName: TestQuest
-  description: 
+  questName: Monsters Stronger
+  description: Kill 2 Slime
+  CompletedText: Haha good job bro
   questType: 1
   requestCount: 2
   currentCount: 0
