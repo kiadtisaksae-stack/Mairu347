@@ -1,7 +1,9 @@
 ﻿using System;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
-
+[RequireComponent(typeof(NetworkTransform))]
+[RequireComponent(typeof(NetworkAnimator))]
 public class Character : Identity, Idestoryable
 {
     private readonly NetworkVariable<int> _networkHealth = new(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -23,7 +25,7 @@ public class Character : Identity, Idestoryable
     
     [Header("status")]
     [SerializeField]
-    private int _initialMaxHealth = 100; 
+    protected int _initialMaxHealth = 100; 
 
     // MaxHealth Property Readonly
     public int maxHealth { get => _networkMaxHealth.Value; }
@@ -33,6 +35,7 @@ public class Character : Identity, Idestoryable
     public int baseDefence = 10;
     public float movementSpeed;
     protected Animator animator;
+    protected NetworkAnimator networkAnimator;
 
     public event Action<Idestoryable> OnDestory;
     protected void InvokeOnDestroy()
@@ -75,6 +78,8 @@ public class Character : Identity, Idestoryable
         {
             Debug.LogError("Animator component not found on " + gameObject.name);
         }
+        networkAnimator = GetComponent<NetworkAnimator>();
+        networkAnimator.Animator = animator;
     }
     
     public virtual void TakeDamage(int amount)
