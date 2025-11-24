@@ -25,15 +25,15 @@ public class Character : Identity, Idestoryable
     
     [Header("status")]
     [SerializeField]
-    protected int _initialMaxHealth = 100; 
+    [HideInInspector] protected int _initialMaxHealth = 100; 
 
     // MaxHealth Property Readonly
-    public int maxHealth { get => _networkMaxHealth.Value; }
-    public int Damage = 10;
-    public int baseDamage = 10;
-    public int Defence = 10;
-    public int baseDefence = 10;
-    public float movementSpeed;
+    [HideInInspector] public int maxHealth { get => _networkMaxHealth.Value; }
+    [HideInInspector] public int Damage = 10;
+    [HideInInspector] public int baseDamage = 10;
+    [HideInInspector] public int Defence = 10;
+    [HideInInspector] public int baseDefence = 10;
+    [HideInInspector] public float movementSpeed;
     protected Animator animator;
     protected NetworkAnimator networkAnimator;
 

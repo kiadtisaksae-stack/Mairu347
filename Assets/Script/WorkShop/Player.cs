@@ -47,6 +47,7 @@ public class Player : Character
     [Header("Inventory")]
     public InventoryCanvas iventory;
     private PlayerData myData;
+    public PlayerSO playerSO;
 
     private void Awake()
     {
@@ -81,6 +82,13 @@ public class Player : Character
     
     public override void OnNetworkSpawn()
     {
+        this.Damage = playerSO.Damage;
+        this.baseDamage = playerSO.baseDamage;
+        this.Defence = playerSO.Defence;
+        this.baseDefence = playerSO.baseDefence;
+        this.movementSpeed = playerSO.movementSpeed;
+        this.sprintSpeed = playerSO.sprint;
+        this._initialMaxHealth = playerSO._initialMaxHealth;
         base.OnNetworkSpawn();
 
         if (IsOwner)

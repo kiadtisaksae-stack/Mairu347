@@ -2645,7 +2645,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 889057592
+  GlobalObjectIdHash: 4267033865
   InScenePlacedSourceGlobalObjectIdHash: 889057592
   DeferredDespawnTick: 0
   Ownership: 1
@@ -2741,14 +2741,11 @@ MonoBehaviour:
   LegEquitp: []
   jumpForce: 8
   gravity: -20
-  rotationSmoothTime: 0.55
-  attackRange: 2
-  attackCooldown: 1
-  comboResetTime: 1
   attackAnimations: []
   effect: []
   questDataTest: {fileID: 11400000, guid: ca55277ac757640f9b0e40f57983af60, type: 2}
   iventory: {fileID: 0}
+  playerSO: {fileID: 11400000, guid: 03e983ff26a924aa3bfceac0545e14e4, type: 2}
 --- !u!114 &8198086993632942249
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3104,7 +3101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2125347005
+  GlobalObjectIdHash: 2696094490
   InScenePlacedSourceGlobalObjectIdHash: 889057592
   DeferredDespawnTick: 0
   Ownership: 1
@@ -3379,7 +3376,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 990308487
+  GlobalObjectIdHash: 1221007332
   InScenePlacedSourceGlobalObjectIdHash: 889057592
   DeferredDespawnTick: 0
   Ownership: 1
@@ -6055,7 +6052,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8366863324959291691, guid: d9932423e09ccf9429307668b3dae6a1, type: 3}
       propertyPath: GlobalObjectIdHash
-      value: 1119477323
+      value: 3413088393
       objectReference: {fileID: 0}
     - target: {fileID: 8366863324959291691, guid: d9932423e09ccf9429307668b3dae6a1, type: 3}
       propertyPath: InScenePlacedSourceGlobalObjectIdHash
