@@ -424,8 +424,8 @@ GameObject:
   - component: {fileID: 8738408038997809434}
   - component: {fileID: 8738408038990821118}
   - component: {fileID: 6982296281094959567}
-  - component: {fileID: 2351314044143127174}
   - component: {fileID: 320948265998014903}
+  - component: {fileID: 2351314044143127174}
   - component: {fileID: 7159988872948136782}
   - component: {fileID: 8558798090960755744}
   - component: {fileID: 7253501137224711347}
@@ -503,6 +503,27 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!135 &320948265998014903
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8738408038998099258}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 1
+  m_Center: {x: 0, y: 0.6, z: 0}
 --- !u!114 &2351314044143127174
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -528,27 +549,6 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!135 &320948265998014903
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8738408038998099258}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.6
-  m_Center: {x: 0, y: 0.6, z: 0}
 --- !u!114 &7159988872948136782
 MonoBehaviour:
   m_ObjectHideFlags: 0
