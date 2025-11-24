@@ -90,6 +90,7 @@ public class Player : Character
         this.sprintSpeed = playerSO.sprint;
         this._initialMaxHealth = playerSO._initialMaxHealth;
         base.OnNetworkSpawn();
+        GameManager.Instance.UpdateStatus(Damage, Defence);
 
         if (IsOwner)
         {
@@ -457,6 +458,7 @@ public class Player : Character
 
         // ✅ อัพเดตค่าสถานะ
         UpdateStatsServerRpc(baseDamage + equipmentDamage, baseDefence + equipmentDefence);
+        GameManager.Instance.UpdateStatus(Damage, Defence);
     }
 
     private int GetSlotDamage(InventorySlot slot)
@@ -575,6 +577,15 @@ public class Player : Character
         {
             GameManager.Instance.UpdateHealthBar(health, maxHealth);
         }
+    }
+    public override void Die()
+    {
+        if (!IsServer) return; // ตายต้องเป็น Server เท่านั้น
+        if (!isOnLive.Value) return; // ถ้าตายแล้ว ห้ามซ้ำ
+
+        isOnLive.Value = false;
+        OnDieClientRpc(); // ให้ Client ทำ animation / ปิด control
+        Revive(new Vector3(0, 5, 0));
     }
 
     [ServerRpc]

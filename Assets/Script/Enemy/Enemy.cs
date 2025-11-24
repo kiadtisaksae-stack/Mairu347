@@ -98,10 +98,12 @@ public class Enemy : Character
 
             ShareXpInRadius();
             DropReward();
+            SetAnimDie(true);
             InvokeOnDestroy();
             GetComponent<NetworkObject>().Despawn();
         }
     }
+
 
     public override void SetUP()
     {
@@ -216,9 +218,27 @@ public class Enemy : Character
     }
     protected void SetAnimationRun(bool isRun)
     {
-        if(animator.GetBool("Run") != isRun)
+        bool HasParameter(Animator anim, string paramName)
+        {
+            foreach (AnimatorControllerParameter param in anim.parameters)
+            {
+                if (param.name == paramName)
+                    return true;
+            }
+            return false;
+        }
+        if (!HasParameter(animator, "Run")) return;
+
+        if (animator.GetBool("Run") != isRun)
         {
             animator.SetBool("Run", isRun);
+        }
+    }
+    protected void SetAnimDie(bool die)
+    {
+        if (animator.GetBool("Die") != die)
+        {
+            animator.SetBool("Die", die);
         }
     }
 }

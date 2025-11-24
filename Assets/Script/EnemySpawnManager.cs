@@ -56,21 +56,13 @@ public class EnemySpawnManager : NetworkBehaviour
         if (IsServer)
         {
             // Host/Server: เรียก Spawn ศัตรูเริ่มต้น
-            SpawnInitialEnemies();
+            SpawnAllDefinedPoints();
         }
         else
         {
             // Client ใหม่ (Late Joiner): สมัครรับ Event เพื่อซิงค์สถานะการทำลาย
             destroyedEnemyIds.OnListChanged += HandleDestroyedEnemyListChanged;
         }
-    }
-    public void OnTriggerSpawn()
-    {
-        if (IsServer)
-        {
-            SpawnInitialEnemies();
-        }
-    
     }
 
     public override void OnNetworkDespawn()
@@ -105,48 +97,60 @@ public class EnemySpawnManager : NetworkBehaviour
     // ----------------------------------------------------
     // 🎯 Shared Logic: การ Spawn ศัตรูที่จุดเดียว
     // ----------------------------------------------------
-    
-    private void SpawnEnemiesAtPoint(Transform spawnPoint)
+
+    private void SpawnEnemiesAtPoint(Transform spawnPoint, GameObject[] prefabsToUse)
     {
-        if (!IsServer || enemyPrefabs == null || enemyPrefabs.Length == 0) return;
+        if (!IsServer || prefabsToUse == null || prefabsToUse.Length == 0) return;
 
         // 1. สุ่มจำนวนศัตรูที่จะเกิด ณ จุดนี้
         int enemiesToSpawn = Random.Range(minEnemiesPerPoint, maxEnemiesPerPoint + 1);
-        
+
         for (int i = 0; i < enemiesToSpawn; i++)
         {
-            // 2. สุ่มเลือก Prefab ศัตรู
-            GameObject selectedPrefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
-            
+            // 2. สุ่มเลือก Prefab ศัตรูจากอาร์เรย์ที่ส่งเข้ามา
+            GameObject selectedPrefab = prefabsToUse[Random.Range(0, prefabsToUse.Length)];
+
             // 3. สุ่มตำแหน่งการเกิดรอบจุด Spawn
             Vector2 randomOffset = Random.insideUnitCircle * spawnRadius;
-            Vector3 spawnPosition = spawnPoint.position + new Vector3(randomOffset.x, 0f, randomOffset.y); 
+            Vector3 spawnPosition = spawnPoint.position + new Vector3(randomOffset.x, 0f, randomOffset.y);
 
             // 4. สร้างและ Spawn ศัตรู
             GameObject enemyObj = Instantiate(selectedPrefab, spawnPosition, spawnPoint.rotation);
             NetworkObject enemyNetObj = enemyObj.GetComponent<NetworkObject>();
-            
+
             enemyNetObj.Spawn();
 
-            // 5. ติดตาม Event การตาย (เพื่อบันทึกสถานะลงใน NetworkList)
+            // 5. ติดตาม Event การตาย 
             if (enemyObj.TryGetComponent(out Character enemyCharacter))
             {
                 enemyCharacter.OnDestory += HandleEnemyDestroyed;
             }
         }
     }
-
-    // ----------------------------------------------------
-    // 🔄 Server Logic: การสร้างศัตรูเริ่มต้น
-    // ----------------------------------------------------
-
-    private void SpawnInitialEnemies()
+    private void SpawnAllDefinedPoints()
     {
         if (!IsServer) return;
 
         foreach (Transform spawnPoint in spawnPoints)
         {
-            SpawnEnemiesAtPoint(spawnPoint);
+            // 💡 ใช้ Prefab เริ่มต้นที่กำหนดไว้ใน Manager
+            SpawnEnemiesAtPoint(spawnPoint, enemyPrefabs);
+        }
+    }
+    public void OnTriggerSpawn(Transform[] pointsToUse, GameObject[] prefabsToUse)
+    {
+        if (!IsServer) return;
+
+        if (pointsToUse == null || pointsToUse.Length == 0)
+        {
+            Debug.LogWarning("[SERVER] OnTriggerSpawn received no spawn points.");
+            return;
+        }
+
+        foreach (Transform spawnPoint in pointsToUse)
+        {
+            // 💡 ใช้ Prefab และจุด Spawn ที่ส่งมาจาก SpawnTrigger
+            SpawnEnemiesAtPoint(spawnPoint, prefabsToUse);
         }
     }
 
@@ -174,7 +178,7 @@ public class EnemySpawnManager : NetworkBehaviour
             {
                 Debug.Log($"[SERVER] Respawning at {spawnPoint.name}. Current count: {currentEnemyCount}");
                 // 3. ทำการ Spawn ศัตรูเต็มจำนวนใหม่ 
-                SpawnEnemiesAtPoint(spawnPoint);
+                SpawnEnemiesAtPoint(spawnPoint, enemyPrefabs);
             }
         }
     }
