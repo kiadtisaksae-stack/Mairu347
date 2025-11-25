@@ -61,6 +61,7 @@ public class QuestManager : MonoBehaviour
                 (quest.targetItem == collectedItem))
             {
                 AddProgress(quest, 1);
+                GameManager.Instance.UpdateQuestUI(quest);
             }
         }
     }
