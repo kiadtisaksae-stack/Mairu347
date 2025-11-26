@@ -13,13 +13,18 @@ MonoBehaviour:
   m_Name: BuffSkillStrength
   m_EditorClassIdentifier: Assembly-CSharp::BuffSkillStragth
   skillName: Strength Buff
+  skillDescription: Buff damage and defence
+  casterPosition: {x: 0, y: 0, z: 0}
   cooldownTime: 15
-  lastUsedTime: -3.4028235e+38
-  timer: 0
-  skillPointCost: 0
+  lastUsedTime: 101.96044
+  timer: -0.0019878913
+  lifeTime: 10
+  isPassive: 1
+  isRange: 0
+  skillPointCost: 4
   skillrequire:
   - {fileID: 11400000, guid: c5f239ed9444fdf4d8ad9ade985dc01e, type: 2}
-  skillIcon: {fileID: 21300044, guid: 1eaee135ce037439d925cee5e41ce026, type: 3}
+  skillIcon: {fileID: 21300000, guid: cd36795e34da3df4d8dcddbbf309b406, type: 3}
   skillPrefab: {fileID: 3280519133390621005, guid: afab5507fd717fb43aa298598f788cda, type: 3}
   addDamage: 1.2
   addDefence: 15

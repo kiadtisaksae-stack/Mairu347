@@ -7,10 +7,16 @@ using UnityEngine.UIElements;
 public abstract class Skill : ScriptableObject
 {
     public string skillName;
+    public string skillDescription;
+    public Vector3 casterPosition;
+    [Header("Skill Timing")]
     public float cooldownTime;
     public float lastUsedTime = float.MinValue; 
     public float timer;
-    public bool isDomain;
+    public float lifeTime = 2;
+    [Header("Skill Type")]
+    public bool isPassive;
+    public bool isRange;
     [Header("Skill Tree Cost")]
     public int skillPointCost;
     public List<Skill> skillrequire;

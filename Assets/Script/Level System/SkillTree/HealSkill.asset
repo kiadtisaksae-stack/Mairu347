@@ -13,11 +13,17 @@ MonoBehaviour:
   m_Name: HealSkill
   m_EditorClassIdentifier: Assembly-CSharp::HealSkill
   skillName: Heal
+  skillDescription: simple healing skill
+  casterPosition: {x: 0, y: 0, z: 0}
   cooldownTime: 8
   lastUsedTime: 39.66039
   timer: -0.0018839075
+  lifeTime: 2
+  isPassive: 1
+  isRange: 0
   skillPointCost: 2
   skillrequire: []
-  skillIcon: {fileID: 21300000, guid: fcc24b0f5a65382438ca936cbffcb9f6, type: 3}
+  skillIcon: {fileID: 21300000, guid: 3886af7250260dc44a0b82119ad2058b, type: 3}
   skillPrefab: {fileID: 8771972552311404799, guid: bbf9e36a48d6c5648a13889afab076fd, type: 3}
   healingAmountPerSecond: 5
+  Duration: 5

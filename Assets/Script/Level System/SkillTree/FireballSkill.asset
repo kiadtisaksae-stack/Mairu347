@@ -12,12 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84d4b0d8c1cf31043b05c086204c4401, type: 3}
   m_Name: FireballSkill
   m_EditorClassIdentifier: Assembly-CSharp::FireballSkill
-  skillName: Fireball Lv1
+  skillName: FireWall
+  skillDescription: Create fire around casters
+  casterPosition: {x: 0, y: 0, z: 0}
   cooldownTime: 5
   lastUsedTime: 43.483696
   timer: 0
+  lifeTime: 2
+  isPassive: 0
+  isRange: 0
   skillPointCost: 2
   skillrequire: []
-  skillIcon: {fileID: 21300048, guid: 1eaee135ce037439d925cee5e41ce026, type: 3}
+  skillIcon: {fileID: 21300000, guid: 06d1c34b4653a7643a8ac7406f2c3b54, type: 3}
   skillPrefab: {fileID: 4593184484909914552, guid: 2e1e9506f5904a64b81744324fb7cd50, type: 3}
+  damage: 50
   searchRadius: 5

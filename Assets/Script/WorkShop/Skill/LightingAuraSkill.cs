@@ -19,6 +19,10 @@ public class LightingAuraSkill : Skill
     int originalDamage;
     int targetDamage;
 
+    public LightingAuraSkill()
+    {
+        this.lifeTime = duration;
+    }
 
     public override void Activate(Character character)
     {
