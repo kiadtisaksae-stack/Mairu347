@@ -672,123 +672,6 @@ public class Player : Character
     #endregion
     #region --- Equipment ---
     
-    // public void EquipHead()
-    // {
-    //     ItemSO itemToEquip = iventory.headSlot.item;
-
-    //     // ตรวจสอบว่ามี ItemSO หรือไม่ (headSlot อาจว่างเปล่า)
-    //     if (itemToEquip == null || itemToEquip.itemName == null)
-    //     {
-    //         // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
-    //         foreach (var head in HeadEquitp)
-    //         {
-    //             if (head != null)
-    //             {
-    //                 head.SetActive(false);
-    //             }
-    //         }
-    //         return;
-    //     }
-
-    //     foreach (var head in HeadEquitp)
-    //     {
-    //         if (head != null)
-    //         {
-    //             head.SetActive(head.name.Contains(itemToEquip.itemName));
-    //         }
-    //     }
-    // }
-    // public void EquipBody()
-    // {
-    //     ItemSO itemToEquip = iventory.bodySlot.item;
-    //     // ตรวจสอบว่ามี ItemSO หรือไม่ (bodySlot อาจว่างเปล่า)
-    //     if (itemToEquip == null || itemToEquip.itemName == null)
-    //     {
-    //         // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
-    //         foreach (var body in BodyEquitp)
-    //         {
-    //             if (body != null)
-    //             {
-    //                 body.SetActive(false);
-    //             }
-    //         }
-    //         return;
-    //     }
-    //     foreach (var body in BodyEquitp)
-    //     {
-    //         if (body != null)
-    //         {
-    //             body.SetActive(body.name.Contains(itemToEquip.itemName));
-    //         }
-    //     }
-    // }
-    // public void EquipLeg()
-    // {
-    //     ItemSO itemToEquip = iventory.legSlot.item;
-    //     // ตรวจสอบว่ามี ItemSO หรือไม่ (legSlot อาจว่างเปล่า)
-    //     if (itemToEquip == null || itemToEquip.itemName == null)
-    //     {
-    //         // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
-    //         foreach (var leg in LegEquitp)
-    //         {
-    //             if (leg != null)
-    //             {
-    //                 leg.SetActive(false);
-    //             }
-    //         }
-    //         return;
-    //     }
-    //     foreach (var leg in LegEquitp)
-    //     {
-    //         if (leg != null)
-    //         {
-    //             leg.SetActive(leg.name.Contains(itemToEquip.itemName));
-    //         }
-    //     }
-    // }
-    // public void EquipWeapon()
-    // {
-    //     ItemSO itemToEquip = iventory.rightHandSlots.item;
-    //     ItemSO itemToEquipLeft = iventory.leftHandSlots.item;
-    //     // ตรวจสอบว่ามี ItemSO หรือไม่ (weaponSlot อาจว่างเปล่า)
-    //     if (itemToEquip == null || itemToEquip.itemName == null)
-    //     {
-    //         // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
-    //         foreach (var weapon in WeaponRigthHand)
-    //         {
-    //             if (weapon != null)
-    //             {
-    //                 weapon.SetActive(false);
-    //             }
-    //         }
-    //         return;
-    //     }
-    //     if (itemToEquipLeft == null || itemToEquipLeft.itemName == null)
-    //     {
-    //         // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
-    //         foreach (var weapon in WeaponLeftHand)
-    //         {
-    //             if (weapon != null)
-    //             {
-    //                 weapon.SetActive(false);
-    //             }
-    //         }
-    //     }
-    //     foreach (var weapon in WeaponRigthHand)
-    //     {
-    //         if (weapon != null)
-    //         {
-    //             weapon.SetActive(weapon.name.Contains(itemToEquip.itemName));
-    //         }
-    //     }
-    //     foreach (var weapon in WeaponLeftHand)
-    //     {
-    //         if (weapon != null)
-    //         {
-    //             weapon.SetActive(weapon.name.Contains(itemToEquipLeft.itemName));
-    //         }
-    //     }
-    // }
     public void UpdateEquipmentStats()
     {
         if (!IsOwner) return;
@@ -830,8 +713,17 @@ public class Player : Character
     [ServerRpc]
     private void UpdateStatsServerRpc(int newDamage, int newDefence)
     {
+
+        UpdateStatusClientRpc(newDamage, newDefence);
+    }
+    [ClientRpc]
+    public void UpdateStatusClientRpc(int newDamage, int newDefence)
+    {
+        if (!IsOwner) return;
         Damage = newDamage;
         Defence = newDefence;
+        GameManager.Instance.UpdateStatus(Damage, Defence);
+
     }
 
     #endregion
