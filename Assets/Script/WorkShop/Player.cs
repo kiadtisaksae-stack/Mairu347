@@ -3,6 +3,15 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
+// ✅ Enum สำหรับ Equipment Slots
+public enum EquipmentSlot
+{
+    Head,
+    Body,
+    Legs,
+    RightHand,
+    LeftHand
+}
 [RequireComponent(typeof(CharacterController))]
 public class Player : Character
 {
@@ -98,7 +107,7 @@ public class Player : Character
             enabled = true;
             UICanvasControllerInput.RegisterLocalPlayer(this);
             inputActions?.Player.Enable();
-
+            InitializeEquipment();
             // Link InventoryCanvas ของผู้เล่น
             iventory = FindFirstObjectByType<InventoryCanvas>();
             if (iventory != null)
@@ -315,7 +324,9 @@ public class Player : Character
         }
     }
     #endregion
-    #region --- Equipment ---
+    #region --- Equipment RPC System ---
+
+    // ✅ Client ใส่ Equipment และแจ้ง Server
     public void EquipHead()
     {
         ItemSO itemToEquip = iventory.headSlot.item;
@@ -331,24 +342,38 @@ public class Player : Character
                     head.SetActive(false);
                 }
             }
+            
+            // ✅ แจ้ง Server ให้ปิด Head
+            NotifyEquipmentChangeServerRpc(EquipmentSlot.Head, "");
             return;
         }
 
+        // ✅ เปิดเฉพาะ Head ที่ตรงกับชื่อไอเทม
+        string equippedItemName = "";
         foreach (var head in HeadEquitp)
         {
             if (head != null)
             {
-                head.SetActive(head.name.Contains(itemToEquip.itemName));
+                bool shouldActive = head.name.Contains(itemToEquip.itemName);
+                head.SetActive(shouldActive);
+                
+                if (shouldActive)
+                {
+                    equippedItemName = itemToEquip.itemName;
+                }
             }
         }
+
+        // ✅ แจ้ง Server ให้ซิงค์
+        NotifyEquipmentChangeServerRpc(EquipmentSlot.Head, equippedItemName);
     }
+
     public void EquipBody()
     {
         ItemSO itemToEquip = iventory.bodySlot.item;
-        // ตรวจสอบว่ามี ItemSO หรือไม่ (bodySlot อาจว่างเปล่า)
+        
         if (itemToEquip == null || itemToEquip.itemName == null)
         {
-            // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
             foreach (var body in BodyEquitp)
             {
                 if (body != null)
@@ -356,23 +381,35 @@ public class Player : Character
                     body.SetActive(false);
                 }
             }
+            
+            NotifyEquipmentChangeServerRpc(EquipmentSlot.Body, "");
             return;
         }
+
+        string equippedItemName = "";
         foreach (var body in BodyEquitp)
         {
             if (body != null)
             {
-                body.SetActive(body.name.Contains(itemToEquip.itemName));
+                bool shouldActive = body.name.Contains(itemToEquip.itemName);
+                body.SetActive(shouldActive);
+                
+                if (shouldActive)
+                {
+                    equippedItemName = itemToEquip.itemName;
+                }
             }
         }
+
+        NotifyEquipmentChangeServerRpc(EquipmentSlot.Body, equippedItemName);
     }
+
     public void EquipLeg()
     {
         ItemSO itemToEquip = iventory.legSlot.item;
-        // ตรวจสอบว่ามี ItemSO หรือไม่ (legSlot อาจว่างเปล่า)
+        
         if (itemToEquip == null || itemToEquip.itemName == null)
         {
-            // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
             foreach (var leg in LegEquitp)
             {
                 if (leg != null)
@@ -380,24 +417,37 @@ public class Player : Character
                     leg.SetActive(false);
                 }
             }
+            
+            NotifyEquipmentChangeServerRpc(EquipmentSlot.Legs, "");
             return;
         }
+
+        string equippedItemName = "";
         foreach (var leg in LegEquitp)
         {
             if (leg != null)
             {
-                leg.SetActive(leg.name.Contains(itemToEquip.itemName));
+                bool shouldActive = leg.name.Contains(itemToEquip.itemName);
+                leg.SetActive(shouldActive);
+                
+                if (shouldActive)
+                {
+                    equippedItemName = itemToEquip.itemName;
+                }
             }
         }
+
+        NotifyEquipmentChangeServerRpc(EquipmentSlot.Legs, equippedItemName);
     }
+
     public void EquipWeapon()
     {
         ItemSO itemToEquip = iventory.rightHandSlots.item;
         ItemSO itemToEquipLeft = iventory.leftHandSlots.item;
-        // ตรวจสอบว่ามี ItemSO หรือไม่ (weaponSlot อาจว่างเปล่า)
+
+        // ✅ Right Hand
         if (itemToEquip == null || itemToEquip.itemName == null)
         {
-            // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
             foreach (var weapon in WeaponRigthHand)
             {
                 if (weapon != null)
@@ -405,11 +455,30 @@ public class Player : Character
                     weapon.SetActive(false);
                 }
             }
-            return;
+            NotifyEquipmentChangeServerRpc(EquipmentSlot.RightHand, "");
         }
+        else
+        {
+            string equippedItemName = "";
+            foreach (var weapon in WeaponRigthHand)
+            {
+                if (weapon != null)
+                {
+                    bool shouldActive = weapon.name.Contains(itemToEquip.itemName);
+                    weapon.SetActive(shouldActive);
+                    
+                    if (shouldActive)
+                    {
+                        equippedItemName = itemToEquip.itemName;
+                    }
+                }
+            }
+            NotifyEquipmentChangeServerRpc(EquipmentSlot.RightHand, equippedItemName);
+        }
+
+        // ✅ Left Hand
         if (itemToEquipLeft == null || itemToEquipLeft.itemName == null)
         {
-            // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
             foreach (var weapon in WeaponLeftHand)
             {
                 if (weapon != null)
@@ -417,22 +486,309 @@ public class Player : Character
                     weapon.SetActive(false);
                 }
             }
+            NotifyEquipmentChangeServerRpc(EquipmentSlot.LeftHand, "");
         }
+        else
+        {
+            string equippedItemName = "";
+            foreach (var weapon in WeaponLeftHand)
+            {
+                if (weapon != null)
+                {
+                    bool shouldActive = weapon.name.Contains(itemToEquipLeft.itemName);
+                    weapon.SetActive(shouldActive);
+                    
+                    if (shouldActive)
+                    {
+                        equippedItemName = itemToEquipLeft.itemName;
+                    }
+                }
+            }
+            NotifyEquipmentChangeServerRpc(EquipmentSlot.LeftHand, equippedItemName);
+        }
+    }
+
+    // ✅ ServerRpc เพื่อแจ้งการเปลี่ยนแปลง Equipment
+    [ServerRpc]
+    private void NotifyEquipmentChangeServerRpc(EquipmentSlot slot, string itemName, ServerRpcParams rpcParams = default)
+    {
+        Debug.Log($"🔄 Server: Player {OwnerClientId} changing {slot} to {itemName}");
+        
+        // ✅ ส่งให้ Client คนอื่นเห็น
+        SyncEquipmentToClientsClientRpc(OwnerClientId, slot, itemName);
+    }
+
+    // ✅ ClientRpc สำหรับซิงค์ Equipment ให้ Client คนอื่น
+    [ClientRpc]
+    private void SyncEquipmentToClientsClientRpc(ulong targetClientId, EquipmentSlot slot, string itemName)
+    {
+        // ✅ ข้ามเจ้าของ (เพราะเจ้าของตั้งค่าไปแล้ว)
+        if (IsOwner) return;
+
+        Debug.Log($"👀 Other client sees player {targetClientId} equipping {itemName} on {slot}");
+
+        // ✅ ตั้งค่า Equipment ให้ Client คนอื่นเห็น
+        switch (slot)
+        {
+            case EquipmentSlot.Head:
+                SetHeadEquipmentForOther(itemName);
+                break;
+            case EquipmentSlot.Body:
+                SetBodyEquipmentForOther(itemName);
+                break;
+            case EquipmentSlot.Legs:
+                SetLegEquipmentForOther(itemName);
+                break;
+            case EquipmentSlot.RightHand:
+                SetRightHandEquipmentForOther(itemName);
+                break;
+            case EquipmentSlot.LeftHand:
+                SetLeftHandEquipmentForOther(itemName);
+                break;
+        }
+    }
+
+    // ✅ Methods สำหรับตั้งค่า Equipment ให้ Client คนอื่นเห็น
+    private void SetHeadEquipmentForOther(string itemName)
+    {
+        foreach (var head in HeadEquitp)
+        {
+            if (head != null)
+            {
+                head.SetActive(!string.IsNullOrEmpty(itemName) && head.name.Contains(itemName));
+            }
+        }
+    }
+
+    private void SetBodyEquipmentForOther(string itemName)
+    {
+        foreach (var body in BodyEquitp)
+        {
+            if (body != null)
+            {
+                body.SetActive(!string.IsNullOrEmpty(itemName) && body.name.Contains(itemName));
+            }
+        }
+    }
+
+    private void SetLegEquipmentForOther(string itemName)
+    {
+        foreach (var leg in LegEquitp)
+        {
+            if (leg != null)
+            {
+                leg.SetActive(!string.IsNullOrEmpty(itemName) && leg.name.Contains(itemName));
+            }
+        }
+    }
+
+    private void SetRightHandEquipmentForOther(string itemName)
+    {
         foreach (var weapon in WeaponRigthHand)
         {
             if (weapon != null)
             {
-                weapon.SetActive(weapon.name.Contains(itemToEquip.itemName));
+                weapon.SetActive(!string.IsNullOrEmpty(itemName) && weapon.name.Contains(itemName));
             }
         }
+    }
+
+    private void SetLeftHandEquipmentForOther(string itemName)
+    {
         foreach (var weapon in WeaponLeftHand)
         {
             if (weapon != null)
             {
-                weapon.SetActive(weapon.name.Contains(itemToEquipLeft.itemName));
+                weapon.SetActive(!string.IsNullOrEmpty(itemName) && weapon.name.Contains(itemName));
             }
         }
     }
+    public void InitializeEquipment()
+    {
+        Debug.Log("🎮 Initializing equipment - disabling all");
+        
+        DisableAllEquipment(WeaponRigthHand, "Right Hand");
+        DisableAllEquipment(WeaponLeftHand, "Left Hand");
+        DisableAllEquipment(HeadEquitp, "Head");
+        DisableAllEquipment(BodyEquitp, "Body");
+        DisableAllEquipment(LegEquitp, "Leg");
+        
+        Debug.Log("✅ All equipment disabled on game start");
+    }
+
+    // ✅ ปิดทั้งหมดใน List
+    private void DisableAllEquipment(List<GameObject> equipmentList, string slotName)
+    {
+        if (equipmentList == null)
+        {
+            Debug.LogWarning($"⚠️ {slotName} equipment list is null!");
+            return;
+        }
+
+        int disabledCount = 0;
+        foreach (var item in equipmentList)
+        {
+            if (item != null)
+            {
+                item.SetActive(false);
+                disabledCount++;
+            }
+        }
+        
+        Debug.Log($"🔧 {slotName}: Disabled {disabledCount}/{equipmentList.Count} items");
+    }
+
+    // ✅ เปิดเฉพาะไอเทมที่ตรงกับชื่อ
+    private void EnableMatchingEquipment(List<GameObject> equipmentList, string itemName, string slotName)
+    {
+        if (equipmentList == null || string.IsNullOrEmpty(itemName))
+        {
+            Debug.LogWarning($"⚠️ Cannot enable equipment - list null or item name empty for {slotName}");
+            return;
+        }
+
+        int enabledCount = 0;
+        foreach (var item in equipmentList)
+        {
+            if (item != null)
+            {
+                bool shouldEnable = item.name.Contains(itemName);
+                item.SetActive(shouldEnable);
+                
+                if (shouldEnable)
+                {
+                    enabledCount++;
+                    Debug.Log($"✅ Enabled {item.name} on {slotName}");
+                }
+            }
+        }
+        
+        if (enabledCount == 0)
+        {
+            Debug.LogWarning($"⚠️ No matching equipment found for '{itemName}' in {slotName}");
+        }
+    }
+
+    #endregion
+    #region --- Equipment ---
+    
+    // public void EquipHead()
+    // {
+    //     ItemSO itemToEquip = iventory.headSlot.item;
+
+    //     // ตรวจสอบว่ามี ItemSO หรือไม่ (headSlot อาจว่างเปล่า)
+    //     if (itemToEquip == null || itemToEquip.itemName == null)
+    //     {
+    //         // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+    //         foreach (var head in HeadEquitp)
+    //         {
+    //             if (head != null)
+    //             {
+    //                 head.SetActive(false);
+    //             }
+    //         }
+    //         return;
+    //     }
+
+    //     foreach (var head in HeadEquitp)
+    //     {
+    //         if (head != null)
+    //         {
+    //             head.SetActive(head.name.Contains(itemToEquip.itemName));
+    //         }
+    //     }
+    // }
+    // public void EquipBody()
+    // {
+    //     ItemSO itemToEquip = iventory.bodySlot.item;
+    //     // ตรวจสอบว่ามี ItemSO หรือไม่ (bodySlot อาจว่างเปล่า)
+    //     if (itemToEquip == null || itemToEquip.itemName == null)
+    //     {
+    //         // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+    //         foreach (var body in BodyEquitp)
+    //         {
+    //             if (body != null)
+    //             {
+    //                 body.SetActive(false);
+    //             }
+    //         }
+    //         return;
+    //     }
+    //     foreach (var body in BodyEquitp)
+    //     {
+    //         if (body != null)
+    //         {
+    //             body.SetActive(body.name.Contains(itemToEquip.itemName));
+    //         }
+    //     }
+    // }
+    // public void EquipLeg()
+    // {
+    //     ItemSO itemToEquip = iventory.legSlot.item;
+    //     // ตรวจสอบว่ามี ItemSO หรือไม่ (legSlot อาจว่างเปล่า)
+    //     if (itemToEquip == null || itemToEquip.itemName == null)
+    //     {
+    //         // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+    //         foreach (var leg in LegEquitp)
+    //         {
+    //             if (leg != null)
+    //             {
+    //                 leg.SetActive(false);
+    //             }
+    //         }
+    //         return;
+    //     }
+    //     foreach (var leg in LegEquitp)
+    //     {
+    //         if (leg != null)
+    //         {
+    //             leg.SetActive(leg.name.Contains(itemToEquip.itemName));
+    //         }
+    //     }
+    // }
+    // public void EquipWeapon()
+    // {
+    //     ItemSO itemToEquip = iventory.rightHandSlots.item;
+    //     ItemSO itemToEquipLeft = iventory.leftHandSlots.item;
+    //     // ตรวจสอบว่ามี ItemSO หรือไม่ (weaponSlot อาจว่างเปล่า)
+    //     if (itemToEquip == null || itemToEquip.itemName == null)
+    //     {
+    //         // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+    //         foreach (var weapon in WeaponRigthHand)
+    //         {
+    //             if (weapon != null)
+    //             {
+    //                 weapon.SetActive(false);
+    //             }
+    //         }
+    //         return;
+    //     }
+    //     if (itemToEquipLeft == null || itemToEquipLeft.itemName == null)
+    //     {
+    //         // หากไม่มี Item ให้ปิด Visuals ทั้งหมด
+    //         foreach (var weapon in WeaponLeftHand)
+    //         {
+    //             if (weapon != null)
+    //             {
+    //                 weapon.SetActive(false);
+    //             }
+    //         }
+    //     }
+    //     foreach (var weapon in WeaponRigthHand)
+    //     {
+    //         if (weapon != null)
+    //         {
+    //             weapon.SetActive(weapon.name.Contains(itemToEquip.itemName));
+    //         }
+    //     }
+    //     foreach (var weapon in WeaponLeftHand)
+    //     {
+    //         if (weapon != null)
+    //         {
+    //             weapon.SetActive(weapon.name.Contains(itemToEquipLeft.itemName));
+    //         }
+    //     }
+    // }
     public void UpdateEquipmentStats()
     {
         if (!IsOwner) return;

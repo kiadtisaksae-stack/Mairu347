@@ -20267,7 +20267,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 2038507469}
-    PlayerPrefab: {fileID: 5806978638919094982, guid: 3df4ea2e76c7d42e1b8c115234226381, type: 3}
+    PlayerPrefab: {fileID: 415563373671390796, guid: 50b06527857ba4df5b33e651b5c21906, type: 3}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: b92989a9759cbf3488714c292fd00a2f, type: 2}
@@ -20598,7 +20598,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f083920478d6f744ca41f8744d19c158, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  playGame: {fileID: 0}
 --- !u!4 &2085899512
 Transform:
   m_ObjectHideFlags: 0
@@ -21503,10 +21502,6 @@ PrefabInstance:
     - target: {fileID: 6809424932223605734, guid: 3df4ea2e76c7d42e1b8c115234226381, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 755156843
-      objectReference: {fileID: 0}
-    - target: {fileID: 6809424932223605734, guid: 3df4ea2e76c7d42e1b8c115234226381, type: 3}
-      propertyPath: InScenePlacedSourceGlobalObjectIdHash
-      value: 3987408891
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
