@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyType
   enemyName: Beholder
   enemyId: 3
-  _initialMaxHealth: 10000
-  Damage: 15
+  _initialMaxHealth: 500
+  Damage: 5
   Defence: 5
   movementSpeed: 3

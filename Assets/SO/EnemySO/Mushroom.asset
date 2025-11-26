@@ -15,6 +15,6 @@ MonoBehaviour:
   enemyName: Mushroom
   enemyId: 5
   _initialMaxHealth: 300
-  Damage: 30
-  Defence: 30
+  Damage: 5
+  Defence: 5
   movementSpeed: 2

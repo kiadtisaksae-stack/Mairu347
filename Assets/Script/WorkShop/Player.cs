@@ -1024,4 +1024,16 @@ public class Player : Character
     }
     #endregion
 
+    public void OnLevelUp()
+    {
+        _initialMaxHealth = Mathf.RoundToInt(maxHealth * 1.2f);
+        health = maxHealth;
+        baseDamage = Mathf.RoundToInt(baseDamage * 1.1f);
+        baseDefence = Mathf.RoundToInt(baseDefence * 1.1f);
+        Damage = baseDamage;
+        Defence = baseDefence;
+        GameManager.Instance.UpdateHealthBar(health, maxHealth);
+        GameManager.Instance.UpdateStatus(Damage, Defence);
+    }
+
 }

@@ -15,6 +15,6 @@ MonoBehaviour:
   enemyName: MalangePla
   enemyId: 7
   _initialMaxHealth: 450
-  Damage: 30
-  Defence: 50
+  Damage: 5
+  Defence: 5
   movementSpeed: 3

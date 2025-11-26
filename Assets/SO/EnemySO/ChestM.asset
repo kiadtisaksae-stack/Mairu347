@@ -15,6 +15,6 @@ MonoBehaviour:
   enemyName: ChestM
   enemyId: 2
   _initialMaxHealth: 120
-  Damage: 10
+  Damage: 5
   Defence: 10
   movementSpeed: 3

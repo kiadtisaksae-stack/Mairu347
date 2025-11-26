@@ -9,9 +9,6 @@ public class Teleport : NetworkBehaviour
     public Transform destinationPoint;    // จุดปลายทาง
     public float teleportDelay = 3f;      
 
-    [Header("🗺️ Map Management")]
-    public GameObject mapToActivate;      // Map ที่จะเปิด (ปลายทาง)
-    public GameObject mapToDeactivate;    // Map ที่จะปิด (ต้นทาง) - Optional
 
     [Header("🎯 Map Boundary Check")]
     public BoxCollider map0Boundary;      // ลาก BoxCollider ของ Map0 มาวางที่นี่
@@ -35,8 +32,7 @@ public class Teleport : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        isMap0Active.OnValueChanged += OnMap0ActiveChanged;
-        UpdateMap0Visibility();
+        
     }
 
     private void OnTriggerEnter(Collider other)
@@ -67,35 +63,6 @@ public class Teleport : NetworkBehaviour
         }
     }
 
-    private IEnumerator TeleportSequence(Player player)
-    {
-        Debug.Log($"🚀 Starting teleport sequence to {destinationPoint.name}");
-
-        isReady = false;
-
-        StartTeleportEffectsClientRpc();
-        yield return new WaitForSeconds(teleportDelay);
-
-        int playerCountInMap0 = CountPlayersInMap0();
-        Debug.Log($"👥 Players in Map0: {playerCountInMap0}");
-
-        ExecuteTeleport(player);
-
-        if (playerCountInMap0 > 1)
-        {
-            Debug.Log("🔵 Multiple players in Map0 - Keeping it active");
-        }
-        else
-        {
-            SetMap0ActiveServerRpc(false);
-            Debug.Log("🔴 Only one player in Map0 - Deactivating it");
-        }
-
-        yield return new WaitForSeconds(cooldownTime);
-        isReady = true;
-
-        Debug.Log("✅ Teleport pad ready again");
-    }
 
     private int CountPlayersInMap0()
     {
@@ -119,53 +86,7 @@ public class Teleport : NetworkBehaviour
         return count;
     }
 
-    [ServerRpc]
-    private void SetMap0ActiveServerRpc(bool active)
-    {
-        isMap0Active.Value = active;
-    }
-
-    private void OnMap0ActiveChanged(bool oldValue, bool newValue)
-    {
-        UpdateMap0Visibility();
-        Debug.Log($"🗺️ Map0 is now {(newValue ? "ACTIVE" : "INACTIVE")}");
-    }
-
-    private void UpdateMap0Visibility()
-    {
-        if (mapToDeactivate != null)
-        {
-            mapToDeactivate.SetActive(isMap0Active.Value);
-        }
-    }
-
-    [ClientRpc]
-    private void StartTeleportEffectsClientRpc()
-    {
-        if (teleportEffect != null)
-            teleportEffect.Play();
-
-        if (teleportLight != null)
-            teleportLight.enabled = true;
-
-        if (teleportSound != null)
-            AudioSource.PlayClipAtPoint(teleportSound, transform.position);
-    }
-
-    private void ExecuteTeleport(Player player)
-    {
-        if (destinationPoint == null)
-        {
-            Debug.LogError("❌ Destination point is not assigned!");
-            return;
-        }
-
-        // ❌ ลบ Logic การเปิด Map ที่นี่ออก
-        // if (mapToActivate != null && !mapToActivate.activeSelf) { mapToActivate.SetActive(true); ... }
-
-        // 💡 แค่วาร์ป Player ไป
-        TeleportPlayerServerRpc(player.NetworkObjectId);
-    }
+   
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void RequestTeleportServerRpc(ulong playerId)
     {
@@ -177,59 +98,13 @@ public class Teleport : NetworkBehaviour
 
             if (player != null)
             {
-                // 💡 1. Host/Server ตรวจสอบว่า Map ปลายทางเปิดอยู่หรือไม่
-                if (mapToActivate != null && !mapToActivate.activeSelf)
-                {
-                    // 🚨 ถ้าปิดอยู่: สั่ง Host/Server เปิด Map ก่อนวาร์ป
-                    OpenDestinationMapServerRpc();
-
-                    // 2. Host/Server รอ 1 เฟรม (เผื่อการซิงค์ GameObject) 
-                    // แล้วเริ่ม Coroutine วาร์ป
-                    StartCoroutine(ExecuteTeleportSequenceDelayed(player));
-                }
-                else
-                {
-                    // 3. Map เปิดอยู่แล้ว หรือไม่มี Map ให้เปิด: เริ่มวาร์ปทันที
-                    teleportCoroutine = StartCoroutine(TeleportSequence(player));
-                }
+                TeleportPlayerServerRpc(player.NetworkObjectId);
+                
             }
         }
     }
-    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-    private void OpenDestinationMapServerRpc()
-    {
-        // โค้ดนี้รันบน Host/Server เท่านั้น
-        if (mapToActivate != null && !mapToActivate.activeSelf)
-        {
-            // 1. Host เปิด Map
-            mapToActivate.SetActive(true);
 
-            // 2. สั่ง Client RPC เพื่อให้ทุกคนเปิด Map นี้ด้วย
-            SyncMapActivationClientRpc(mapToActivate.name, true);
-        }
-    }
-
-    // 💡 NEW: Client RPC เพื่อให้ Client เปิด Map ตาม Host
-    [ClientRpc]
-    private void SyncMapActivationClientRpc(string mapName, bool active)
-    {
-        // ตรวจสอบว่า Map ที่ถูกสั่งเปิด/ปิดตรงกับ mapToActivate หรือ mapToDeactivate หรือไม่
-        if (mapToActivate != null && mapToActivate.name == mapName)
-        {
-            mapToActivate.SetActive(active);
-        }
-        // (เพิ่ม logic สำหรับ mapToDeactivate ถ้าจำเป็นต้องปิด Map ต้นทางทันที)
-    }
-
-    // 💡 NEW: Coroutine ที่ใช้เรียกหลังเปิด Map เพื่อหน่วงเวลา
-    private IEnumerator ExecuteTeleportSequenceDelayed(Player player)
-    {
-        // รอ 1 เฟรม ให้ Netcode มีโอกาสซิงค์สถานะ Map Activation
-        yield return null;
-
-        // เริ่ม Coroutine วาร์ปหลัก
-        teleportCoroutine = StartCoroutine(TeleportSequence(player));
-    }
+ 
 
     [ServerRpc]
     private void TeleportPlayerServerRpc(ulong playerId)
