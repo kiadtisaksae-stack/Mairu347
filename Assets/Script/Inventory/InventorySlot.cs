@@ -133,10 +133,17 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             Player player = localObj.GetComponent<Player>();
             if (player != null)
             {
-                player.EquipBody();
-                player.EquipWeapon();
-                player.EquipLeg();
-                player.EquipHead();
+                // ✅ เรียก Equipment methods ตาม Slot type
+                if (this == iventory.headSlot)
+                    player.EquipHead();
+                else if (this == iventory.bodySlot)
+                    player.EquipBody();
+                else if (this == iventory.legSlot)
+                    player.EquipLeg();
+                else if (this == iventory.rightHandSlots || this == iventory.leftHandSlots)
+                    player.EquipWeapon();
+
+                // ✅ อัพเดต Stats
                 player.UpdateEquipmentStats();
             }
         }

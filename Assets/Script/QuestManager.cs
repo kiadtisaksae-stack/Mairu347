@@ -1,4 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -11,6 +14,7 @@ public class QuestManager : MonoBehaviour
 
     [Header("Completed Quests")]
     public List<QuestData> completedQuests = new List<QuestData>();
+    public TextMeshProUGUI giveRewardText;
 
     // Events สำหรับแจ้งเตือน UI
     public UnityEvent<QuestData> OnQuestStarted;
@@ -27,6 +31,10 @@ public class QuestManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
+    void Start()
+    {
+        giveRewardText.gameObject.SetActive(false);
+    }
 
     // เริ่มเควส
     public void StartQuest(QuestData quest)
@@ -39,7 +47,7 @@ public class QuestManager : MonoBehaviour
 
         quest.currentCount = 0;
         activeQuests.Add(quest);
-
+        GameManager.Instance.UpdateQuestUI(quest);
         Debug.Log($"🎯 เริ่มเควส: {quest.questName}");
         OnQuestStarted?.Invoke(quest);
     }
@@ -53,6 +61,7 @@ public class QuestManager : MonoBehaviour
                 (quest.targetItem == collectedItem))
             {
                 AddProgress(quest, 1);
+                GameManager.Instance.UpdateQuestUI(quest);
             }
         }
     }
@@ -85,11 +94,10 @@ public class QuestManager : MonoBehaviour
         Debug.Log($"📊 เควส {quest.questName}: {quest.currentCount}/{quest.requestCount}");
         OnQuestProgressUpdated?.Invoke(quest);
 
-        CheckProgress(quest);
     }
 
     // ตรวจสอบครบ
-    private void CheckProgress(QuestData quest)
+    public void CheckProgress(QuestData quest)
     {
         if (quest.currentCount >= quest.requestCount)
         {
@@ -104,11 +112,10 @@ public class QuestManager : MonoBehaviour
 
         // ให้รางวัล
         GiveRewards(quest);
-
+        GameManager.Instance.ClearQuest(quest);
         // ย้ายไปยังรายการเควสที่สำเร็จ
         activeQuests.Remove(quest);
         completedQuests.Add(quest);
-
         OnQuestCompleted?.Invoke(quest);
 
         // เริ่มเควสถัดไป (ถ้ามี)
@@ -121,19 +128,43 @@ public class QuestManager : MonoBehaviour
     // ให้รางวัล
     private void GiveRewards(QuestData quest)
     {
-        // ให้ EXP
-        if (quest.rewardExp > 0)
+        if(quest.rewardExp > 0 && quest.rewardItems != null && quest.rewardItems.Length > 0)
         {
             PlayerLevel playerLevel = FindObjectOfType<PlayerLevel>();
             if (playerLevel != null)
             {
                 playerLevel.AddExperience(quest.rewardExp);
-                Debug.Log($"🎁 ได้รับ EXP: {quest.rewardExp}");
+                giveRewardText.text = " Get Exp = " + quest.rewardExp;
+                StartCoroutine(CloseAfterTime(giveRewardText.gameObject, 3f)); 
+                
+            }
+            InventoryCanvas inventory = FindObjectOfType<InventoryCanvas>();
+            if (inventory != null)
+            {
+                foreach (ItemSO rewardItem in quest.rewardItems)
+                {
+                    inventory.AddItem(rewardItem, 1);
+                    giveRewardText.text = "🎁 Item: " + rewardItem.itemName + 
+                      "\n⭐ EXP: " + quest.rewardExp;
+                    StartCoroutine(CloseAfterTime(giveRewardText.gameObject, 3f)); 
+                }
+            }
+           
+        }
+        else if (quest.rewardExp > 0 && quest.rewardItems.Length <= 0)
+        {
+            PlayerLevel playerLevel = FindObjectOfType<PlayerLevel>();
+            if (playerLevel != null)
+            {
+                playerLevel.AddExperience(quest.rewardExp);
+                giveRewardText.text = " Get Exp = " + quest.rewardExp;
+                StartCoroutine(CloseAfterTime(giveRewardText.gameObject, 3f)); 
+                
             }
         }
 
         // ให้ไอเทม
-        if (quest.rewardItems != null && quest.rewardItems.Length > 0)
+        else if (quest.rewardItems != null && quest.rewardItems.Length > 0 && quest.rewardExp <= 0 )
         {
             InventoryCanvas inventory = FindObjectOfType<InventoryCanvas>();
             if (inventory != null)
@@ -141,7 +172,8 @@ public class QuestManager : MonoBehaviour
                 foreach (ItemSO rewardItem in quest.rewardItems)
                 {
                     inventory.AddItem(rewardItem, 1);
-                    Debug.Log($"🎁 ได้รับไอเทม: {rewardItem.itemName}");
+                    giveRewardText.text = " Get Item = " + rewardItem.itemName;
+                    StartCoroutine(CloseAfterTime(giveRewardText.gameObject, 3f)); 
                 }
             }
         }
@@ -156,5 +188,11 @@ public class QuestManager : MonoBehaviour
     public bool IsQuestCompleted(QuestData quest)
     {
         return completedQuests.Contains(quest);
+    }
+    public IEnumerator CloseAfterTime(GameObject obj, float delay)
+    {
+        giveRewardText.gameObject.SetActive(true);
+        yield return new WaitForSeconds(delay);
+        obj.SetActive(false);   // ปิด object
     }
 }

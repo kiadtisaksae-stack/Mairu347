@@ -29,9 +29,11 @@ public class RelayManager : MonoBehaviour
 
     public GameObject UiStart;
     public GameObject UiJoin;
+    public GameObject[] characterPrefabs;
 
     private string savedJoinCode = "";
     private bool isReconnecting = false;
+    public int selectedCharacterIndex = 0;
 
     async void Start()
     {

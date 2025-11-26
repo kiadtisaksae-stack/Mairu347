@@ -236,7 +236,11 @@ public class Identity : NetworkBehaviour
 
     public virtual void SetUP() 
     {
-        isOnLive.Value = true;
+        if (IsServer)
+        {
+            isOnLive.Value = true;
+        }
+        SetIsOnLive(true);
     }
 
     protected void UpdateInFrontCache()
@@ -286,4 +290,22 @@ public class Identity : NetworkBehaviour
         }
     }
     #endregion
+    protected void SetIsOnLive(bool value)
+    {
+        if (IsServer)
+        {
+            isOnLive.Value = value;
+        }
+        else
+        {
+            // ถ้าเป็น Client ส่ง RPC ไปหา Server
+            SetIsOnLiveServerRpc(value);
+        }
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void SetIsOnLiveServerRpc(bool value)
+    {
+        isOnLive.Value = value;
+    }
 }
