@@ -1,6 +1,7 @@
 
 public class BossEnemy : Enemy
 {
+    
     void Start()
     {
         

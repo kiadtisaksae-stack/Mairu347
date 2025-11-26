@@ -17,7 +17,7 @@ public class ItemSO : ScriptableObject
     [Header("Consumable Effects")]
     public int healAmount = 0;
     public int manaAmount = 0;
-    [Header("In Game Obj")]
-    public GameObject gamePrefab;
+    [Header("Normal Prefab")]
+    public GameObject Prefab;
     
 }
