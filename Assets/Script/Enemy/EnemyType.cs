@@ -5,6 +5,12 @@ public class EnemyType : ScriptableObject
 {
     public string enemyName;
     public int enemyId;
-    public Sprite icon;
-    public string description;
+    
+    [Header("status")]
+    [SerializeField]
+    public int _initialMaxHealth = 100; 
+    public int Damage ;
+    public int Defence;
+    public float movementSpeed;    
+    
 }

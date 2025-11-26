@@ -32,11 +32,13 @@ public class EnemyMovetoPlayer : Enemy
         {
             // ระยะไล่ล่า
             SetAnimationState(false);
+            SetAnimationRun(true);
             Move(directionToTarget.normalized);
             currentState = State.Chase;
         }
         else
         {
+            SetAnimationRun(false);
             SetAnimationState(false);
             currentState = State.Idel;
         }
