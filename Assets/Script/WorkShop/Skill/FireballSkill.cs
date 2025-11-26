@@ -18,7 +18,6 @@ public class FireballSkill : Skill
     }
     public override void Activate(Character character)
     {
-        
         Debug.Log(character.Name + " Casting Fireball! Deals" + damage + " damage.");
 
         Enemy[] target = GetEnemysInRange(character);

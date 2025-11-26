@@ -12,16 +12,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff413ab64307a384ab3c6c4d3314bb86, type: 3}
   m_Name: HolyDomainSkill
   m_EditorClassIdentifier: Assembly-CSharp::HolyDomainSkill
-  skillName: 
+  skillName: Holy Domain
+  skillDescription: Create Domain to Heal Ally and Debuff Enemies
+  casterPosition: {x: 0, y: 0, z: 0}
   cooldownTime: 45
-  lastUsedTime: 75.42036
-  timer: -0.0026635684
-  isDomain: 1
-  skillPointCost: 0
+  lastUsedTime: 92.48529
+  timer: 2.347851
+  lifeTime: 25
+  isPassive: 0
+  isRange: 0
+  skillPointCost: 12
   skillrequire:
   - {fileID: 11400000, guid: 3c95d028edcd78c4794f7de9dec3d95b, type: 2}
   - {fileID: 11400000, guid: 9a2631665931eb14581e1e8c14aeef43, type: 2}
-  skillIcon: {fileID: 21300000, guid: 45ee67771bc63e940bac6a14fc3da957, type: 3}
+  skillIcon: {fileID: 21300000, guid: c9e2c84c6fca386489128f1d914d73af, type: 3}
   skillPrefab: {fileID: 3280519133390621005, guid: 36e83405fc91c7b499040cd6f9647d4e, type: 3}
   healingAmountPerSecond: 10
   skillRadius: 30

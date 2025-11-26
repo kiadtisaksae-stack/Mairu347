@@ -65,31 +65,28 @@ public class SkillBook : NetworkBehaviour
             Debug.Log($"Skill '{skill.skillName}' cooldown: {skill.lastUsedTime + skill.cooldownTime - Time.time:F2}s");
             return;
         }
-
-        // Spawn Effect
-        GameObject g = Instantiate(skill.skillPrefab , transform.position, Quaternion.identity, transform);
-
-        if (skill.isDomain)
-        {
-            g.transform.parent = null;
-        }
-  
         // Run Skill Action
         skill.Activate(player);
         skill.TimeStampSkill(Time.time);
 
+        // Spawn Effect
+        GameObject g = Instantiate(skill.skillPrefab, player.transform.position, Quaternion.identity , transform);
+     
+        Destroy(g, skill.lifeTime);
+        if (skill.isRange)
+        {
+            g.transform.localPosition = new Vector3(0,0, skill.casterPosition.z);
+        }
+
+        if (!skill.isPassive)
+        {
+            g.transform.parent = null;
+        }
+
         if (skill.timer > 0)
         {
             DulationSkills.Add(skill);
-            Destroy(g, skill.timer);
         }
-        else
-        {
-            Destroy(g, 2);
-        }
-       
-
-
     }
 
     private void OnDrawGizmos()

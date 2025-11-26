@@ -24,12 +24,14 @@ public class HolyDomainSkill : Skill
     {
         this.skillName = "Holy Domain";
         this.cooldownTime = 30;
+        this.lifeTime = duration;
     }
 
 
     public override void Activate(Character character)
     {
         timer = duration;
+  
         Enemy[] enemies = GetEnemysInRange(character);
         if (enemies.Length > 0)
         {

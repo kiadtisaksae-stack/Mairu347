@@ -20,7 +20,8 @@ public class BuffSkillStragth : Skill
     {
         this.skillName = "Strength Buff";
         this.cooldownTime = 15;
-        this.duration = 10f; 
+        this.duration = 10f;
+        this.lifeTime = duration;
     }
 
 
