@@ -2647,7 +2647,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 209549764
+  GlobalObjectIdHash: 889057592
   InScenePlacedSourceGlobalObjectIdHash: 889057592
   DeferredDespawnTick: 0
   Ownership: 1
@@ -6192,6 +6192,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BOW2
       objectReference: {fileID: 0}
+    - target: {fileID: 4272939240103433196, guid: 8bc53569de53b3144a7db7ca5aa2231d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6422,6 +6426,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BOW1
       objectReference: {fileID: 0}
+    - target: {fileID: 3285334081458016006, guid: 912f3548970b3e7409aadbfe7dacc355, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6483,6 +6491,10 @@ PrefabInstance:
     - target: {fileID: 2773260159954929202, guid: 0b843529f2663db4aa40ec3d45b2519f, type: 3}
       propertyPath: m_Name
       value: BOW3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2773260159954929202, guid: 0b843529f2663db4aa40ec3d45b2519f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
