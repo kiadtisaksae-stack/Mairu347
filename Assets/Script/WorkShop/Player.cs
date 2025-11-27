@@ -926,6 +926,7 @@ public class Player : Character
         Defence = baseDefence;
         GameManager.Instance.UpdateHealthBar(health, maxHealth);
         GameManager.Instance.UpdateStatus(Damage, Defence);
+        UpdateEquipmentStats();
     }
 
 }

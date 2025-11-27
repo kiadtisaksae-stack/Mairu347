@@ -1,0 +1,20 @@
+{
+    "asset": "dadde6c73c11140a19b9186650adc940",
+    "fileName": "019ac485-815c-7c4e-bf98-bab99137ace8.png",
+    "prompt": "Icon Sword fantasy color purple",
+    "negativePrompt": "",
+    "model": "5b5b2af1-6ea4-4266-b087-cc9f3bf4f450",
+    "modelName": "Flux.1 Dev",
+    "customSeed": -1,
+    "w3CTraceId": "bb5a5ad2a3aa195a78946bce8d1fbd69",
+    "refinementMode": "Generation",
+    "pixelateTargetSize": 0,
+    "pixelateKeepImageSize": false,
+    "pixelatePixelBlockSize": 0,
+    "pixelateMode": 0,
+    "pixelateOutlineThickness": 0,
+    "doodles": {
+        "m_Items": []
+    },
+    "upscaleFactor": 0
+}

@@ -122,7 +122,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1395894930
+  GlobalObjectIdHash: 2496764690
   InScenePlacedSourceGlobalObjectIdHash: 2852264170
   DeferredDespawnTick: 0
   Ownership: 1
@@ -158,9 +158,9 @@ MonoBehaviour:
   TimeToAttack: 1
   AttackRange: 1.5
   rewardItemPrefabs:
-  - {fileID: 4085178008262843607, guid: 43374e1d38550234687793562e2d236d, type: 3}
+  - {fileID: 3113941589425255099, guid: 021e7fa40dfa149bf945e91a9123eb4c, type: 3}
   - {fileID: 4116771651019849451, guid: dd2d1ee2d12dc8c4093505c8772d5f1f, type: 3}
-  - {fileID: 819387871131794206, guid: b02af064469aabe419031c3c87c383bd, type: 3}
+  - {fileID: 4116771651019849451, guid: dd2d1ee2d12dc8c4093505c8772d5f1f, type: 3}
   dropWeight1: 50
   dropWeight2: 30
   dropWeight3: 20

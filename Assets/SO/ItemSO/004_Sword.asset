@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e3b00fa1858ef6442aadb8279d289895, type: 3}
-  m_Name: 002_Sword
+  m_Name: 004_Sword
   m_EditorClassIdentifier: 
-  icon: {fileID: 21300000, guid: dadde6c73c11140a19b9186650adc940, type: 3}
+  icon: {fileID: 21300000, guid: b7cea50e6bcfb429a973bff48196f2e2, type: 3}
   tybe: 5
   id: 2
   Damage: 50
   Deffent: 0
-  itemName: SWORD1
+  itemName: SWORD3
   description: a
   maxStack: 1
   healAmount: 0

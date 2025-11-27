@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7f165d79d5dd2493cba0ee0ea14de7ca, type: 3}
-  m_Name: QkillSlime
+  m_Name: QuestFindKey
   m_EditorClassIdentifier: Assembly-CSharp::QuestData
-  questName: Monsters Stronger
-  description: Kill 2 Slime
-  CompletedText: Haha good job bro
-  questType: 1
+  questName: FindKey
+  description: Find 2 Key
+  CompletedText: Thanks for keys
+  questType: 0
   requestCount: 2
-  currentCount: 0
-  targetItem: {fileID: 0}
+  currentCount: 2
+  targetItem: {fileID: 11400000, guid: 2ccace0c747e0ff4aab07641e2ddba2e, type: 2}
   targetItemId: 0
-  targetEnemyType: {fileID: 11400000, guid: 62ac6cd23f6bc4e4ca63bfedd942f418, type: 2}
+  targetEnemyType: {fileID: 0}
   targetEnemyId: 0
   rewardItems:
-  - {fileID: 11400000, guid: 318bb7a3cfef46643897d4ebf68cd50e, type: 2}
-  rewardExp: 0
+  - {fileID: 11400000, guid: 3162e2be4bde8478eaff7399b09a4a1d, type: 2}
+  rewardExp: 3000
   rewardGold: 0
   nextQuest: {fileID: 0}

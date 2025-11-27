@@ -34,12 +34,15 @@ public class CharacterSelection : MonoBehaviour
 
     public void ConfirmAndPlayHost()
     {
+        RelayManager.Instance.selectedCharacterIndex = index; // บันทึกตัวเลือก
         SetSelectedPrefab();
+        SetupConnectionApproval(); // ✅ ตั้งค่า Connection Approval
         RelayManager.Instance.StartRelay();
     }
 
     public void ConfirmAndPlayClient()
     {
+        RelayManager.Instance.selectedCharacterIndex = index; // บันทึกตัวเลือก
         SetSelectedPrefab();
         RelayManager.Instance.JoinRelay();
     }
@@ -62,5 +65,33 @@ public class CharacterSelection : MonoBehaviour
             int spriteIndex = index % characterSprites.Count; // ป้องกัน out of range
             characterImage.sprite = characterSprites[spriteIndex];
         }
+    }
+    private void SetupConnectionApproval()
+    {
+        NetworkManager.Singleton.NetworkConfig.ConnectionApproval = true;
+        NetworkManager.Singleton.ConnectionApprovalCallback += OnConnectionApproval;
+    }
+
+    private void OnConnectionApproval(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
+    {
+        // ✅ อนุมัติการเชื่อมต่อทั้งหมด
+        response.Approved = true;
+        response.CreatePlayerObject = true;
+        
+        // ✅ ส่งข้อมูลตัวละครที่เลือกให้ client
+        response.PlayerPrefabHash = GetPrefabHash(RelayManager.Instance.selectedCharacterIndex);
+    }
+
+    private uint GetPrefabHash(int characterIndex)
+    {
+        if (characterIndex >= 0 && characterIndex < RelayManager.Instance.characterPrefabs.Length)
+        {
+            var prefab = RelayManager.Instance.characterPrefabs[characterIndex];
+            var networkObject = prefab.GetComponent<NetworkObject>();
+            
+            // ✅ ใช้ PrefabIdHash แทน GlobalObjectIdHash
+            return networkObject.PrefabIdHash;
+        }
+        return 0;
     }
 }

@@ -387,7 +387,7 @@ MonoBehaviour:
   TimeToAttack: 1
   AttackRange: 1.5
   rewardItemPrefabs:
-  - {fileID: 4085178008262843607, guid: 43374e1d38550234687793562e2d236d, type: 3}
+  - {fileID: 3863052731067108231, guid: c70af2939d69c47e980f417537e34740, type: 3}
   - {fileID: 4116771651019849451, guid: dd2d1ee2d12dc8c4093505c8772d5f1f, type: 3}
   - {fileID: 819387871131794206, guid: b02af064469aabe419031c3c87c383bd, type: 3}
   dropWeight1: 50

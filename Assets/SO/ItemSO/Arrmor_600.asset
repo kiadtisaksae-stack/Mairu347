@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e3b00fa1858ef6442aadb8279d289895, type: 3}
-  m_Name: 002_Sword
+  m_Name: Arrmor_600
   m_EditorClassIdentifier: 
-  icon: {fileID: 21300000, guid: dadde6c73c11140a19b9186650adc940, type: 3}
-  tybe: 5
-  id: 2
-  Damage: 50
-  Deffent: 0
-  itemName: SWORD1
-  description: a
+  icon: {fileID: 21300000, guid: 786a24300bd744a3883afe8ecb2e2942, type: 3}
+  tybe: 3
+  id: 600
+  Damage: 0
+  Deffent: 20
+  itemName: Arromr1
+  description: as
   maxStack: 1
   healAmount: 0
   manaAmount: 0
