@@ -1780,7 +1780,7 @@ PrefabInstance:
     - target: {fileID: 2478905580774955251, guid: 9e55d9b4642484f41be20c69a9b48063, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: f89d75d5bc23f84449f68263500dc017, type: 3}
+      objectReference: {fileID: 21300000, guid: cd36795e34da3df4d8dcddbbf309b406, type: 3}
     - target: {fileID: 2478905580774955251, guid: 9e55d9b4642484f41be20c69a9b48063, type: 3}
       propertyPath: m_Color.b
       value: 1
@@ -4207,6 +4207,18 @@ PrefabInstance:
       propertyPath: questData
       value: 
       objectReference: {fileID: 11400000, guid: 1a2c0eb06393d4564bef7ad54880ed13, type: 2}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[0].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: 1064a40df8344974d9b3b470518e779e, type: 3}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[1].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: 1064a40df8344974d9b3b470518e779e, type: 3}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[2].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: 9b83dced60efb9b4288b2f81395f7ace, type: 3}
     - target: {fileID: 8256507700149646667, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -7686,6 +7698,18 @@ PrefabInstance:
       propertyPath: questData
       value: 
       objectReference: {fileID: 11400000, guid: ca55277ac757640f9b0e40f57983af60, type: 2}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[0].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: fcb376849f8a004428855518aa79d898, type: 3}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[1].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: fcb376849f8a004428855518aa79d898, type: 3}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[2].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: 5e172a7333f805f43bcab1ca5f1cba0c, type: 3}
     - target: {fileID: 8256507700149646667, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -8164,7 +8188,7 @@ PrefabInstance:
     - target: {fileID: 2478905580774955251, guid: 9e55d9b4642484f41be20c69a9b48063, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: cd36795e34da3df4d8dcddbbf309b406, type: 3}
+      objectReference: {fileID: 21300000, guid: f89d75d5bc23f84449f68263500dc017, type: 3}
     - target: {fileID: 2478905580774955251, guid: 9e55d9b4642484f41be20c69a9b48063, type: 3}
       propertyPath: m_Color.b
       value: 1
@@ -14466,7 +14490,7 @@ PrefabInstance:
     - target: {fileID: 2478905580774955251, guid: 9e55d9b4642484f41be20c69a9b48063, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 3886af7250260dc44a0b82119ad2058b, type: 3}
+      objectReference: {fileID: 21300000, guid: e7133fd7d0555aa43bb73d3083a26df0, type: 3}
     - target: {fileID: 4091757288130996202, guid: 9e55d9b4642484f41be20c69a9b48063, type: 3}
       propertyPath: m_Name
       value: skill2
@@ -16718,6 +16742,18 @@ PrefabInstance:
       propertyPath: questData
       value: 
       objectReference: {fileID: 11400000, guid: 803ee31a3da054e779b0c49e639196b7, type: 2}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[0].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: f24c14b5599112c41a2fa8642290e155, type: 3}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[1].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: e8dc1d489cc4c934daabe49156a12a33, type: 3}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[2].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: f24c14b5599112c41a2fa8642290e155, type: 3}
     - target: {fileID: 8256507700149646667, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -20552,6 +20588,18 @@ PrefabInstance:
       propertyPath: InScenePlacedSourceGlobalObjectIdHash
       value: 67784585
       objectReference: {fileID: 0}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[0].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: a2f3d1ea8a1835d45912f19014141c81, type: 3}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[1].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: a2f3d1ea8a1835d45912f19014141c81, type: 3}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[2].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: 37a9c8922c9474948a3aa225887a4fee, type: 3}
     - target: {fileID: 8256507700149646667, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -21207,6 +21255,18 @@ PrefabInstance:
       propertyPath: questData
       value: 
       objectReference: {fileID: 11400000, guid: 320be2ef419fe4f019608d969c655c21, type: 2}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[0].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: c0f30ca373362d34bb0311fc734c8825, type: 3}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[1].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: c0f30ca373362d34bb0311fc734c8825, type: 3}
+    - target: {fileID: 4848059488771979737, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
+      propertyPath: conversationSteps.Array.data[2].npcFace
+      value: 
+      objectReference: {fileID: 21300000, guid: 93f6f3e565ac4e840bbca6dfcd3478f5, type: 3}
     - target: {fileID: 8256507700149646667, guid: 26494491558f6482ab4d4f2b25b7fd01, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -26873,7 +26933,7 @@ PrefabInstance:
     - target: {fileID: 2478905580774955251, guid: 9e55d9b4642484f41be20c69a9b48063, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: e7133fd7d0555aa43bb73d3083a26df0, type: 3}
+      objectReference: {fileID: 21300000, guid: cd36795e34da3df4d8dcddbbf309b406, type: 3}
     - target: {fileID: 2478905580774955251, guid: 9e55d9b4642484f41be20c69a9b48063, type: 3}
       propertyPath: m_Color.b
       value: 1
