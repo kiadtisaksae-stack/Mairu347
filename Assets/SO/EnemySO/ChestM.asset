@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyType
   enemyName: ChestM
   enemyId: 2
-  _initialMaxHealth: 120
+  _initialMaxHealth: 1000
   Damage: 5
   Defence: 10
   movementSpeed: 3

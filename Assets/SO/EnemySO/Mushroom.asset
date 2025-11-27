@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyType
   enemyName: Mushroom
   enemyId: 5
-  _initialMaxHealth: 300
+  _initialMaxHealth: 550
   Damage: 5
   Defence: 5
   movementSpeed: 2
