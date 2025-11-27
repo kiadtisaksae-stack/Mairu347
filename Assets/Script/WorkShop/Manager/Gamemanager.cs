@@ -3,20 +3,15 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using Unity.Netcode;
 
-// ¡ÓË¹´ãËéà»ç¹ sealed à¾×èÍ»éÍ§¡Ñ¹¡ÒÃÊ×º·Í´
-public sealed class GameManager : MonoBehaviour 
+public sealed class GameManager : MonoBehaviour
 {
-    // 1. Private Static Field (The Singleton Instance)
-    // ãªé backing field à¾×èÍ¤Çº¤ØÁ¡ÒÃà¢éÒ¶Ö§
     private static GameManager _instance;
-
-    // 2. Public Static Property (Global Access Point)
     public static GameManager Instance
     {
         get
         {
-            // ¶éÒ Instance ÂÑ§à»ç¹ null (¡Ã³Õ¶Ù¡àÃÕÂ¡ãªé¡èÍ¹ Awake)
             if (_instance == null)
             {
                 Debug.LogError("GameManager instance is null! Is it in the scene?");
@@ -24,60 +19,302 @@ public sealed class GameManager : MonoBehaviour
             return _instance;
         }
     }
+
     [Header("Player Stats")]
     public TextMeshProUGUI playerDamage;
     public TextMeshProUGUI playerDefence;
+
     [Header("Quest UI Slots")]
     public List<TextMeshProUGUI> questTextSlots = new List<TextMeshProUGUI>();
-    public List< QuestData > questDatas = new List<QuestData>();
+    public List<QuestData> questDatas = new List<QuestData>();
+
     [Header("Game State")]
     public int currentScore = 0;
     public bool isGamePaused = false;
 
     [Header("UI Game")]
     public GameObject pauseMenuUI;
+    public GameObject exitConfirmationUI; // ✅ เพิ่ม UI ยืนยันการออกเกม
     public TMP_Text scoreText;
     public Slider HPBar;
     public InputSystem_Actions inputActions;
-
+    public Button exitGameButton;
+    public Button confirmExitButton;
+    public Button cancelExitButton;
 
     public Slider Xpbar;
     public TMP_Text XpText;
     public TMP_Text LevelText;
 
-    // 3. Private Constructor Logic (ãªé Awake() á·¹ Constructor »¡µÔã¹ Unity)
     private void Awake()
     {
-        // µÃÇ¨ÊÍºÇèÒÁÕ Instance ÍÂÙèáÅéÇËÃ×ÍäÁè
         if (_instance == null)
         {
-            // ¡ÓË¹´ãËé Instance ¹Õéà»ç¹ Singleton
             _instance = this;
-
-            // »éÍ§¡Ñ¹äÁèãËé Object ¹Õé¶Ù¡·ÓÅÒÂàÁ×èÍÁÕ¡ÒÃâËÅ´ Scene ãËÁè
             DontDestroyOnLoad(gameObject);
-
             Debug.Log("GameManager Singleton Initialized.");
         }
         else
         {
-            // ¶éÒÁÕ Instance Í×è¹ÍÂÙèáÅéÇ (ÁÒ¨Ò¡ Scene ¡èÍ¹Ë¹éÒ) ãËé·ÓÅÒÂµÑÇàÍ§·Ôé§
             Debug.Log("Duplicate GameManager found. Destroying self.");
             Destroy(gameObject);
         }
     }
 
-    // ------------------- Singleton Functionality -------------------
+    private void Start()
+    {
+        // ✅ ตั้งค่า Event Listeners สำหรับปุ่ม Exit
+        SetupExitButtons();
+    }
+
     private void OnEnable()
     {
         inputActions = new InputSystem_Actions();
         inputActions.UI.Cancel.performed += ctx => TogglePause();
+        inputActions.Enable();
     }
+
+    private void OnDisable()
+    {
+        inputActions.UI.Cancel.performed -= ctx => TogglePause();
+        inputActions.Disable();
+    }
+
+    // ✅ ตั้งค่า Event Listeners สำหรับปุ่ม Exit
+    private void SetupExitButtons()
+    {
+        if (exitGameButton != null)
+        {
+            exitGameButton.onClick.RemoveAllListeners();
+            exitGameButton.onClick.AddListener(ShowExitConfirmation);
+        }
+
+        if (confirmExitButton != null)
+        {
+            confirmExitButton.onClick.RemoveAllListeners();
+            confirmExitButton.onClick.AddListener(ConfirmExitGame);
+        }
+
+        if (cancelExitButton != null)
+        {
+            cancelExitButton.onClick.RemoveAllListeners();
+            cancelExitButton.onClick.AddListener(HideExitConfirmation);
+        }
+    }
+
+    // ✅ แสดงหน้าต่างยืนยันการออกเกม
+    public void ShowExitConfirmation()
+    {
+        if (exitConfirmationUI != null)
+        {
+            exitConfirmationUI.SetActive(true);
+            if (pauseMenuUI != null)
+            {
+                pauseMenuUI.SetActive(false);
+            }
+            Debug.Log("Exit confirmation shown");
+        }
+    }
+
+    // ✅ ซ่อนหน้าต่างยืนยันการออกเกม
+    public void HideExitConfirmation()
+    {
+        if (exitConfirmationUI != null)
+        {
+            exitConfirmationUI.SetActive(false);
+            Debug.Log("Exit confirmation hidden");
+        }
+    }
+
+    // ✅ ยืนยันการออกเกม - จัดการทั้ง Host และ Client
+    public void ConfirmExitGame()
+    {
+        Debug.Log("Confirming exit game...");
+
+        // ✅ ปิด UI
+        HideExitConfirmation();
+        if (pauseMenuUI != null)
+        {
+            pauseMenuUI.SetActive(false);
+        }
+
+        // ✅ คืนค่า Time Scale
+        Time.timeScale = 1f;
+        isGamePaused = false;
+
+        // ✅ จัดการ Netcode ตามบทบาท
+        if (NetworkManager.Singleton != null)
+        {
+            if (NetworkManager.Singleton.IsServer)
+            {
+                ExitAsHost();
+            }
+            else if (NetworkManager.Singleton.IsClient)
+            {
+                ExitAsClient();
+            }
+            else
+            {
+                ExitAsSinglePlayer();
+            }
+        }
+        else
+        {
+            ExitAsSinglePlayer();
+        }
+    }
+
+    // ✅ ออกเกมในฐานะ Host (ปิดทั้ง Server)
+    private void ExitAsHost()
+    {
+        Debug.Log("Exiting as Host...");
+
+        // ✅ ส่ง notification ไปยัง clients ก่อน (optional)
+        NotifyClientsBeforeShutdown();
+
+        // ✅ ปิด NetworkManager
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.Shutdown();
+            Debug.Log("NetworkManager shut down");
+        }
+
+        Application.Quit();
+
+            // สำหรับ Editor
+        #if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+        #endif
+    }
+
+    // ✅ ออกเกมในฐานะ Client
+    private void ExitAsClient()
+    {
+        Debug.Log("Exiting as Client...");
+
+        // ✅ ปิดการเชื่อมต่อ
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.Shutdown();
+            Debug.Log("Client disconnected");
+        }
+
+        Application.Quit();
+
+        // สำหรับ Editor
+        #if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+        #endif
+    }
+
+    // ✅ ออกเกมในโหมด Single Player
+    private void ExitAsSinglePlayer()
+    {
+        Debug.Log("Exiting as Single Player...");
+        Application.Quit();
+
+        // สำหรับ Editor
+        #if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+        #endif
+    }
+
+    // ✅ แจ้งเตือน Clients ก่อนที่ Host จะปิด Server (Optional)
+    private void NotifyClientsBeforeShutdown()
+    {
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
+        {
+            // ✅ ส่ง ClientRpc เพื่อแจ้งเตือน clients
+            NotifyShutdownClientRpc();
+
+            // ✅ รอสักครู่ก่อน shutdown จริง
+            StartCoroutine(ShutdownAfterDelay(2f));
+        }
+    }
+
+    [ClientRpc]
+    private void NotifyShutdownClientRpc()
+    {
+        Debug.Log("Server is shutting down...");
+        // ✅ สามารถแสดง UI แจ้งเตือนผู้เล่นได้ที่นี่
+        if (GameManager.Instance != null)
+        {
+            // แสดงข้อความว่า Server กำลังปิด
+        }
+    }
+
+    private System.Collections.IEnumerator ShutdownAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.Shutdown();
+        }
+
+        ReturnToLobby();
+    }
+
+    // ✅ กลับไปยังหน้า Lobby
+    private void ReturnToLobby()
+    {
+        Debug.Log("Returning to Lobby...");
+
+        // ✅ ใช้ SceneTransitionHandler ถ้ามี
+        if (SceneTransitionHandler.Instance != null)
+        {
+            SceneTransitionHandler.Instance.GoToLobbyScene();
+        }
+        else
+        {
+            // ✅ สำรอง: โหลด Scene โดยตรง
+            UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
+        }
+
+        // ✅ ทำความสะอาด GameManager (optional)
+        CleanupBeforeExit();
+    }
+
+    // ✅ ทำความสะอาดก่อนออกจากเกม
+    private void CleanupBeforeExit()
+    {
+        // ✅ รีเซ็ต game state
+        currentScore = 0;
+        isGamePaused = false;
+        questDatas.Clear();
+
+        // ✅ รีเฟรช UI
+        RefreshQuestUI();
+
+        Debug.Log("GameManager cleaned up");
+    }
+
+    // ✅ อัพเดท UI เมื่อกดปุ่ม Exit (สำหรับใน Pause Menu)
+    public void OnExitButtonPressed()
+    {
+        ShowExitConfirmation();
+    }
+
+    // ✅ Handle เมื่อมีการ disconnect จาก network
+    public void HandleNetworkDisconnect()
+    {
+        Debug.Log("Network disconnected, returning to lobby...");
+
+        // ✅ คืนค่า Time Scale
+        Time.timeScale = 1f;
+        isGamePaused = false;
+
+        // ✅ กลับไป Lobby
+        ReturnToLobby();
+    }
+
+    // ------------------- ฟังก์ชันเดิมที่เหลือ -------------------
     public void UpdateQuestUI(QuestData questData)
     {
         questDatas.Add(questData);
         RefreshQuestUI();
     }
+
     public void ClearQuest(QuestData questData)
     {
         for (int i = questDatas.Count - 1; i >= 0; i--)
@@ -87,17 +324,15 @@ public sealed class GameManager : MonoBehaviour
                 questDatas.RemoveAt(i);
             }
         }
-
         RefreshQuestUI();
     }
+
     public void RefreshQuestUI()
     {
-        // วนลูปช่อง UI ตามจำนวนที่มี
         for (int i = 0; i < questTextSlots.Count; i++)
         {
             if (i < questDatas.Count)
             {
-                // แสดงข้อความเควสตามลำดับ index
                 questTextSlots[i].text = questDatas[i].questName + " (" +
                                         questDatas[i].currentCount + "/" +
                                         questDatas[i].requestCount + ")";
@@ -105,11 +340,11 @@ public sealed class GameManager : MonoBehaviour
             }
             else
             {
-                // ถ้าไม่มีเควสในช่องนี้ ให้ซ่อน
                 questTextSlots[i].text = "None Quest";
             }
         }
     }
+
     public void UpdateStatus(int damage, int defence)
     {
         if (playerDamage != null)
@@ -135,16 +370,25 @@ public sealed class GameManager : MonoBehaviour
             Debug.LogWarning("HPBar reference is missing in GameManager.");
         }
     }
+
     public void AddScore(int amount)
     {
         currentScore += amount;
-        scoreText.text = currentScore.ToString();
+        if (scoreText != null)
+        {
+            scoreText.text = currentScore.ToString();
+        }
         Debug.Log($"Score updated: {currentScore}");
-        // â¤é´ÊÓËÃÑºÍÑ»à´µ UI, ºÑ¹·Ö¡¤Ðá¹¹ ÏÅÏ
     }
 
     public void TogglePause()
     {
+        // ✅ ไม่ให้ pause เมื่อกำลังยืนยันการออกเกม
+        if (exitConfirmationUI != null && exitConfirmationUI.activeInHierarchy)
+        {
+            return;
+        }
+
         isGamePaused = !isGamePaused;
         Time.timeScale = isGamePaused ? 0f : 1f;
         if (pauseMenuUI != null)
@@ -156,19 +400,22 @@ public sealed class GameManager : MonoBehaviour
 
     public void UpdateXpbar(int currentXP, int XpRequire)
     {
-        Xpbar.maxValue = XpRequire;
-        Xpbar.value = currentXP;
-        XpText.text = currentXP + "/" + XpRequire; 
+        if (Xpbar != null)
+        {
+            Xpbar.maxValue = XpRequire;
+            Xpbar.value = currentXP;
+        }
+        if (XpText != null)
+        {
+            XpText.text = currentXP + "/" + XpRequire;
+        }
     }
 
     public void UpdateLevel(int level)
     {
-        LevelText.text = "Level : " + level;
+        if (LevelText != null)
+        {
+            LevelText.text = "Level : " + level;
+        }
     }
-
-    public void Update()
-    {
-        
-    }
-
 }

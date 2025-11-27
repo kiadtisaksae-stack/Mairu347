@@ -1,0 +1,5 @@
+E:/374444/New folder/Mairu347/.utmp/RelWithDebInfo/4u56z3e5/arm64-v8a/CMakeFiles/edit_cache.dir
+E:/374444/New folder/Mairu347/.utmp/RelWithDebInfo/4u56z3e5/arm64-v8a/CMakeFiles/rebuild_cache.dir
+E:/374444/New folder/Mairu347/.utmp/RelWithDebInfo/4u56z3e5/arm64-v8a/GameActivity/CMakeFiles/game.dir
+E:/374444/New folder/Mairu347/.utmp/RelWithDebInfo/4u56z3e5/arm64-v8a/GameActivity/CMakeFiles/edit_cache.dir
+E:/374444/New folder/Mairu347/.utmp/RelWithDebInfo/4u56z3e5/arm64-v8a/GameActivity/CMakeFiles/rebuild_cache.dir

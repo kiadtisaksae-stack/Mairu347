@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyType
   enemyName: MalangeYung
   enemyId: 6
-  _initialMaxHealth: 350
+  _initialMaxHealth: 550
   Damage: 5
   Defence: 5
   movementSpeed: 5

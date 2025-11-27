@@ -15,7 +15,7 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 786a24300bd744a3883afe8ecb2e2942, type: 3}
   tybe: 3
   id: 600
-  Damage: 0
+  Damage: 20
   Deffent: 20
   itemName: Arromr1
   description: as
