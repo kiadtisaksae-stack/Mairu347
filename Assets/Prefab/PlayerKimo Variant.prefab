@@ -138,6 +138,10 @@ MonoBehaviour:
   skillButton: {fileID: 9198817432421846382}
   skillIcon: {fileID: 0}
   borderIcon: {fileID: 5653447030318519503}
+  skilldes: {fileID: 0}
+  skillNameText: {fileID: 0}
+  skillDescriptionText: {fileID: 0}
+  skillPointRequireText: {fileID: 0}
   lockedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   unlockableColor: {r: 1, g: 1, b: 1, a: 1}
   unlockedColor: {r: 1, g: 0.8, b: 0, a: 1}
@@ -279,6 +283,10 @@ MonoBehaviour:
   skillButton: {fileID: 1009812420816504412}
   skillIcon: {fileID: 0}
   borderIcon: {fileID: 7130893299946193905}
+  skilldes: {fileID: 0}
+  skillNameText: {fileID: 0}
+  skillDescriptionText: {fileID: 0}
+  skillPointRequireText: {fileID: 0}
   lockedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   unlockableColor: {r: 1, g: 1, b: 1, a: 1}
   unlockedColor: {r: 1, g: 0.8, b: 0, a: 1}
@@ -456,6 +464,10 @@ MonoBehaviour:
   skillButton: {fileID: 3806856504190442058}
   skillIcon: {fileID: 0}
   borderIcon: {fileID: 5823717386015066490}
+  skilldes: {fileID: 0}
+  skillNameText: {fileID: 0}
+  skillDescriptionText: {fileID: 0}
+  skillPointRequireText: {fileID: 0}
   lockedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   unlockableColor: {r: 1, g: 1, b: 1, a: 1}
   unlockedColor: {r: 1, g: 0.8, b: 0, a: 1}
@@ -909,6 +921,10 @@ MonoBehaviour:
   skillButton: {fileID: 8070011427885143951}
   skillIcon: {fileID: 0}
   borderIcon: {fileID: 2609943708102925002}
+  skilldes: {fileID: 0}
+  skillNameText: {fileID: 0}
+  skillDescriptionText: {fileID: 0}
+  skillPointRequireText: {fileID: 0}
   lockedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   unlockableColor: {r: 1, g: 1, b: 1, a: 1}
   unlockedColor: {r: 1, g: 0.8, b: 0, a: 1}
@@ -1186,6 +1202,10 @@ MonoBehaviour:
   skillButton: {fileID: 5386697430183265271}
   skillIcon: {fileID: 0}
   borderIcon: {fileID: 2178784906886360052}
+  skilldes: {fileID: 0}
+  skillNameText: {fileID: 0}
+  skillDescriptionText: {fileID: 0}
+  skillPointRequireText: {fileID: 0}
   lockedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   unlockableColor: {r: 1, g: 1, b: 1, a: 1}
   unlockedColor: {r: 1, g: 0.8, b: 0, a: 1}
@@ -1871,6 +1891,10 @@ MonoBehaviour:
   skillButton: {fileID: 281294212959006420}
   skillIcon: {fileID: 0}
   borderIcon: {fileID: 2127659821413061066}
+  skilldes: {fileID: 0}
+  skillNameText: {fileID: 0}
+  skillDescriptionText: {fileID: 0}
+  skillPointRequireText: {fileID: 0}
   lockedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   unlockableColor: {r: 1, g: 1, b: 1, a: 1}
   unlockedColor: {r: 1, g: 0.8, b: 0, a: 1}
@@ -2383,6 +2407,10 @@ MonoBehaviour:
   skillButton: {fileID: 5028894081810697887}
   skillIcon: {fileID: 0}
   borderIcon: {fileID: 4464359035913933602}
+  skilldes: {fileID: 0}
+  skillNameText: {fileID: 0}
+  skillDescriptionText: {fileID: 0}
+  skillPointRequireText: {fileID: 0}
   lockedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   unlockableColor: {r: 1, g: 1, b: 1, a: 1}
   unlockedColor: {r: 1, g: 0.8, b: 0, a: 1}
@@ -3298,7 +3326,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3839554453414025792, guid: 63918e8d66571a84ab54ff0df019ba9b, type: 3}
       propertyPath: GlobalObjectIdHash
-      value: 3372976141
+      value: 4294079549
       objectReference: {fileID: 0}
     - target: {fileID: 3932494527518700318, guid: 63918e8d66571a84ab54ff0df019ba9b, type: 3}
       propertyPath: m_Name
@@ -3466,15 +3494,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7289247470788136712, guid: 63918e8d66571a84ab54ff0df019ba9b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -8.15
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7289247470788136712, guid: 63918e8d66571a84ab54ff0df019ba9b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.25
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7289247470788136712, guid: 63918e8d66571a84ab54ff0df019ba9b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.06539297
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7289247470788136712, guid: 63918e8d66571a84ab54ff0df019ba9b, type: 3}
       propertyPath: m_LocalRotation.w

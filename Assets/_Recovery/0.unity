@@ -1272,10 +1272,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1019470884}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 330, y: -105}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &139581782
 PrefabInstance:
@@ -1527,7 +1527,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &155574155
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1740,10 +1740,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1019470884}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 120, y: -105}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &164780747
 CanvasRenderer:
@@ -2580,7 +2580,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &198689065
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2588,11 +2588,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 198689064}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 72bf44deb5aa544bc8d564f11c13e84f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterSelection
+  ShowTopMostFoldoutHeaderGroup: 1
   numberCharacterText: {fileID: 1440503326}
   characterImage: {fileID: 2079089560}
   characterSprites:
@@ -5872,7 +5873,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 14712553004979392, guid: d0c842e1966e7014c9dea1c205fd121d, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1810168775272387150, guid: d0c842e1966e7014c9dea1c205fd121d, type: 3}
       propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
@@ -7451,7 +7452,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 567078111
+  GlobalObjectIdHash: 1230666914
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -8706,6 +8707,7 @@ MonoBehaviour:
   - {fileID: 3932494527518700318, guid: 63918e8d66571a84ab54ff0df019ba9b, type: 3}
   - {fileID: 5806978638919094982, guid: 3df4ea2e76c7d42e1b8c115234226381, type: 3}
   - {fileID: 415563373671390796, guid: 50b06527857ba4df5b33e651b5c21906, type: 3}
+  characterSelection: {fileID: 0}
   selectedCharacterIndex: 0
 --- !u!4 &655118771
 Transform:
@@ -12149,7 +12151,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 198689065}
         m_TargetAssemblyTypeName: CharacterSelection, Assembly-CSharp
-        m_MethodName: 
+        m_MethodName: ConfirmAndPlayHost
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -12187,18 +12189,6 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
         m_MethodName: SetActive
         m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 655118770}
-        m_TargetAssemblyTypeName: RelayManager, Assembly-CSharp
-        m_MethodName: StartRelay
-        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -12275,7 +12265,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 176665253
+  GlobalObjectIdHash: 2206466411
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -12622,10 +12612,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1019470884}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 120, y: -45}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &914383500
 MonoBehaviour:
@@ -17360,7 +17350,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1329617460
+  GlobalObjectIdHash: 2795293728
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -18620,7 +18610,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2207047848
+  GlobalObjectIdHash: 838904394
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -19267,7 +19257,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 198689065}
         m_TargetAssemblyTypeName: CharacterSelection, Assembly-CSharp
-        m_MethodName: 
+        m_MethodName: ConfirmAndPlayClient
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -19293,18 +19283,6 @@ MonoBehaviour:
         m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
         m_MethodName: SetActive
         m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 655118770}
-        m_TargetAssemblyTypeName: RelayManager, Assembly-CSharp
-        m_MethodName: JoinRelay
-        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -23591,10 +23569,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1019470884}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 330, y: -45}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1706283568
 MonoBehaviour:
@@ -27207,7 +27185,7 @@ MonoBehaviour:
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 2038507469}
-    PlayerPrefab: {fileID: 3932494527518700318, guid: 63918e8d66571a84ab54ff0df019ba9b, type: 3}
+    PlayerPrefab: {fileID: 415563373671390796, guid: 50b06527857ba4df5b33e651b5c21906, type: 3}
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: b92989a9759cbf3488714c292fd00a2f, type: 2}
