@@ -1,17 +1,11 @@
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
-[CreateAssetMenu(fileName = "FireSlashSkill", menuName = "Skills/SlashSkill")]
-
+[CreateAssetMenu(fileName = "FireBoltSkill", menuName = "Skills/SlashSkill")]
 public class FireBoltSkill : Skill
 {
-
     [Header("Skill Ability")]
     public int damage;
     public float firespeed = 20f;
-
-    private Rigidbody rb;
 
     public FireBoltSkill()
     {
@@ -19,23 +13,28 @@ public class FireBoltSkill : Skill
         this.cooldownTime = 5f;
     }
 
-    public override void Activate(Character character)
+    public override void Activate(Character character, GameObject spawnedInstance)
     {
-        Projectle projectle = skillPrefab.GetComponent<Projectle>();
+        if (spawnedInstance == null)
+        {
+            Debug.LogWarning($"[{skillName}] spawnedInstance is null!");
+            return;
+        }
+
+        Projectle projectle = spawnedInstance.GetComponent<Projectle>();
+        if (projectle == null)
+        {
+            Debug.LogWarning($"[{skillName}] No Projectle component on spawned instance!");
+            return;
+        }
+
         projectle.character = character;
         projectle.damage = this.damage;
         projectle.speed = this.firespeed;
         projectle.lifetime = this.lifeTime;
     }
 
-    public override void Deactivate(Character character)
-    {
-        throw new System.NotImplementedException();
-    }
+    public override void Deactivate(Character character) { }
 
-    public override void UpdateSkill(Character character)
-    {
-
-    }
-
+    public override void UpdateSkill(Character character) { }
 }

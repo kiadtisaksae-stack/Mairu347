@@ -114,13 +114,17 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3822718251962214707, guid: a6a2433b93dfbea4aaf74b8f5e15a6d5, type: 3}
+      propertyPath: item
+      value: 
+      objectReference: {fileID: 11400000, guid: b5622acf809d941ea9a51307a62f2e78, type: 2}
     - target: {fileID: 4139584759936063656, guid: a6a2433b93dfbea4aaf74b8f5e15a6d5, type: 3}
       propertyPath: m_Name
       value: Sword (3) Variant
       objectReference: {fileID: 0}
     - target: {fileID: 4664232521968897989, guid: a6a2433b93dfbea4aaf74b8f5e15a6d5, type: 3}
       propertyPath: GlobalObjectIdHash
-      value: 491625493
+      value: 4076124471
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:

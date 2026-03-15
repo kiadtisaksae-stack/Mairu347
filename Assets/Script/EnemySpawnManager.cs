@@ -1,92 +1,75 @@
 using UnityEngine;
-using Unity.Netcode;
 using System.Collections.Generic;
-using Unity.Collections; 
+using Unity.Netcode;
+using Unity.Collections;
 using Random = UnityEngine.Random;
 
 public class EnemySpawnManager : NetworkBehaviour
 {
-    // 💡 Singleton Instance: ใช้ในการเข้าถึงจากคลาสอื่น (เช่น SpawnTrigger หรือ Character)
     public static EnemySpawnManager Instance { get; private set; }
 
     [Header("Spawn Settings")]
-    [Tooltip("อาร์เรย์ของ Prefab ศัตรูที่สามารถสุ่มสร้างได้")]
-    [SerializeField] private GameObject[] enemyPrefabs; 
-    
-    [Tooltip("จำนวนศัตรูขั้นต่ำที่ต้องการสร้างต่อจุด Spawn")]
-    [SerializeField] private int minEnemiesPerPoint = 1; 
-    
-    [Tooltip("จำนวนศัตรูสูงสุดที่ต้องการสร้างต่อจุด Spawn")]
-    [SerializeField] private int maxEnemiesPerPoint = 3; 
-    
-    [Tooltip("รัศมีการสุ่มตำแหน่งการเกิดรอบจุด Spawn")]
-    [SerializeField] private float spawnRadius = 2f; 
-    
+    [SerializeField] private GameObject[] enemyPrefabs;
+    [SerializeField] private int minEnemiesPerPoint = 1;
+    [SerializeField] private int maxEnemiesPerPoint = 3;
+    [SerializeField] private float spawnRadius = 2f;
     [SerializeField] private Transform[] spawnPoints;
 
     [Header("Respawn Settings")]
-    [Tooltip("ช่วงเวลาเป็นวินาทีในการตรวจสอบและ Respawn ศัตรู")]
-    [SerializeField] private float respawnCheckInterval = 10f; 
-    
-    [Tooltip("LayerMask สำหรับระบุว่า GameObject ใดคือศัตรู (จำเป็นสำหรับการตรวจสอบ Respawn)")]
-    [SerializeField] private LayerMask enemyLayer; 
-    
-    private float lastRespawnCheckTime = 0f; // ตัวจับเวลา Respawn
+    [SerializeField] private float respawnCheckInterval = 10f;
+    [SerializeField] private LayerMask enemyLayer;
 
-    // 💡 NetworkList: เก็บ ID ของศัตรูที่ 'ถูกทำลาย' ไปแล้ว (สำหรับ Late Joiner Sync)
+    private float lastRespawnCheckTime = 0f;
+
     private NetworkList<ulong> destroyedEnemyIds = new NetworkList<ulong>(
-        default, 
+        default,
         NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Server 
+        NetworkVariableWritePermission.Server
     );
 
+    // แก้ปัญหา Static + NetworkBehaviour
+    // ย้ายจาก Awake() → OnNetworkSpawn/Despawn
+    // เพื่อให้ Instance ชี้ไปที่ object ที่ Active อยู่จริงเสมอ
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
+        // ไม่ตั้ง Instance ใน Awake อีกต่อไป
+        // เพราะถ้า Despawn แล้ว Spawn ใหม่ Instance จะยังชี้ตัวเก่า
     }
 
     public override void OnNetworkSpawn()
     {
+        // ✅ ตั้ง Instance ตอน Spawn — รับประกันว่าชี้ไปที่ตัวที่ Active อยู่
+        Instance = this;
 
         if (IsServer)
         {
-            // Host/Server: เรียก Spawn ศัตรูเริ่มต้น
             SpawnAllDefinedPoints();
         }
         else
         {
-            // Client ใหม่ (Late Joiner): สมัครรับ Event เพื่อซิงค์สถานะการทำลาย
             destroyedEnemyIds.OnListChanged += HandleDestroyedEnemyListChanged;
         }
     }
 
     public override void OnNetworkDespawn()
     {
+        // ✅ ล้าง Instance ตอน Despawn — ป้องกัน stale reference
+        if (Instance == this)
+            Instance = null;
+
         if (IsServer)
         {
             destroyedEnemyIds.Dispose();
         }
         else
         {
-
             destroyedEnemyIds.OnListChanged -= HandleDestroyedEnemyListChanged;
         }
     }
-    
-    // ----------------------------------------------------
-    // 🕒 Server Logic: ควบคุมจังหวะการ Respawn
-    // ----------------------------------------------------
 
     private void LateUpdate()
     {
-        // Host/Server ควบคุมจังหวะการตรวจสอบเท่านั้น
-        if (!IsServer) return; 
-        
+        if (!IsServer) return;
         if (Time.time >= lastRespawnCheckTime + respawnCheckInterval)
         {
             CheckAndRespawnAllPoints();
@@ -94,133 +77,92 @@ public class EnemySpawnManager : NetworkBehaviour
         }
     }
 
-    // ----------------------------------------------------
-    // 🎯 Shared Logic: การ Spawn ศัตรูที่จุดเดียว
-    // ----------------------------------------------------
-
     private void SpawnEnemiesAtPoint(Transform spawnPoint, GameObject[] prefabsToUse)
     {
         if (!IsServer || prefabsToUse == null || prefabsToUse.Length == 0) return;
 
-        // 1. สุ่มจำนวนศัตรูที่จะเกิด ณ จุดนี้
         int enemiesToSpawn = Random.Range(minEnemiesPerPoint, maxEnemiesPerPoint + 1);
 
         for (int i = 0; i < enemiesToSpawn; i++)
         {
-            // 2. สุ่มเลือก Prefab ศัตรูจากอาร์เรย์ที่ส่งเข้ามา
             GameObject selectedPrefab = prefabsToUse[Random.Range(0, prefabsToUse.Length)];
-
-            // 3. สุ่มตำแหน่งการเกิดรอบจุด Spawn
             Vector2 randomOffset = Random.insideUnitCircle * spawnRadius;
             Vector3 spawnPosition = spawnPoint.position + new Vector3(randomOffset.x, 0f, randomOffset.y);
 
-            // 4. สร้างและ Spawn ศัตรู
             GameObject enemyObj = Instantiate(selectedPrefab, spawnPosition, spawnPoint.rotation);
             NetworkObject enemyNetObj = enemyObj.GetComponent<NetworkObject>();
-
             enemyNetObj.Spawn();
 
-            // 5. ติดตาม Event การตาย 
             if (enemyObj.TryGetComponent(out Character enemyCharacter))
             {
                 enemyCharacter.OnDestory += HandleEnemyDestroyed;
             }
         }
     }
+
     private void SpawnAllDefinedPoints()
     {
         if (!IsServer) return;
-
         foreach (Transform spawnPoint in spawnPoints)
         {
-            // 💡 ใช้ Prefab เริ่มต้นที่กำหนดไว้ใน Manager
             SpawnEnemiesAtPoint(spawnPoint, enemyPrefabs);
         }
     }
+
     public void OnTriggerSpawn(Transform[] pointsToUse, GameObject[] prefabsToUse)
     {
         if (!IsServer) return;
-
         if (pointsToUse == null || pointsToUse.Length == 0)
         {
             Debug.LogWarning("[SERVER] OnTriggerSpawn received no spawn points.");
             return;
         }
-
         foreach (Transform spawnPoint in pointsToUse)
         {
-            // 💡 ใช้ Prefab และจุด Spawn ที่ส่งมาจาก SpawnTrigger
             SpawnEnemiesAtPoint(spawnPoint, prefabsToUse);
         }
     }
 
-    // ----------------------------------------------------
-    // ♻️ Server Logic: การตรวจสอบและ Respawn
-    // ----------------------------------------------------
-
     private void CheckAndRespawnAllPoints()
     {
-        if (!IsServer || enemyLayer == 0) return; 
-
+        if (!IsServer || enemyLayer == 0) return;
         foreach (Transform spawnPoint in spawnPoints)
         {
-            // 1. ตรวจสอบจำนวนศัตรูที่มีอยู่ในรัศมี
-            Collider[] hitColliders = Physics.OverlapSphere(
-                spawnPoint.position, 
-                spawnRadius, 
-                enemyLayer
-            );
-
-            int currentEnemyCount = hitColliders.Length;
-
-            // 2. เงื่อนไข Respawn: ถ้าจำนวนศัตรูในบริเวณนั้นน้อยกว่า 1 (คือ 0)
-            if (currentEnemyCount < 1) 
+            Collider[] hitColliders = Physics.OverlapSphere(spawnPoint.position, spawnRadius, enemyLayer);
+            if (hitColliders.Length < 1)
             {
-                Debug.Log($"[SERVER] Respawning at {spawnPoint.name}. Current count: {currentEnemyCount}");
-                // 3. ทำการ Spawn ศัตรูเต็มจำนวนใหม่ 
+                Debug.Log($"[SERVER] Respawning at {spawnPoint.name}.");
                 SpawnEnemiesAtPoint(spawnPoint, enemyPrefabs);
             }
         }
     }
 
-    // ----------------------------------------------------
-    // 📢 Server Logic: บันทึกศัตรูที่ถูกทำลาย
-    // ----------------------------------------------------
-
-    // Host/Server บันทึก ID ศัตรูที่ถูกทำลายลงใน NetworkList
     public void HandleEnemyDestroyed(Idestoryable destroyedObject)
     {
         if (!IsServer) return;
-
         if (destroyedObject is Character enemyCharacter)
         {
-            // บันทึก ID ของศัตรูที่ตายแล้วลงใน NetworkList (ซิงค์ Late Joiner)
             ulong id = enemyCharacter.NetworkObjectId;
             if (!destroyedEnemyIds.Contains(id))
             {
                 destroyedEnemyIds.Add(id);
-                Debug.Log($"[SERVER] Enemy Destroyed: {id}. Tracking for late joiners.");
+                Debug.Log($"[SERVER] Enemy Destroyed: {id}.");
             }
         }
     }
 
-    // ----------------------------------------------------
-    // 💻 Client Logic: การตรวจสอบและทำลาย Object (สำหรับ Late Joiner)
-    // ----------------------------------------------------
-
     private void HandleDestroyedEnemyListChanged(NetworkListEvent<ulong> changeEvent)
     {
-        if (IsServer) return; 
+        if (IsServer) return;
         CheckAndDestroyObject(changeEvent.Value);
     }
-    
+
     private void CheckAndDestroyObject(ulong networkId)
     {
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkId, out NetworkObject netObj))
         {
-             // ทำลาย GameObject ที่ถูก Spawn ขึ้นมาใหม่โดยไม่ตั้งใจ
-             Destroy(netObj.gameObject);
-             Debug.Log($"[CLIENT {NetworkManager.Singleton.LocalClientId}] Destroyed Late Joiner Enemy ID: {networkId}");
+            Destroy(netObj.gameObject);
+            Debug.Log($"[CLIENT {NetworkManager.Singleton.LocalClientId}] Destroyed Late Joiner Enemy ID: {networkId}");
         }
     }
 }

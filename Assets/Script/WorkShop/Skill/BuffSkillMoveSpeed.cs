@@ -1,21 +1,23 @@
-using System;
-using UnityEngine;
+Ôªøusing UnityEngine;
 
 [CreateAssetMenu(fileName = "BuffSkillMoveSpeed", menuName = "Skills/BuffSkillMoveSpeed")]
 public class BuffSkillMoveSpeed : Skill
 {
     [Header("Skill Ability")]
-    public float SpeedIncreaseAmount = 5f; // ®”π«π∑’Ë‡æ‘Ë¡§«“¡‡√Á«
-    float OriginalSpeed; // §«“¡‡√Á«‡¥‘¡¢Õßµ—«≈–§√
+    public float SpeedIncreaseAmount = 5f;
+    float OriginalSpeed;
     float TargetSpeed;
     public float Duration;
+
     public BuffSkillMoveSpeed()
     {
         this.skillName = "Speed Boost";
         this.cooldownTime = 5;
-        this.Duration = 2f; // √–¬–‡«≈“∑’Ë °‘≈¡’º≈
+        this.Duration = 2f;
     }
-    public override void Activate(Character character)
+
+    // ‡πÅ‡∏Å‡πâ signature ‡πÄ‡∏û‡∏¥‡πà‡∏° GameObject spawnedInstance ‚Äî ‡∏™‡∏Å‡∏¥‡∏•‡∏ô‡∏µ‡πâ‡πÑ‡∏°‡πà‡πÉ‡∏ä‡πâ instance
+    public override void Activate(Character character, GameObject spawnedInstance)
     {
         timer = Duration;
 

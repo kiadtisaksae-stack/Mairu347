@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using Unity.Netcode;
 
 public class UICanvasControllerInput : MonoBehaviour
@@ -8,7 +9,9 @@ public class UICanvasControllerInput : MonoBehaviour
     private Player localPlayer;
     private SkillBook skillBook;
 
-    private bool isSearching = false;
+    [Header("Skill Buttons (slot 1-9)")]
+    public GameObject[] skillButtonSlots = new GameObject[9];
+    // แต่ละ slot คือ Button GameObject ที่มี child ชื่อ "Image_Icon"
 
     private void Awake()
     {
@@ -16,7 +19,6 @@ public class UICanvasControllerInput : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            Debug.Log("✅ UICanvasControllerInput Singleton created");
         }
         else
         {
@@ -26,93 +28,28 @@ public class UICanvasControllerInput : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log("🎮 UICanvasControllerInput Started");
-        StartCoroutine(FindLocalPlayerCoroutine());
+        InvokeRepeating(nameof(TryFindLocalPlayer), 0f, 0.5f);
     }
-    private void Update()
+
+    private void TryFindLocalPlayer()
     {
-        // ถ้ายังหา Player ไม่เจอ และไม่ได้กำลังหาอยู่
-        if (localPlayer == null && !isSearching)
+        if (localPlayer != null)
         {
-            StartCoroutine(FindLocalPlayerCoroutine());
+            CancelInvoke(nameof(TryFindLocalPlayer));
+            return;
         }
-    }
 
-    private System.Collections.IEnumerator FindLocalPlayerCoroutine()
-    {
-        if (isSearching) yield break;
-
-        isSearching = true;
-
-        int attempts = 0;
-        while (attempts < 50) // พยายามหา 5 วินาที
+        var players = FindObjectsOfType<Player>();
+        foreach (var player in players)
         {
-            var players = FindObjectsOfType<Player>();
-
-            foreach (var player in players)
+            if (player != null && player.IsOwner)
             {
-                // ✅ ตรวจสอบ NetworkObject และ IsOwner
-                if (player != null && player.IsOwner)
-                {
-                    localPlayer = player;
-                    skillBook = localPlayer.GetComponent<SkillBook>();
-                    Debug.Log($"✅ Found local player: {player.name} (Client ID: {player.OwnerClientId})");
-                    isSearching = false;
-                    yield break;
-                }
+                localPlayer = player;
+                skillBook = localPlayer.GetComponent<SkillBook>();
+                CancelInvoke(nameof(TryFindLocalPlayer));
+                return;
             }
-
-            attempts++;
-            yield return new WaitForSeconds(0.1f);
         }
-
- 
-        isSearching = false;
-    }
-    public void VirtualInteract(bool isInterract)
-    {
-        if (localPlayer != null)
-        {
-            localPlayer.SetInteractInput(isInterract);
-
-        }
-  
-    }
-    public void VirtualAttack(bool isAttack)
-    {
-        if (localPlayer != null)
-        {
-            localPlayer.SetAttackInput(isAttack);
-        }
-
-    }
-    public void VirtualMoveInput(Vector2 virtualMoveDirection)
-    {
-        if (localPlayer != null)
-        {
-            localPlayer.SetMoveInput(virtualMoveDirection);
-            
-        }
-  
-    }
-
-    public void VirtualJumpInput(bool state)
-    {
-        if (localPlayer != null)
-        {
-            localPlayer.SetJumpInput(state);
-            
-        }
-    }
-
-    public void VirtualSprintInput(bool state)
-    {
-        if (localPlayer != null)
-        {
-            localPlayer.SetSprintInput(state);
-            
-        }
-
     }
 
     public static void RegisterLocalPlayer(Player player)
@@ -120,83 +57,62 @@ public class UICanvasControllerInput : MonoBehaviour
         if (Instance != null && player.IsOwner)
         {
             Instance.localPlayer = player;
-        }
-    }
-    #region skill input
-
-    public void VirtualUseSkill1()
-    {
-        if (skillBook != null)
-        {
-            skillBook.UseSkill(0);
-            Debug.Log("🎮 UI Skill 1 Activated");
-        }
-    }
-    public void VirtualUseSkill2()
-    {
-        if (skillBook != null)
-        {
-            skillBook.UseSkill(1);
-            Debug.Log("🎮 UI Skill 2 Activated");
-        }
-    }
-    public void VirtualUseSkill3()
-    {
-        if (skillBook != null)
-        {
-            skillBook.UseSkill(2);
-            Debug.Log("🎮 UI Skill 3 Activated");
-        }
-    }
-    public void VirtualUseSkill4()
-    {
-        if (skillBook != null)
-        {
-            skillBook.UseSkill(3);
-            Debug.Log("🎮 UI Skill 4 Activated");
-        }
-    }
-    public void VirtualUseSkill5()
-    {
-        if (skillBook != null)
-        {
-            skillBook.UseSkill(4);
-            Debug.Log("🎮 UI Skill 5 Activated");
-        }
-    }
-    public void VirtualUseSkill6()
-    {
-        if (skillBook != null)
-        {
-            skillBook.UseSkill(5);
-            Debug.Log("🎮 UI Skill 6 Activated");
-        }
-    }
-    public void VirtualUseSkill7()
-    {
-        if (skillBook != null)
-        {
-            skillBook.UseSkill(6);
-            Debug.Log("🎮 UI Skill 7 Activated");
-        }
-    }
-    public void VirtualUseSkill8()
-    {
-        if (skillBook != null)
-        {
-            skillBook.UseSkill(7);
-            Debug.Log("🎮 UI Skill 8 Activated");
-        }
-    }
-    public void VirtualUseSkill9()
-    {        
-        if (skillBook != null)
-        {
-            skillBook.UseSkill(8);
-            Debug.Log("🎮 UI Skill 9 Activated");
+            Instance.skillBook = player.GetComponent<SkillBook>();
+            Instance.CancelInvoke(nameof(TryFindLocalPlayer));
         }
     }
 
+    // ─────────────────────────────────────────
+    // เรียกจาก SkillTreeManager.Unlock() เมื่ออัพสกิล
+    // หาช่องว่างแรกใน skillButtonSlots แล้วใส่ icon สกิลลงไป
+    // ─────────────────────────────────────────
+    public static void RegisterSkillToNextSlot(Skill skill)
+    {
+        if (Instance == null) return;
+
+        for (int i = 0; i < Instance.skillButtonSlots.Length; i++)
+        {
+            GameObject slotObj = Instance.skillButtonSlots[i];
+            if (slotObj == null) continue;
+
+            // เช็คว่าช่องนี้ยังว่างอยู่ไหม (ดูจาก Image_Icon ที่ยังไม่มี sprite)
+            Transform iconTransform = slotObj.transform.Find("Image_Icon");
+            if (iconTransform == null) continue;
+
+            Image iconImage = iconTransform.GetComponent<Image>();
+            if (iconImage == null) continue;
+
+            // ถ้า sprite ยังว่าง → ช่องนี้ว่าง ใส่สกิลได้
+            if (iconImage.sprite == null)
+            {
+                iconImage.sprite = skill.skillIcon;
+                iconImage.color = Color.white;
+                Debug.Log($"[UICanvas] ใส่ '{skill.skillName}' ไว้ที่ slot {i + 1}");
+                return;
+            }
+        }
+
+        Debug.LogWarning("[UICanvas] ไม่มีช่องว่างสำหรับสกิลใหม่แล้ว");
+    }
+
+    // ─────────────────────────────────────────
+    // Virtual inputs
+    // ─────────────────────────────────────────
+    public void VirtualInteract(bool isInterract) { if (localPlayer != null) localPlayer.SetInteractInput(isInterract); }
+    public void VirtualAttack(bool isAttack) { if (localPlayer != null) localPlayer.SetAttackInput(isAttack); }
+    public void VirtualMoveInput(Vector2 dir) { if (localPlayer != null) localPlayer.SetMoveInput(dir); }
+    public void VirtualJumpInput(bool state) { if (localPlayer != null) localPlayer.SetJumpInput(state); }
+    public void VirtualSprintInput(bool state) { if (localPlayer != null) localPlayer.SetSprintInput(state); }
+
+    #region Skill inputs
+    public void VirtualUseSkill1() { if (skillBook != null) skillBook.UseSkill(0); }
+    public void VirtualUseSkill2() { if (skillBook != null) skillBook.UseSkill(1); }
+    public void VirtualUseSkill3() { if (skillBook != null) skillBook.UseSkill(2); }
+    public void VirtualUseSkill4() { if (skillBook != null) skillBook.UseSkill(3); }
+    public void VirtualUseSkill5() { if (skillBook != null) skillBook.UseSkill(4); }
+    public void VirtualUseSkill6() { if (skillBook != null) skillBook.UseSkill(5); }
+    public void VirtualUseSkill7() { if (skillBook != null) skillBook.UseSkill(6); }
+    public void VirtualUseSkill8() { if (skillBook != null) skillBook.UseSkill(7); }
+    public void VirtualUseSkill9() { if (skillBook != null) skillBook.UseSkill(8); }
     #endregion
-
 }

@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 151784243a2fb3d4eae05f63e2386e55, type: 3}
+  m_Name: MalangePla
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyType
+  enemyName: MalangePla
+  enemyId: 7
+  _initialMaxHealth: 550
+  Damage: 5
+  Defence: 5
+  movementSpeed: 3
+  experience: 400
+  dropTable:
+  - prefab: {fileID: 8144414016697674214, guid: cbb08a3bc0837439c9d7f49dc407e355, type: 3}
+    weight: 39
+  - prefab: {fileID: 7601563144390618403, guid: 87a873b92f5dd40e3a83385ae2163953, type: 3}
+    weight: 75
+  dropCount: 1

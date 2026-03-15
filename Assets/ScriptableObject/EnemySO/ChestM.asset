@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 151784243a2fb3d4eae05f63e2386e55, type: 3}
+  m_Name: ChestM
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyType
+  enemyName: ChestM
+  enemyId: 2
+  _initialMaxHealth: 1000
+  Damage: 5
+  Defence: 10
+  movementSpeed: 3
+  experience: 2000
+  dropTable:
+  - prefab: {fileID: 5500088467180248298, guid: c70af2939d69c47e980f417537e34740, type: 3}
+    weight: 81
+  dropCount: 1

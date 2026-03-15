@@ -2,6 +2,7 @@
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
+
 [RequireComponent(typeof(NetworkTransform))]
 [RequireComponent(typeof(NetworkAnimator))]
 public class Character : Identity, Idestoryable
@@ -12,23 +13,18 @@ public class Character : Identity, Idestoryable
 
     public int health
     {
-        get { return _networkHealth.Value; }
-        set 
-        { 
-            if (IsServer) 
-            {
-                // Use Hp sync (_networkMaxHealth.Value)
-                _networkHealth.Value = Mathf.Clamp(value, 0, maxHealth); 
-            }
+        get => _networkHealth.Value;
+        set
+        {
+            if (IsServer)
+                _networkHealth.Value = Mathf.Clamp(value, 0, maxHealth);
         }
     }
-    
-    [Header("status")]
-    [SerializeField]
-    protected int _initialMaxHealth = 100; 
 
-    // MaxHealth Property Readonly
-    public int maxHealth { get => _networkMaxHealth.Value; }
+    [Header("Status")]
+    [SerializeField] protected int _initialMaxHealth = 100;
+
+    public int maxHealth => _networkMaxHealth.Value;
     public int Damage = 10;
     public int baseDamage = 10;
     public int Defence = 10;
@@ -38,84 +34,84 @@ public class Character : Identity, Idestoryable
     protected NetworkAnimator networkAnimator;
 
     public event Action<Idestoryable> OnDestory;
-    protected void InvokeOnDestroy()
-    {
-        OnDestory?.Invoke(this);
-    }
-
+    protected void InvokeOnDestroy() => OnDestory?.Invoke(this);
 
     [Header("Quests")]
     protected QuestManager questManager;
 
-    // Netcode Lifecycle: OnNetworkSpawn/OnDespawn 
-
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        
         if (IsServer)
         {
-            //Sevrer Set initial values
-            _networkMaxHealth.Value = _initialMaxHealth; 
+            _networkMaxHealth.Value = _initialMaxHealth;
             _networkHealth.Value = _initialMaxHealth;
         }
-        
     }
 
     public override void OnNetworkDespawn()
     {
         base.OnNetworkDespawn();
     }
-    
-  
-    // TakeDamage & Heal
+
     public override void SetUP()
     {
         base.SetUP();
-        
         animator = GetComponentInChildren<Animator>();
         if (animator == null)
-        {
-            Debug.LogError("Animator component not found on " + gameObject.name);
-        }
+            Debug.LogError("Animator not found on " + gameObject.name);
+
         networkAnimator = GetComponent<NetworkAnimator>();
         networkAnimator.Animator = animator;
     }
-    
+
+    // -------- TakeDamage --------
+
     public virtual void TakeDamage(int amount)
     {
-        if(isOnLive.Value == false) return;
-        if (!IsServer)
-        {
-            return;
-        }
+        if (isOnLive.Value == false) return;
+        if (!IsServer) return;
 
         int actualDamage = Mathf.Clamp(amount - Defence, 1, amount);
         health -= actualDamage;
 
-
         ShowDamageClientRpc(actualDamage, transform.position);
-        if (TryGetComponent<NetworkObject>(out var netObject))
+
+        // ส่ง UI update ให้ Owner เท่านั้น
+        if (TryGetComponent<NetworkObject>(out var netObj))
         {
             UpdateHealthUIForOwnerClientRpc(health, maxHealth,
-                new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { netObject.OwnerClientId } } });
+                new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { netObj.OwnerClientId } } });
         }
-        if (health <= 0)
-        {
-            Die();
-        }
+
+        if (health <= 0) Die();
     }
-    
+
+    // -------- Heal --------
+
     public virtual void Heal(int amount)
     {
         if (!IsServer) return;
-        health += amount;
+
+        health += amount;  // NetworkVariable sync อัตโนมัติ
+
+        Debug.Log($"[SERVER] {gameObject.name} healed {amount} → HP {health}/{maxHealth}");
+
+        // ✅ ส่ง UI update กลับ Owner (เหมือนที่ TakeDamage ทำ)
+        if (TryGetComponent<NetworkObject>(out var netObj))
+        {
+            UpdateHealthUIForOwnerClientRpc(health, maxHealth,
+                new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { netObj.OwnerClientId } } });
+        }
+
         HealClientRpc(amount, transform.position);
     }
+
+    // -------- Die / Revive --------
+
     public virtual void Die()
     {
         OnDestory?.Invoke(this);
-
         if (NetworkObject != null && NetworkObject.IsSpawned)
             NetworkObject.Despawn();
         else
@@ -125,47 +121,38 @@ public class Character : Identity, Idestoryable
     public virtual void Revive(Vector3 spawnPoint)
     {
         if (!IsServer) return;
-
         isOnLive.Value = true;
         transform.position = spawnPoint;
         health = maxHealth;
         OnReviveClientRpc(spawnPoint);
     }
 
+    #region RPC
 
-
-    #region ---RPC Calls---
+    // ส่ง HP bar ให้ Owner เท่านั้น — ใช้ทั้ง TakeDamage และ Heal
     [ClientRpc]
     private void UpdateHealthUIForOwnerClientRpc(int currentHealth, int currentMaxHealth, ClientRpcParams rpcParams = default)
     {
         if (this is Player)
         {
             GameManager.Instance.UpdateHealthBar(currentHealth, currentMaxHealth);
-            Debug.Log($"🩸 Client UI Updated: {currentHealth}/{currentMaxHealth}");
+            Debug.Log($"[CLIENT UI] HP updated: {currentHealth}/{currentMaxHealth}");
         }
     }
+
     [ClientRpc]
     public void ShowDamageClientRpc(int actualDamage, Vector3 damagePosition)
     {
-        if (animator != null)
-        {
-            //
-        }
-
+        // TODO: แสดง damage number
     }
+
     [ClientRpc]
     public void HealClientRpc(int amount, Vector3 healPosition)
     {
-
-        if (animator != null)
-        {
-            //
-        }
-
-        Debug.Log($"Client {NetworkManager.Singleton.LocalClientId} sees {gameObject.name} heal {amount} at {healPosition}");
-
-
+        // TODO: แสดง heal effect / animation
+        Debug.Log($"[CLIENT] {gameObject.name} heal {amount} at {healPosition}");
     }
+
     [ClientRpc]
     protected void OnDieClientRpc()
     {
@@ -174,18 +161,15 @@ public class Character : Identity, Idestoryable
 
         var anim = GetComponent<Animator>();
         if (anim) anim.SetTrigger("Die");
-
-        // ถ้าใช้ script เดินให้ปิด
-        //var player = GetComponent<Player>();
-        //if (player) player.enabled = false;
     }
+
     [ClientRpc]
     private void OnReviveClientRpc(Vector3 spawnPoint)
     {
         var cc = GetComponent<CharacterController>();
         if (cc)
         {
-            cc.enabled = false; // ต้องปิดก่อนย้ายตำแหน่ง
+            cc.enabled = false;
             transform.position = spawnPoint;
             cc.enabled = true;
         }
@@ -198,11 +182,9 @@ public class Character : Identity, Idestoryable
         if (anim)
         {
             anim.Rebind();
-            anim.Update(0f); // reset state ของ Animator
+            anim.Update(0f);
         }
-
-        //var move = GetComponent<PlayerMovement>();
-        //if (move) move.enabled = true;
     }
+
     #endregion
 }

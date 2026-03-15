@@ -55,7 +55,7 @@ PrefabInstance:
     - target: {fileID: 3822718251962214707, guid: a6a2433b93dfbea4aaf74b8f5e15a6d5, type: 3}
       propertyPath: item
       value: 
-      objectReference: {fileID: 11400000, guid: b5622acf809d941ea9a51307a62f2e78, type: 2}
+      objectReference: {fileID: 11400000, guid: f3c680dcda2ff43b28bd6df86cf31c39, type: 2}
     - target: {fileID: 4139584759936063656, guid: a6a2433b93dfbea4aaf74b8f5e15a6d5, type: 3}
       propertyPath: m_Name
       value: Sword0 Variant

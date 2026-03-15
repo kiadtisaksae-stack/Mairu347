@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 151784243a2fb3d4eae05f63e2386e55, type: 3}
+  m_Name: Slime
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyType
+  enemyName: Slime
+  enemyId: 1
+  _initialMaxHealth: 100
+  Damage: 5
+  Defence: 5
+  movementSpeed: 4
+  experience: 50
+  dropTable:
+  - prefab: {fileID: 4139584759936063656, guid: a6a2433b93dfbea4aaf74b8f5e15a6d5, type: 3}
+    weight: 16
+  - prefab: {fileID: 4677510126313433478, guid: dd2d1ee2d12dc8c4093505c8772d5f1f, type: 3}
+    weight: 93
+  dropCount: 1

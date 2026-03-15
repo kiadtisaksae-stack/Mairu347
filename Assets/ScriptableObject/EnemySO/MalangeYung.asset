@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 151784243a2fb3d4eae05f63e2386e55, type: 3}
+  m_Name: MalangeYung
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyType
+  enemyName: MalangeYung
+  enemyId: 6
+  _initialMaxHealth: 550
+  Damage: 5
+  Defence: 5
+  movementSpeed: 5
+  experience: 300
+  dropTable:
+  - prefab: {fileID: 8257174275443207283, guid: b02af064469aabe419031c3c87c383bd, type: 3}
+    weight: 45
+  - prefab: {fileID: 1955510356423304272, guid: dfe0b2070edb5a843812fe0f5cb8716d, type: 3}
+    weight: 66
+  dropCount: 1

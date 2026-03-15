@@ -21,12 +21,14 @@ public class QuestData : ScriptableObject
     public int requestCount;
     public int currentCount;
 
+    // ✅ ถ้า true = ทำเสร็จแล้วต้องกลับมาส่ง NPC ก่อนรับรางวัล
+    // ถ้า false = เสร็จแล้วรับรางวัลทันที
+    [Header("Quest Delivery")]
+    public bool requireDelivery = false;
+
     [Header("Target Configuration")]
-    // สำหรับเควสเก็บไอเทม
     public ItemSO targetItem;
     public int targetItemId;
-
-    // สำหรับเควสฆ่ามอนสเตอร์
     public EnemyType targetEnemyType;
     public int targetEnemyId;
 

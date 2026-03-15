@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 151784243a2fb3d4eae05f63e2386e55, type: 3}
+  m_Name: Mushroom
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyType
+  enemyName: Mushroom
+  enemyId: 5
+  _initialMaxHealth: 550
+  Damage: 5
+  Defence: 5
+  movementSpeed: 2
+  experience: 200
+  dropTable:
+  - prefab: {fileID: 3487540889921364986, guid: 1e3d684d9527148e7a9cdcd5b356d531, type: 3}
+    weight: 74
+  - prefab: {fileID: 5980390857668961750, guid: 021e7fa40dfa149bf945e91a9123eb4c, type: 3}
+    weight: 43
+  dropCount: 1

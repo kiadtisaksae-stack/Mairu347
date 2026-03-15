@@ -1,17 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Unity.Netcode;
-using System.Collections.Generic;
 
 public class Teleport : NetworkBehaviour
 {
     [Header("📍 Teleport Settings")]
-    public Transform destinationPoint;    // จุดปลายทาง
-    public float teleportDelay = 3f;      
-
+    public Transform destinationPoint;
+    public float teleportDelay = 3f;
 
     [Header("🎯 Map Boundary Check")]
-    public BoxCollider map0Boundary;      // ลาก BoxCollider ของ Map0 มาวางที่นี่
+    public BoxCollider map0Boundary;
 
     [Header("✨ Visual Effects")]
     public ParticleSystem teleportEffect;
@@ -19,7 +17,7 @@ public class Teleport : NetworkBehaviour
     public AudioClip teleportSound;
 
     [Header("🔒 Anti-Spam")]
-    public float cooldownTime = 5f;       // ป้องกันวาปไปมาถี่เกิน
+    public float cooldownTime = 5f;
 
     private NetworkVariable<bool> isMap0Active = new NetworkVariable<bool>(
         true,
@@ -30,24 +28,14 @@ public class Teleport : NetworkBehaviour
     private bool isReady = true;
     private Coroutine teleportCoroutine;
 
-    public override void OnNetworkSpawn()
-    {
-        
-    }
-
     private void OnTriggerEnter(Collider other)
     {
-        // 1. ตรวจสอบ Anti-Spam และ Player Tag
         if (!isReady) return;
-
         if (other.CompareTag("Player"))
         {
             Player player = other.GetComponent<Player>();
-
-            // 2. ตรวจสอบว่าเป็น Local Player (Owner) ที่เหยียบหรือไม่
             if (player != null && player.IsOwner)
             {
-                // 3. 🚨 NEW: Client ส่งคำขอวาร์ปไปยัง Server ทันที
                 RequestTeleportServerRpc(player.NetworkObjectId);
             }
         }
@@ -63,30 +51,6 @@ public class Teleport : NetworkBehaviour
         }
     }
 
-
-    private int CountPlayersInMap0()
-    {
-        if (map0Boundary == null)
-        {
-            Debug.LogError("❌ Map0 Boundary is not assigned!");
-            return 0;
-        }
-
-        Player[] allPlayers = FindObjectsByType<Player>(FindObjectsSortMode.None);
-        int count = 0;
-
-        foreach (Player player in allPlayers)
-        {
-            if (map0Boundary.bounds.Contains(player.transform.position))
-            {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-   
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void RequestTeleportServerRpc(ulong playerId)
     {
@@ -95,22 +59,18 @@ public class Teleport : NetworkBehaviour
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(playerId, out NetworkObject playerNetObj))
         {
             Player player = playerNetObj.GetComponent<Player>();
-
             if (player != null)
             {
-                TeleportPlayerServerRpc(player.NetworkObjectId);
-                
+                // แก้ปัญหา #18 — เดิมเรียก TeleportPlayerServerRpc (ServerRpc) จาก Server
+                // ServerRpc เรียก ServerRpc ซ้อนกันไม่ถูกต้อง
+                // แก้โดยเรียก ClientRpc โดยตรงจาก Server แทน
+                TeleportPlayerClientRpc(player.NetworkObjectId, destinationPoint.position, destinationPoint.rotation);
             }
         }
     }
 
- 
-
-    [ServerRpc]
-    private void TeleportPlayerServerRpc(ulong playerId)
-    {
-        TeleportPlayerClientRpc(playerId, destinationPoint.position, destinationPoint.rotation);
-    }
+    // ลบ TeleportPlayerServerRpc ออก — ไม่จำเป็นแล้ว
+    // Server เรียก ClientRpc โดยตรงได้เลย
 
     [ClientRpc]
     private void TeleportPlayerClientRpc(ulong playerId, Vector3 position, Quaternion rotation)
@@ -120,7 +80,6 @@ public class Teleport : NetworkBehaviour
             Player player = playerObj.GetComponent<Player>();
             if (player != null && player.IsOwner)
             {
-                // ใช้ CharacterController สำหรับการย้ายที่ถูกต้อง
                 CharacterController controller = player.GetComponent<CharacterController>();
                 if (controller != null)
                 {
@@ -132,7 +91,6 @@ public class Teleport : NetworkBehaviour
                 {
                     player.transform.SetPositionAndRotation(position, rotation);
                 }
-
                 Debug.Log($"✅ Teleported {player.Name} to {position}");
             }
         }
@@ -140,11 +98,8 @@ public class Teleport : NetworkBehaviour
 
     private void StopTeleportEffects()
     {
-        if (teleportEffect != null)
-            teleportEffect.Stop();
-
-        if (teleportLight != null)
-            teleportLight.enabled = false;
+        if (teleportEffect != null) teleportEffect.Stop();
+        if (teleportLight != null) teleportLight.enabled = false;
     }
 
     private void ResetTeleport()
@@ -152,43 +107,35 @@ public class Teleport : NetworkBehaviour
         isReady = true;
         StopTeleportEffects();
     }
+
     private void OnDrawGizmos()
     {
-          if (destinationPoint != null)
+        if (destinationPoint != null)
         {
             Gizmos.color = Color.cyan;
             Gizmos.DrawLine(transform.position, destinationPoint.position);
-
             DrawArrow(transform.position, destinationPoint.position - transform.position);
-
             Gizmos.color = Color.green;
             Gizmos.DrawWireCube(destinationPoint.position, Vector3.one * 1f);
         }
-
         if (map0Boundary != null)
         {
             Gizmos.color = isMap0Active.Value ? Color.green : Color.red;
             Gizmos.DrawWireCube(map0Boundary.transform.position + map0Boundary.center, map0Boundary.size);
         }
-
         Gizmos.color = Color.yellow;
         Collider collider = GetComponent<Collider>();
         if (collider != null)
-        {
             Gizmos.DrawWireCube(transform.position, collider.bounds.size);
-        }
     }
 
     private void DrawArrow(Vector3 pos, Vector3 direction)
     {
         float arrowHeadLength = 0.5f;
         float arrowHeadAngle = 20.0f;
-
         Gizmos.DrawRay(pos, direction);
-
         Vector3 right = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180 + arrowHeadAngle, 0) * Vector3.forward;
         Vector3 left = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 180 - arrowHeadAngle, 0) * Vector3.forward;
-
         Gizmos.DrawRay(pos + direction, right * arrowHeadLength);
         Gizmos.DrawRay(pos + direction, left * arrowHeadLength);
     }

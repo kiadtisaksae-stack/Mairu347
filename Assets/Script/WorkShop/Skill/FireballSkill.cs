@@ -1,68 +1,69 @@
-using System;
-using System.Collections.Generic;
+Ôªøusing System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "FireballSkill", menuName = "Skills/FireballSkill")]
 public class FireballSkill : Skill
 {
     [Header("Skill Ability")]
-
     public int damage = 50;
     public float searchRadius = 5;
 
-    // µÈÕß Override ‡¡∏Õ¥ Activate() µ“¡∑’Ë Abstract Class °”Àπ¥
     public FireballSkill()
     {
         this.skillName = "FireballSkill";
         this.cooldownTime = 5;
     }
-    public override void Activate(Character character)
+
+    // ‡∏£‡∏±‡∏ö spawnedInstance ‡∏à‡∏≤‡∏Å SkillBook (‡πÑ‡∏°‡πà‡πÉ‡∏ä‡πâ‡πÉ‡∏ô‡∏™‡∏Å‡∏¥‡∏•‡∏ô‡∏µ‡πâ ‡πÅ‡∏ï‡πà‡∏ï‡πâ‡∏≠‡∏á implement ‡∏ï‡∏≤‡∏° abstract)
+    public override void Activate(Character character, GameObject spawnedInstance)
     {
-        Debug.Log(character.Name + " Casting Fireball! Deals" + damage + " damage.");
+        Debug.Log(character.Name + " Casting Fireball! Deals " + damage + " damage.");
 
-        Enemy[] target = GetEnemysInRange(character);
-        if (target.Length>0)
+        // ‡πÅ‡∏Å‡πâ‡∏õ‡∏±‡∏ç‡∏´‡∏≤ #7 ‚Äî ‡πÄ‡∏î‡∏¥‡∏°‡πÄ‡∏£‡∏µ‡∏¢‡∏Å enemy.TakeDamage() ‡∏à‡∏≤‡∏Å Client ‡πÇ‡∏î‡∏¢‡∏ï‡∏£‡∏á
+        // TakeDamage ‡πÄ‡∏ä‡πá‡∏Ñ if (!IsServer) return ‚Üí damage ‡πÑ‡∏°‡πà‡πÄ‡∏Å‡∏¥‡∏î‡∏Ç‡∏∂‡πâ‡∏ô‡πÄ‡∏•‡∏¢
+        // ‡πÅ‡∏Å‡πâ‡πÇ‡∏î‡∏¢‡∏™‡πà‡∏á‡∏ú‡πà‡∏≤‡∏ô DealDamageServerRpc ‡∏Ç‡∏≠‡∏á Player ‡πÅ‡∏ó‡∏ô
+
+        Player player = character as Player;
+        if (player == null)
         {
-            foreach (var enemy in target)
-            {
-                enemy.TakeDamage(damage);
-                Debug.Log($"{character.Name} casts {skillName} on {enemy.Name}, dealing 50 damage!");
+            Debug.LogWarning("[FireballSkill] Caster is not a Player, cannot send ServerRpc");
+            return;
+        }
 
+        Enemy[] targets = GetEnemiesInRange(character);
+        if (targets.Length > 0)
+        {
+            foreach (var enemy in targets)
+            {
+                // ‡∏™‡πà‡∏á damage ‡∏ú‡πà‡∏≤‡∏ô ServerRpc ‡∏Ç‡∏≠‡∏á Player
+                // DealDamageServerRpc ‡∏à‡∏∞‡∏ó‡∏≥‡∏á‡∏≤‡∏ô‡∏ö‡∏ô Server ‚Üí ‡πÄ‡∏£‡∏µ‡∏¢‡∏Å TakeDamage ‡∏ö‡∏ô Server ‡∏ñ‡∏π‡∏Å‡∏ï‡πâ‡∏≠‡∏á
+                player.DealDamageServerRpc(enemy.NetworkObjectId, damage);
+                Debug.Log($"{character.Name} casts {skillName} on {enemy.Name}, dealing {damage} damage!");
             }
         }
         else
         {
             Debug.Log("No enemies in range to target with Fireball.");
         }
-        // ‚§È¥∑’Ë„™È„π°“√ √È“ß≈Ÿ°‰ø·≈–§”π«≥§«“¡‡ ’¬À“¬
     }
 
-    public override void Deactivate(Character character)
-    {
-        //µÈÕß Override ‡¡∏Õ¥ Deactivate() µ“¡∑’Ë Abstract Class °”Àπ¥·¡È‰¡Ë‰¥È„™È
-    }
+    public override void Deactivate(Character character) { }
 
-    public override void UpdateSkill(Character character)
-    {
-        //µÈÕß Override ‡¡∏Õ¥ UpdateSkill() µ“¡∑’Ë Abstract Class °”Àπ¥·¡È‰¡Ë‰¥È„™È
-    }
+    public override void UpdateSkill(Character character) { }
 
-    // A private helper method to find the nearest enemy
-    private Enemy[] GetEnemysInRange(Character caster)
+    private Enemy[] GetEnemiesInRange(Character caster)
     {
-        // Find all colliders within the search radius
         Collider[] hitColliders = Physics.OverlapSphere(caster.transform.position, searchRadius);
-        List<Enemy> Enemys = new List<Enemy>();
+        List<Enemy> enemies = new List<Enemy>();
 
         foreach (var hitCollider in hitColliders)
         {
-            // Check if the collider belongs to a character that isn't the caster
             Enemy targetCharacter = hitCollider.GetComponent<Enemy>();
             if (targetCharacter != null && targetCharacter != caster)
             {
-                Enemys.Add(targetCharacter);
+                enemies.Add(targetCharacter);
             }
         }
-        return Enemys.ToArray();
+        return enemies.ToArray();
     }
 }

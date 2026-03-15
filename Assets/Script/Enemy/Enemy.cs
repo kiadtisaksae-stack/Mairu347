@@ -5,41 +5,22 @@ using Unity.Netcode.Components;
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(SphereCollider))]
 [RequireComponent(typeof(NetworkRigidbody))]
-
 public class Enemy : Character
 {
     [Header("Enemy Type")]
     public EnemyType enemyType;
     protected enum State { Idel, Chase, Attack, Death }
+
     [Header("Attack Settings")]
-    [SerializeField]
-    protected float TimeToAttack = 1f;
-    [SerializeField]
-    protected float AttackRange = 1.5f; // ระยะโจมตี
+    [SerializeField] protected float TimeToAttack = 1f;
+    [SerializeField] protected float AttackRange = 1.5f;
     protected bool isRun = false;
-    
+
     protected State currentState = State.Idel;
     protected float timer = 0f;
     protected Rigidbody rb;
     protected SphereCollider sphereCollider;
-    
     protected Player _targetPlayer;
-
-    [Header("Reward")]
-    [SerializeField]
-    private NetworkObject[] rewardItemPrefabs = new NetworkObject[3];
-    [Header("Drop Rate Weights (Total should be 100)")]
-    [Tooltip("Item 1 (Common)")]
-    [SerializeField]
-    private int dropWeight1 = 50;
-    [Tooltip("Item 2 (Uncommon)")]
-    [SerializeField]
-    private int dropWeight2 = 30;
-    [Tooltip("Item 3 (Rare)")]
-    [SerializeField]
-    private int dropWeight3 = 20;
-    [SerializeField]
-    private int rewardCount = 1;
 
     [Header("Xp Drop")]
     public int xpValue = 50;
@@ -47,40 +28,15 @@ public class Enemy : Character
 
     public override void OnNetworkSpawn()
     {
-        
-        this._initialMaxHealth =  enemyType._initialMaxHealth;
+        this._initialMaxHealth = enemyType._initialMaxHealth;
         this.Name = enemyType.enemyName;
         this.Defence = enemyType.Defence;
         this.Damage = enemyType.Damage;
         this.movementSpeed = enemyType.movementSpeed;
+        this.xpValue = enemyType.experience;
         base.OnNetworkSpawn();
-
     }
-    private void FixedUpdate()
-    {
-        if (!IsServer) return;
-        _targetPlayer = GetClosestPlayer();
-        if (_targetPlayer == null)
-        {
-            SetAnimationState(false);
-            return;
-        }
-        Vector3 directionToTarget = _targetPlayer.transform.position - transform.position;
-        Turn(directionToTarget);
-        timer -= Time.fixedDeltaTime;
 
-        if (GetDistanClosestPlayer() < AttackRange)
-        {
-            Attack(_targetPlayer);
-            currentState = State.Attack;
-        }
-        else
-        {
-            SetAnimationState(false);
-
-            currentState = State.Chase;
-        }
-    }
     public override void TakeDamage(int amount)
     {
         if (!IsServer) return;
@@ -90,11 +46,8 @@ public class Enemy : Character
 
         if (health <= 0)
         {
-            // ✅ แจ้ง Quest Manager ก่อนทำลาย
             if (QuestManager.Instance != null && enemyType != null)
-            {
                 QuestManager.Instance.OnEnemyKilled(enemyType);
-            }
 
             ShareXpInRadius();
             DropReward();
@@ -104,104 +57,106 @@ public class Enemy : Character
         }
     }
 
-
     public override void SetUP()
     {
         base.SetUP();
         rb = GetComponent<Rigidbody>();
         sphereCollider = GetComponent<SphereCollider>();
         if (animator == null)
-        {
-            Debug.LogError("Animator component not found on " + gameObject.name);
-        }
+            Debug.LogError("Animator not found on " + gameObject.name);
     }
+
+    // ─────────────────────────────────────────
+    // Drop — อ่านจาก EnemyType.dropTable
+    // ─────────────────────────────────────────
     protected virtual void DropReward()
     {
         if (!IsServer) return;
+        if (enemyType == null || enemyType.dropTable == null || enemyType.dropTable.Count == 0) return;
 
-        // ตรวจสอบความถูกต้องของ Array
-        if (rewardItemPrefabs.Length < 3 || rewardItemPrefabs[0] == null)
+        // คำนวณ total weight ครั้งเดียว
+        int totalWeight = 0;
+        foreach (var entry in enemyType.dropTable)
+            totalWeight += entry.weight;
+
+        if (totalWeight <= 0) return;
+
+        Vector3 dropPos = transform.position + Vector3.up * 0.2f;
+
+        for (int i = 0; i < enemyType.dropCount; i++)
         {
-            return;
-        }
+            GameObject prefab = GetRandomDrop(totalWeight);
+            if (prefab == null) continue;
 
-        Vector3 dropPosition = transform.position + Vector3.up * 0.2f; // Drop เหนือพื้นเล็กน้อย
-
-        for (int i = 0; i < rewardCount; i++)
-        {
-            NetworkObject selectedPrefab = GetRandomWeightedReward();
-
-            if (selectedPrefab != null)
+            NetworkObject netObj = prefab.GetComponent<NetworkObject>();
+            if (netObj != null)
             {
-                NetworkObject droppedItem = Instantiate(selectedPrefab, dropPosition, Quaternion.identity);
-                droppedItem.Spawn(true);
-                Debug.Log($"[SERVER REWARD] Dropped item: {selectedPrefab.name}");
+                // prefab มี NetworkObject → Spawn ผ่าน Network
+                NetworkObject dropped = Instantiate(netObj, dropPos, Quaternion.identity);
+                dropped.Spawn(true);
+            }
+            else
+            {
+                // prefab ธรรมดา → Instantiate ปกติ
+                Instantiate(prefab, dropPos, Quaternion.identity);
             }
         }
     }
 
+    private GameObject GetRandomDrop(int totalWeight)
+    {
+        int roll = Random.Range(0, totalWeight);
+        int cumulative = 0;
+
+        foreach (var entry in enemyType.dropTable)
+        {
+            cumulative += entry.weight;
+            if (roll < cumulative)
+                return entry.prefab;
+        }
+
+        return null;
+    }
+
+    // ─────────────────────────────────────────
+    // XP
+    // ─────────────────────────────────────────
     private void ShareXpInRadius()
     {
         PlayerLevel[] allPlayers = FindObjectsByType<PlayerLevel>(FindObjectsSortMode.None);
+        if (allPlayers.Length == 0) return;
+
+        int averageXp = xpValue / allPlayers.Length;
         foreach (PlayerLevel player in allPlayers)
         {
-            float distance = Vector3.Distance(transform.position, player.transform.position);
-
-            if (distance <= xpShareRadius)
-            {
-                if (allPlayers.Length == 0) return;
-                int averageXp = xpValue / allPlayers.Length;
+            if (Vector3.Distance(transform.position, player.transform.position) <= xpShareRadius)
                 player.AddExperience(averageXp);
-            }
         }
     }
 
-
-    private NetworkObject GetRandomWeightedReward()
-    {
-        int totalWeight = dropWeight1 + dropWeight2 + dropWeight3;
-        if (totalWeight <= 0)
-        {
-            Debug.LogError("[REWARD ERROR] Total drop weight is zero or negative. Check inspector values.");
-            return rewardItemPrefabs[0];
-        }
-        int randomNumber = UnityEngine.Random.Range(0, totalWeight);
-
-        if (randomNumber < dropWeight1)
-        {
-            return rewardItemPrefabs[0];
-        }
-        else if (randomNumber < dropWeight1 + dropWeight2)
-        {
-            return rewardItemPrefabs[1];
-        }
-        else
-        {
-            return rewardItemPrefabs[2];
-        }
-    }
-
+    // ─────────────────────────────────────────
+    // Movement / Combat helpers
+    // ─────────────────────────────────────────
     protected virtual void Turn(Vector3 direction)
     {
-        // ลบแกน Y ออกจากการหมุนเพื่อไม่ให้ศัตรูเงย/ก้มตามพื้น
-        direction.y = 0; 
+        direction.y = 0;
         if (direction != Vector3.zero)
         {
             Quaternion lookRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.fixedDeltaTime * 10f); // หมุนแบบนุ่มนวล
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.fixedDeltaTime * 10f);
         }
     }
-    
+
     protected virtual void Move(Vector3 direction)
     {
         rb.linearVelocity = new Vector3(direction.x * movementSpeed, rb.linearVelocity.y, direction.z * movementSpeed);
     }
-    
-    protected virtual void Attack(Player _player) 
+
+    protected virtual void Attack(Player _player)
     {
         if (timer <= 0)
         {
-            _player.TakeDamage(Damage); 
+            _player.TakeDamage(Damage);
             SetAnimationState(true);
             Debug.Log($"{Name} attacks {_player.Name} for {Damage} damage.");
             timer = TimeToAttack;
@@ -210,35 +165,26 @@ public class Enemy : Character
 
     protected void SetAnimationState(bool isAttacking)
     {
-        // ใช้ SetBool เพียงครั้งเดียวเพื่อป้องกันการเรียกซ้ำ
         if (animator.GetBool("Attack") != isAttacking)
-        {
             animator.SetBool("Attack", isAttacking);
-        }
     }
+
     protected void SetAnimationRun(bool isRun)
     {
         bool HasParameter(Animator anim, string paramName)
         {
             foreach (AnimatorControllerParameter param in anim.parameters)
-            {
-                if (param.name == paramName)
-                    return true;
-            }
+                if (param.name == paramName) return true;
             return false;
         }
         if (!HasParameter(animator, "Run")) return;
-
         if (animator.GetBool("Run") != isRun)
-        {
             animator.SetBool("Run", isRun);
-        }
     }
+
     protected void SetAnimDie(bool die)
     {
         if (animator.GetBool("Die") != die)
-        {
             animator.SetBool("Die", die);
-        }
     }
 }

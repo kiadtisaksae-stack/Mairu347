@@ -1,20 +1,17 @@
 ﻿using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
-using System.Linq;
 using System.Collections;
 
-// คลาสพื้นฐานสำหรับเอนทิตี้ที่รองรับ Netcode
+[RequireComponent(typeof(NetworkObject))]
 public class Identity : NetworkBehaviour
 {
-    // 1. ใช้ NetworkVariable สำหรับข้อมูลที่ต้องซิงค์
     private readonly NetworkVariable<FixedString32Bytes> _networkName = new NetworkVariable<FixedString32Bytes>(
         default,
         NetworkVariableReadPermission.Everyone,
-        NetworkVariableWritePermission.Server); // ⬅️ เปลี่ยนเป็น Server Write
+        NetworkVariableWritePermission.Server);
+
     protected NetworkVariable<bool> isOnLive = new NetworkVariable<bool>(true);
-
-
 
     public string Name
     {
@@ -35,20 +32,17 @@ public class Identity : NetworkBehaviour
         set
         {
             if (IsOwner)
-            {
                 transform.position = new Vector3(value, transform.position.y, transform.position.z);
-            }
         }
     }
+
     public int positionY
     {
         get { return Mathf.RoundToInt(transform.position.z); }
         set
         {
             if (IsOwner)
-            {
                 transform.position = new Vector3(transform.position.x, transform.position.y, value);
-            }
         }
     }
 
@@ -57,7 +51,7 @@ public class Identity : NetworkBehaviour
         return $"Name: {Name}, Position: ({transform.position.x}, {transform.position.y}, {transform.position.z})";
     }
 
-    #region ---Local Player and Closest Player ---
+    #region --- Local Player and Closest Player ---
     private Transform _localPlayerTransform;
     protected Transform LocalPlayerTransform
     {
@@ -67,15 +61,12 @@ public class Identity : NetworkBehaviour
             {
                 var localPlayerNetworkObject = NetworkManager.Singleton.LocalClient.PlayerObject;
                 if (localPlayerNetworkObject != null)
-                {
                     _localPlayerTransform = localPlayerNetworkObject.transform;
-                }
             }
             return _localPlayerTransform;
         }
     }
 
-    private float distanFormPlayer;
     protected Player LocalPlayer
     {
         get
@@ -89,8 +80,7 @@ public class Identity : NetworkBehaviour
     protected float GetDistanPlayer()
     {
         if (LocalPlayerTransform == null) return -1;
-        distanFormPlayer = Vector3.Distance(transform.position, LocalPlayerTransform.position);
-        return distanFormPlayer;
+        return Vector3.Distance(transform.position, LocalPlayerTransform.position);
     }
 
     protected Transform ClosestPlayerTransform => GetClosestPlayerTransform();
@@ -99,9 +89,7 @@ public class Identity : NetworkBehaviour
     {
         Transform closestTransform = ClosestPlayerTransform;
         if (closestTransform != null)
-        {
             return closestTransform.GetComponent<Player>();
-        }
         return null;
     }
 
@@ -125,7 +113,6 @@ public class Identity : NetworkBehaviour
             {
                 Transform playerTransform = client.PlayerObject.transform;
                 float distance = Vector3.Distance(transform.position, playerTransform.position);
-
                 if (distance < minDistance)
                 {
                     minDistance = distance;
@@ -137,15 +124,12 @@ public class Identity : NetworkBehaviour
     }
     #endregion
 
-    #region  --- Identity InFront Caching ---
+    #region --- Identity InFront Caching ---
     protected Identity _cachedIdentityInFront;
     public Identity InFront => _cachedIdentityInFront;
 
     float sphereRadius = 0.5f;
     float maxDistance = 1.0f;
-
-    private float updateCheckInterval = 0.2f;
-    private float lastCheckTime = 0f;
 
     private NetworkVariable<Vector3> savedPosition = new NetworkVariable<Vector3>(
         default,
@@ -155,22 +139,24 @@ public class Identity : NetworkBehaviour
 
     private float saveInterval = 5f;
     private float lastSaveTime = 0f;
+    private Vector3 _lastSavedPosition = Vector3.zero;
 
     [ServerRpc]
     private void SendPositionToServerRpc(Vector3 pos)
     {
-        if (!IsOwner || !IsSpawned) return;
+        // แก้ปัญหา #14 — ลบ if (!IsOwner) ออก เพราะ ServerRpc ต้องการ IsOwner อยู่แล้ว
+        // เพิ่มเช็ค IsSpawned ก็พอ
+        if (!IsSpawned) return;
         savedPosition.Value = pos;
     }
 
     public override void OnNetworkSpawn()
     {
-        if (IsOwner && string.IsNullOrEmpty(_networkName.Value.ToString()))
+        if (IsServer && string.IsNullOrEmpty(_networkName.Value.ToString()))
         {
             _networkName.Value = gameObject.name;
         }
 
-        // ✅ ถ้ามีตำแหน่ง restore ให้เรียก coroutine
         if (IsOwner)
         {
             StartCoroutine(RestorePositionAfterReconnect());
@@ -178,17 +164,12 @@ public class Identity : NetworkBehaviour
 
         SetUP();
     }
+
     public override void OnNetworkDespawn()
     {
         base.OnNetworkDespawn();
-
-
-        // 💡 รับประกันการทำลาย GameObject หลังจากการ Despawn ของ Netcode
         if (gameObject != null)
-        {
             Destroy(gameObject);
-        }
-
     }
 
     private IEnumerator RestorePositionAfterReconnect()
@@ -198,63 +179,55 @@ public class Identity : NetworkBehaviour
         if (savedPosition.Value != Vector3.zero)
         {
             Vector3 pos = savedPosition.Value;
-
             if (Physics.Raycast(pos + Vector3.up * 2, Vector3.down, out RaycastHit hit, 10))
-            {
                 transform.position = hit.point;
-            }
             else
-            {
                 transform.position = pos;
-            }
 
             Debug.Log($"✅ Restored player position to {transform.position}");
         }
     }
 
-    void Update()
-    {
-        UpdateInFrontCache();
-    }
+    // แก้ปัญหา #19 — ลบ Update ออกจาก Identity base class
+    // Player.cs override และเรียก UpdateInFrontCache() ใน Update ของตัวเองอยู่แล้ว
+    // ถ้า Identity ก็มี Update → SphereCast รันซ้ำสองรอบทุก frame
+    // คลาสที่ไม่ใช่ Player (เช่น Enemy) ไม่ต้องการ InFront cache
+    // void Update() { UpdateInFrontCache(); }  ← ลบออก
 
     private void FixedUpdate()
     {
-        
-        if (Time.time > lastCheckTime + updateCheckInterval)
-        {
-            lastCheckTime = Time.time;
-        }
-        
+        // แก้ปัญหา #14 — เช็คว่า position เปลี่ยนจริงก่อนส่ง RPC
+        // ลดการส่ง RPC โดยไม่จำเป็น
+        if (!IsOwner) return;
 
         if (Time.time >= lastSaveTime + saveInterval)
         {
-            if (!IsOwner) return;
             lastSaveTime = Time.time;
-            SendPositionToServerRpc(transform.position);
+
+            // ส่งเฉพาะตอนที่ position เปลี่ยนจริงๆ
+            if (Vector3.Distance(transform.position, _lastSavedPosition) > 0.1f)
+            {
+                _lastSavedPosition = transform.position;
+                SendPositionToServerRpc(transform.position);
+            }
         }
     }
 
-    public virtual void SetUP() 
+    public virtual void SetUP()
     {
         if (IsServer)
-        {
             isOnLive.Value = true;
-        }
         SetIsOnLive(true);
     }
 
+    // ทำให้เป็น protected เพื่อให้ Player.cs เรียกได้
     protected void UpdateInFrontCache()
     {
         RaycastHit hit = GetClosestInfornt();
         if (hit.collider != null)
-        {
             _cachedIdentityInFront = hit.collider.GetComponent<Identity>();
-        }
         else
-        {
             _cachedIdentityInFront = null;
-        }
-        
     }
 
     public virtual RaycastHit GetClosestInfornt()
@@ -290,17 +263,13 @@ public class Identity : NetworkBehaviour
         }
     }
     #endregion
+
     protected void SetIsOnLive(bool value)
     {
         if (IsServer)
-        {
             isOnLive.Value = value;
-        }
         else
-        {
-            // ถ้าเป็น Client ส่ง RPC ไปหา Server
             SetIsOnLiveServerRpc(value);
-        }
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]

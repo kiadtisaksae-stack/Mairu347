@@ -6,11 +6,12 @@ using Unity.Netcode;
 
 public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IPointerClickHandler
 {
-
     [Header("Crafting Detail")]
     public GameObject[] reCipePrefubs;
+
     [Header("Inventory Detail")]
     public InventoryCanvas iventory;
+
     [Header("Slot Detail")]
     public ItemSO item;
     public int stack;
@@ -19,7 +20,6 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public Color emptyColor;
     public Color itemColor;
     [SerializeField] private Outline outline;
-
     public Color selectedColor;
     public Color backgroundColor;
     public Image icons;
@@ -33,12 +33,9 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     protected Canvas canvas;
     protected CanvasGroup canvasGroup;
 
-
-    // สำหรับ double click
     private float lastClickTime;
     private const float doubleClickThreshold = 0.3f;
 
-    // สำหรับ multi-selection
     public bool isSelected = false;
     private InputSystem_Actions inputActions;
     private RectTransform canvasRect;
@@ -49,27 +46,26 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         canvasGroup = GetComponent<CanvasGroup>();
         siblingIndex = transform.GetSiblingIndex();
         if (canvas != null)
-        {
             canvasRect = canvas.GetComponent<RectTransform>();
-        }
 
         if (background == null)
             background = GetComponent<Image>();
-
     }
+
     void OnEnable()
     {
         inputActions = new InputSystem_Actions();
         inputActions.Enable();
     }
+
     void OnDisable()
     {
-        inputActions.Disable();
+        if (inputActions != null)
+            inputActions.Disable();
     }
 
-    void Update() { }
+    #region Drag and Drop
 
-    #region Drag and Drop Methods
     public virtual void OnBeginDrag(PointerEventData eventData)
     {
         canvasGroup.alpha = 0.6f;
@@ -78,20 +74,17 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         iventory.SetLayoutControlChiad(false);
         iventory.MakeThisToTopLayer(true, 2);
 
-        // ให้ draggable ติดเมาส์ตรง ๆ
         Vector2 localPoint;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             canvas.transform as RectTransform,
             eventData.position,
             canvas.worldCamera,
-            out localPoint
-        );
+            out localPoint);
         draggable.anchoredPosition = localPoint;
     }
 
     public virtual void OnDrag(PointerEventData eventData)
     {
-        // ✅ วิธีง่ายๆ: ตั้งตำแหน่งตรงๆ
         if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
             canvasRect,
             eventData.position,
@@ -112,54 +105,38 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public virtual void OnDrop(PointerEventData eventData)
     {
-        if (eventData.pointerDrag != null)
+        if (eventData.pointerDrag == null) return;
+
+        InventorySlot slot = eventData.pointerDrag.GetComponent<InventorySlot>();
+        if (slot == null) return;
+
+        if (slot.item == item)
+            MergeThisSlot(slot);
+        else
+            SwapSlot(slot);
+
+        // อัพเดต Equipment บน Server
+        Player player = GetLocalPlayer();
+        if (player != null)
         {
-            InventorySlot slot = eventData.pointerDrag.GetComponent<InventorySlot>();
-            if (slot != null)
-            {
-                if (slot.item == item)
-                {
-                    MergeThisSlot(slot);
-                }
-                else
-                {
-                    SwapSlot(slot);
-                }
-            }
+            if (this == iventory.headSlot) player.EquipHead();
+            else if (this == iventory.bodySlot) player.EquipBody();
+            else if (this == iventory.legSlot) player.EquipLeg();
+            else if (this == iventory.rightHandSlots || this == iventory.leftHandSlots)
+                player.EquipWeapon();
+
+            player.UpdateEquipmentStats();
         }
-        var localObj = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
-        if (localObj != null)
-        {
-            Player player = localObj.GetComponent<Player>();
-            if (player != null)
-            {
-                // ✅ เรียก Equipment methods ตาม Slot type
-                if (this == iventory.headSlot)
-                    player.EquipHead();
-                else if (this == iventory.bodySlot)
-                    player.EquipBody();
-                else if (this == iventory.legSlot)
-                    player.EquipLeg();
-                else if (this == iventory.rightHandSlots || this == iventory.leftHandSlots)
-                    player.EquipWeapon();
-
-                // ✅ อัพเดต Stats
-                player.UpdateEquipmentStats();
-            }
-        }
-
-
-
     }
+
     #endregion
 
-    #region Click and Selection Methods
+    #region Click and Selection
+
     public virtual void OnPointerClick(PointerEventData eventData)
     {
-        if (item == iventory.Empty_Item)
-            return;
+        if (item == iventory.Empty_Item) return;
 
-        // ตรวจสอบ double click
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             if (Time.time - lastClickTime < doubleClickThreshold)
@@ -168,23 +145,16 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             }
             else
             {
-                // Single click - select/deselect
                 if (inputActions != null && inputActions.UI.RightClick.IsPressed())
-                {
                     ToggleSelection();
-                }
                 else
                 {
                     if (isSelected && iventory.selectedSlots.Count == 1)
-                    {
                         DeselectThisSlot();
-                    }
                     else
-                    {
                         SelectThisSlot();
-                    }
                 }
-                inputActions.Disable();
+                inputActions?.Disable();
             }
             lastClickTime = Time.time;
         }
@@ -192,23 +162,21 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             iventory.ClearAllSelections();
             UpdateSelectionVisual();
-            iventory.UpdateSlotSelection(this, false); // แจ้งเตือนเท่านั้น
+            iventory.UpdateSlotSelection(this, false);
         }
     }
 
     public void OnPointerDoubleClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Left && item != iventory.Empty_Item)
-        {
             UseItem();
-        }
     }
 
     public void ToggleSelection()
     {
         isSelected = !isSelected;
         UpdateSelectionVisual();
-        iventory.UpdateSlotSelection(this, isSelected); // แจ้งเตือนเท่านั้น
+        iventory.UpdateSlotSelection(this, isSelected);
     }
 
     public void SelectThisSlot()
@@ -217,7 +185,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             isSelected = true;
             UpdateSelectionVisual();
-            iventory.UpdateSlotSelection(this, true); // แจ้งเตือนเท่านั้น ไม่เรียก recursive
+            iventory.UpdateSlotSelection(this, true);
         }
     }
 
@@ -227,7 +195,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             isSelected = false;
             UpdateSelectionVisual();
-            iventory.UpdateSlotSelection(this, false); // แจ้งเตือนเท่านั้น ไม่เรียก recursive
+            iventory.UpdateSlotSelection(this, false);
         }
     }
 
@@ -236,8 +204,6 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         if (outline != null)
         {
             outline.enabled = isSelected;
-
-            // สามารถปรับแต่งเพิ่มเติมเมื่อเลือก
             if (isSelected)
             {
                 outline.effectColor = selectedColor;
@@ -245,20 +211,16 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             }
         }
 
-        // เปลี่ยนสี background เพิ่มเติม (optional)
         if (background != null)
-        {
             background.color = isSelected ? backgroundColor : Color.white;
-        }
     }
 
-    public bool IsSelected()
-    {
-        return isSelected;
-    }
+    public bool IsSelected() => isSelected;
+
     #endregion
 
     #region Button Handlers
+
     public void OnClickButtonUseItem()
     {
         if (item != iventory.Empty_Item)
@@ -272,53 +234,46 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (item != iventory.Empty_Item)
         {
-            // ตรวจสอบว่ามี slot ที่เลือกมากกว่าหนึ่งชิ้นหรือไม่
             if (iventory.HasMultipleSelections())
-            {
                 iventory.DeleteSelectedItems();
-            }
             else
-            {
-                // ลบแค่ชิ้นเดียว
                 iventory.RemoveItem(this);
-            }
+
             iventory.UpdateButtonInteractability();
         }
     }
+
     #endregion
 
-    #region Item Management
+    #region Item Usage
+
     public virtual void UseItem()
     {
         if (item == iventory.Empty_Item) return;
 
-        // ✅ ใช้ไอเทมตามประเภท
         bool itemUsed = ApplyItemEffects();
 
         if (itemUsed)
         {
             stack = Mathf.Clamp(stack - 1, 0, item.maxStack);
             if (stack > 0)
-            {
                 checkShowText();
-            }
             else
-            {
                 iventory.RemoveItem(this);
-            }
         }
 
         DeselectThisSlot();
     }
+
     private bool ApplyItemEffects()
     {
-        var localObj = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
-        if (localObj == null) return false;
+        Player player = GetLocalPlayer();
+        if (player == null)
+        {
+            Debug.LogWarning("[InventorySlot] ไม่พบ Local Player!");
+            return false;
+        }
 
-        Player player = localObj.GetComponent<Player>();
-        if (player == null) return false;
-
-        // ✅ ใช้ static class ItemTypes ในการตรวจสอบ
         switch (item.tybe)
         {
             case ItemTypes.CONSUMABLE:
@@ -331,9 +286,8 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             case ItemTypes.TWO_HAND_WEAPON:
                 return EquipItem(player);
 
-            case ItemTypes.NONE:
             default:
-                Debug.Log($"Cannot use item type: {item.tybe}");
+                Debug.Log($"[InventorySlot] ไม่รู้จักประเภทไอเทม: {item.tybe}");
                 return false;
         }
     }
@@ -342,36 +296,44 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         bool effectApplied = false;
 
-        // ✅ รักษา HP
+        // ✅ ส่งผ่าน ServerRpc — Client ห้ามเรียก Heal() ตรง
         if (item.healAmount > 0)
         {
-            player.Heal(item.healAmount);
-            Debug.Log($"❤️ ใช้ {item.itemName} รักษา {item.healAmount} HP");
+            player.HealServerRpc(item.healAmount);
+            Debug.Log($"[InventorySlot] ใช้ {item.itemName} รักษา {item.healAmount} HP");
             effectApplied = true;
         }
 
         if (!effectApplied)
-        {
-            Debug.Log($"ℹ️ {item.itemName} ไม่มี effect");
-        }
+            Debug.Log($"[InventorySlot] {item.itemName} ไม่มี effect");
 
         return effectApplied;
     }
 
     private bool EquipItem(Player player)
     {
-        // ✅ Equipment ต้องสวมใส่ผ่าน Drag & Drop
-        Debug.Log($"🛡️ {item.itemName} ต้องสวมใส่ผ่านการลากไปที่ช่อง Equipment");
+        Debug.Log($"[InventorySlot] {item.itemName} ต้องสวมใส่ผ่านการลากไปที่ช่อง Equipment");
         return false;
     }
+
+    // Helper — ดึง Local Player ได้จากทุกที่
+    protected Player GetLocalPlayer()
+    {
+        if (NetworkManager.Singleton == null) return null;
+        var localObj = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
+        return localObj != null ? localObj.GetComponent<Player>() : null;
+    }
+
+    #endregion
+
+    #region Slot Management
 
     public void SwapSlot(InventorySlot newSlot)
     {
         ItemSO keepItem = item;
-        int keepstack = stack;
-
+        int keepStack = stack;
         SetSwap(newSlot.item, newSlot.stack);
-        newSlot.SetSwap(keepItem, keepstack);
+        newSlot.SetSwap(keepItem, keepStack);
     }
 
     public void SetSwap(ItemSO swapItem, int amount)
@@ -391,49 +353,34 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             return;
         }
 
-        int ItemAmount = stack + mergeSlot.stack;
-        int intInthisSlot = Mathf.Clamp(ItemAmount, 0, item.maxStack);
-        stack = intInthisSlot;
-
+        int total = stack + mergeSlot.stack;
+        stack = Mathf.Clamp(total, 0, item.maxStack);
         checkShowText();
-        int amountLeft = ItemAmount - intInthisSlot;
-        if (amountLeft > 0)
-        {
-            mergeSlot.SetThisSlot(mergeSlot.item, amountLeft);
-        }
+
+        int leftOver = total - stack;
+        if (leftOver > 0)
+            mergeSlot.SetThisSlot(mergeSlot.item, leftOver);
         else
-        {
             iventory.RemoveItem(mergeSlot);
-        }
     }
 
     public void MergeThisSlot(ItemSO mergeItem, int mergeAmount)
     {
         item = mergeItem;
         icons.sprite = mergeItem.icon;
-        int ItemAmount = stack + mergeAmount;
 
-        int intInthisSlot = Mathf.Clamp(ItemAmount, 0, item.maxStack); //า itemAmout ว่าเกืน newItem มั้ย ท่าเกินตัดออก
-        stack = intInthisSlot;
-
+        int total = stack + mergeAmount;
+        stack = Mathf.Clamp(total, 0, item.maxStack);
         checkShowText();
-        int amountLeft = ItemAmount - intInthisSlot;//เช็คว่า ไอเทมเกินช่ิงมั้ย
-        if (amountLeft > 0)//เกินเท่าไหร่
+
+        int leftOver = total - stack;
+        if (leftOver > 0)
         {
             InventorySlot slot = iventory.IsEmptySlotLeft(mergeItem, this);
             if (slot == null)
-            {
-                iventory.DropItem(mergeItem, amountLeft);
-                return;
-            }
+                iventory.DropItem(mergeItem, leftOver);
             else
-            {
-                slot.MergeThisSlot(mergeItem, amountLeft);//รีเคอซีพ
-            }
-        }
-        else
-        {
-
+                slot.MergeThisSlot(mergeItem, leftOver);
         }
     }
 
@@ -442,59 +389,49 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         item = newItem;
         icons.sprite = newItem.icon;
 
-        int ItemAmount = amount;
-        int intInthisSlot = Mathf.Clamp(ItemAmount, 0, newItem.maxStack);
-        stack = intInthisSlot;
-
+        int total = amount;
+        stack = Mathf.Clamp(total, 0, newItem.maxStack);
         checkShowText();
-        int amountLeft = ItemAmount - intInthisSlot;
-        if (amountLeft > 0)
+
+        int leftOver = total - stack;
+        if (leftOver > 0)
         {
             InventorySlot slot = iventory.IsEmptySlotLeft(newItem, this);
-            if (slot == null)
-            {
-                return;
-            }
-            else
-            {
-                slot.SetThisSlot(newItem, amountLeft);
-            }
+            if (slot != null)
+                slot.SetThisSlot(newItem, leftOver);
         }
+
         UpdateSelectionVisual();
     }
+
     #endregion
 
-    #region UI Methods
+    #region UI
+
     public void checkShowText()
     {
         UpdateColorSlot();
         stackText.text = stack.ToString();
-        if (item.maxStack < 2)
-        {
-            stackText.gameObject.SetActive(false);
-        }
-        else
-        {
-            stackText.gameObject.SetActive(stack > 1);
-        }
+        stackText.gameObject.SetActive(item.maxStack >= 2 && stack > 1);
     }
 
     public void UpdateColorSlot()
     {
         if (iventory == null || iventory.Empty_Item == null)
         {
-            Debug.LogWarning("Inventory or Empty_Item reference is missing!");
+            Debug.LogWarning("[InventorySlot] Inventory หรือ Empty_Item หายไป!");
             return;
         }
-
         if (icons == null)
         {
-            Debug.LogWarning("Icons reference is missing!");
+            Debug.LogWarning("[InventorySlot] Icons reference หายไป!");
             return;
         }
 
-        icons.color = (item == iventory.Empty_Item) ? emptyColor : itemColor;
-        icons.gameObject.SetActive(item != iventory.Empty_Item);
+        bool isEmpty = (item == iventory.Empty_Item);
+        icons.color = isEmpty ? emptyColor : itemColor;
+        icons.gameObject.SetActive(!isEmpty);
     }
+
     #endregion
 }

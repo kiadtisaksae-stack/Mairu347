@@ -1,8 +1,7 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "LightingAuraSkill", menuName = "Skills/LightingAura")]
-
 public class LightingAuraSkill : Skill
 {
     [Header("Skill Ability")]
@@ -10,11 +9,11 @@ public class LightingAuraSkill : Skill
     private float damageAccumulator = 0f;
     public float duration;
     public float lightingRadius;
-    [Header("Skill Buff")]
-    public float speedIncreaseAmount = 5f; 
-    float originalSpeed; 
-    float targetSpeed;
 
+    [Header("Skill Buff")]
+    public float speedIncreaseAmount = 5f;
+    float originalSpeed;
+    float targetSpeed;
     public float addCasterDamage = 2f;
     int originalDamage;
     int targetDamage;
@@ -24,7 +23,8 @@ public class LightingAuraSkill : Skill
         this.lifeTime = duration;
     }
 
-    public override void Activate(Character character)
+    // แก้ signature เพิ่ม GameObject spawnedInstance — สกิลนี้ไม่ใช้ instance
+    public override void Activate(Character character, GameObject spawnedInstance)
     {
         Debug.Log("Casting Lighting Aura!");
         timer = duration;
@@ -33,7 +33,6 @@ public class LightingAuraSkill : Skill
         originalDamage = character.Damage;
         targetSpeed = originalSpeed + speedIncreaseAmount;
         targetDamage = (int)(originalDamage * addCasterDamage);
-        
     }
 
     public override void Deactivate(Character character)
@@ -48,17 +47,23 @@ public class LightingAuraSkill : Skill
         timer -= Time.deltaTime;
         character.movementSpeed = targetSpeed;
         character.Damage = targetDamage;
+
         if (timer >= 0)
         {
             damageAccumulator += Time.deltaTime;
-
             if (damageAccumulator >= 1)
             {
                 Enemy[] enemies = GetEnemysInRange(character);
                 foreach (var enemy in enemies)
                 {
-                    enemy.TakeDamage(lightingDamage);
-                    Debug.Log($"{character.Name} lighting strike to {enemy.name} {lightingDamage} damage. Remaining Duration: {timer:F2} seconds.");
+                    // ส่ง damage ผ่าน ServerRpc ถ้าเป็น Player
+                    Player player = character as Player;
+                    if (player != null)
+                        player.DealDamageServerRpc(enemy.NetworkObjectId, lightingDamage);
+                    else
+                        enemy.TakeDamage(lightingDamage);
+
+                    Debug.Log($"{character.Name} lighting strike to {enemy.name} {lightingDamage} damage. Remaining: {timer:F2}s");
                 }
                 damageAccumulator = 0;
             }
@@ -71,19 +76,14 @@ public class LightingAuraSkill : Skill
 
     private Enemy[] GetEnemysInRange(Character caster)
     {
-        // Find all colliders within the search radius
         Collider[] hitColliders = Physics.OverlapSphere(caster.transform.position, lightingRadius);
-        List<Enemy> Enemys = new List<Enemy>();
-
+        List<Enemy> enemies = new List<Enemy>();
         foreach (var hitCollider in hitColliders)
         {
-            // Check if the collider belongs to a character that isn't the caster
-            Enemy targetCharacter = hitCollider.GetComponent<Enemy>();
-            if (targetCharacter != null && targetCharacter != caster)
-            {
-                Enemys.Add(targetCharacter);
-            }
+            Enemy target = hitCollider.GetComponent<Enemy>();
+            if (target != null && target != caster)
+                enemies.Add(target);
         }
-        return Enemys.ToArray();
+        return enemies.ToArray();
     }
 }

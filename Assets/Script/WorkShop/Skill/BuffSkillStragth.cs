@@ -1,10 +1,8 @@
-using UnityEngine;
-
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "BuffSkillStrength", menuName = "Skills/BuffSkillStrength")]
 public class BuffSkillStragth : Skill
 {
-
     [Header("Skill Ability")]
     public float addDamage = 1.2f;
     int originalDamage;
@@ -24,8 +22,8 @@ public class BuffSkillStragth : Skill
         this.lifeTime = duration;
     }
 
-
-    public override void Activate(Character character)
+    // แก้ signature เพิ่ม GameObject spawnedInstance — สกิลนี้ไม่ใช้ instance
+    public override void Activate(Character character, GameObject spawnedInstance)
     {
         timer = duration;
 
@@ -34,7 +32,6 @@ public class BuffSkillStragth : Skill
         targetDamage = (int)(originalDamage * addDamage);
         targetDefence = orignalDefence + addDefence;
         Debug.Log($"{character.Name} Atk increased by {targetDamage} and Def {targetDefence} for {duration} seconds.");
-
     }
 
     public override void Deactivate(Character character)
@@ -54,5 +51,4 @@ public class BuffSkillStragth : Skill
             Deactivate(character);
         }
     }
-
 }

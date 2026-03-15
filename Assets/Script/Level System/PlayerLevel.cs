@@ -1,55 +1,69 @@
-﻿using UnityEngine;
+﻿using Unity.Netcode; // เพิ่มตัวนี้
+using UnityEngine;
 using UnityEngine.Events;
 
-public class PlayerLevel : MonoBehaviour
+// เปลี่ยนจาก MonoBehaviour เป็น NetworkBehaviour
+public class PlayerLevel : NetworkBehaviour
 {
-    public int currentXp;
-    public int currentLevel = 1;
-    public int xpToNextLevel;
+    // ใช้ NetworkVariable เพื่อให้ค่าซิงค์กันระหว่าง Server และ Client
+    public NetworkVariable<int> currentXp = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public NetworkVariable<int> currentLevel = new NetworkVariable<int>(1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    public int xpToNextLevel;
     public int baseXPRequirement = 100;
     public float xpMultiplierPerLevel = 1.5f;
 
     [Header("Events")]
     public UnityEvent OnLevelUp;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public override void OnNetworkSpawn()
     {
-        xpToNextLevel = baseXPRequirement;
-        GameManager.Instance.UpdateXpbar(currentXp, xpToNextLevel);
-        GameManager.Instance.UpdateLevel(currentLevel);
+        // คำนวณ XP ที่ต้องใช้ ณ เลเวลปัจจุบัน
+        CalculateNextLevelXP();
 
+        // สมัครรับการแจ้งเตือนเมื่อค่าเปลี่ยน (เพื่ออัปเดต UI)
+        currentXp.OnValueChanged += (oldVal, newVal) => UpdateUI();
+        currentLevel.OnValueChanged += (oldVal, newVal) => {
+            UpdateUI();
+            if (newVal > oldVal) OnLevelUp?.Invoke();
+        };
+
+        if (IsOwner) UpdateUI();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void UpdateUI()
     {
-        
+        if (!IsOwner) return;
+        GameManager.Instance.UpdateXpbar(currentXp.Value, xpToNextLevel);
+        GameManager.Instance.UpdateLevel(currentLevel.Value);
     }
+
+    // การเพิ่ม XP ต้องทำที่ Server เท่านั้น
     public void AddExperience(int XpAmount)
     {
-        currentXp += XpAmount;
-        GameManager.Instance.UpdateXpbar(currentXp , xpToNextLevel);
-        while (currentXp >= xpToNextLevel)
+        if (!IsServer) return;
+
+        currentXp.Value += XpAmount;
+        while (currentXp.Value >= xpToNextLevel)
         {
             LevelUp();
         }
     }
 
-    public void LevelUp()
+    private void LevelUp()
     {
-        currentLevel++;
-        currentXp -= xpToNextLevel;
+        // ไม่ต้องเช็ค IsServer ซ้ำเพราะเรียกมาจาก AddExperience ที่เช็คแล้ว
+        currentLevel.Value++;
+        currentXp.Value -= xpToNextLevel;
         CalculateNextLevelXP();
-        Debug.Log("Level Up");
-        GameManager.Instance.UpdateLevel(currentLevel);
-        OnLevelUp?.Invoke();
+
+        // เรียก ClientRpc หากต้องการให้มี Effect เล่นที่เครื่องคนอื่นด้วย
+        // LevelUpClientRpc(); 
     }
 
     private void CalculateNextLevelXP()
     {
-        xpToNextLevel = (int)(baseXPRequirement * Mathf.Pow(currentLevel, xpMultiplierPerLevel));
-        GameManager.Instance.UpdateXpbar(currentXp, xpToNextLevel);
+        // ใช้ .Value สำหรับ NetworkVariable
+        xpToNextLevel = (int)(baseXPRequirement * Mathf.Pow(currentLevel.Value, xpMultiplierPerLevel));
     }
 }

@@ -1,12 +1,10 @@
-using NUnit.Framework;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "AoeHealSkill", menuName = "Skills/AoeHealSkill")]
 public class AoeHealSkill : Skill
 {
     [Header("Skill Ability")]
-
     public int healAmount = 50;
     public float healRadius = 10;
 
@@ -16,9 +14,10 @@ public class AoeHealSkill : Skill
         this.cooldownTime = 30;
     }
 
-    public override void Activate(Character character)
+    // แก้ signature เพิ่ม GameObject spawnedInstance — สกิลนี้ไม่ใช้ instance
+    public override void Activate(Character character, GameObject spawnedInstance)
     {
-        Debug.Log($"{character.name} casting Aoe Heal skill deal {healAmount} ");
+        Debug.Log($"{character.name} casting Aoe Heal skill deal {healAmount}");
 
         Player[] players = GetPlayerInRange(character);
         foreach (var p in players)
@@ -28,30 +27,20 @@ public class AoeHealSkill : Skill
         }
     }
 
-    public override void Deactivate(Character character)
-    {
+    public override void Deactivate(Character character) { }
 
-    }
-
-    public override void UpdateSkill(Character character)
-    {
-
-    }
-
+    public override void UpdateSkill(Character character) { }
 
     private Player[] GetPlayerInRange(Character caster)
     {
-        Collider[] hitcolliders = Physics.OverlapSphere(caster.transform.position, healRadius);
+        Collider[] hitColliders = Physics.OverlapSphere(caster.transform.position, healRadius);
         List<Player> players = new List<Player>();
-        foreach (var hitcollider in hitcolliders)
+        foreach (var hitCollider in hitColliders)
         {
-            Player inRangeplayer = hitcollider.GetComponent<Player>();
-            if (inRangeplayer != null)
-            {
-                players.Add(inRangeplayer);
-            }
+            Player player = hitCollider.GetComponent<Player>();
+            if (player != null)
+                players.Add(player);
         }
         return players.ToArray();
     }
-
 }

@@ -1,36 +1,31 @@
-using UnityEngine;
-using System.Collections.Generic;
+Ôªøusing UnityEngine;
 
-// °”Àπ¥„ÀÈ‡ªÁπ sealed ‡æ◊ËÕªÈÕß°—π°“√ ◊∫∑Õ¥
 public sealed class SoundManager : MonoBehaviour
 {
-    // 1. Singleton Instance
+    // ---- Singleton ----
     private static SoundManager _instance;
-
-    // 2. Public Static Property (Global Access Point)
     public static SoundManager Instance
     {
         get
         {
             if (_instance == null)
-            {
                 Debug.LogError("SoundManager instance is null! Is it in the scene?");
-            }
             return _instance;
         }
     }
 
     [Header("Audio Sources")]
-    // Audio Source  ”À√—∫‡æ≈ßª√–°Õ∫ (Looping)
-    public AudioSource musicSource;
-    // Audio Source  ”À√—∫‡Õø‡ø°µÏ‡ ’¬ß (Non-Looping)
-    public AudioSource sfxSource;
+    public AudioSource musicSource; // ‡∏™‡∏≥‡∏´‡∏£‡∏±‡∏ö‡πÄ‡∏û‡∏•‡∏á‡∏õ‡∏£‡∏∞‡∏Å‡∏≠‡∏ö (Looping)
+    public AudioSource sfxSource;   // ‡∏™‡∏≥‡∏´‡∏£‡∏±‡∏ö‡πÄ‡∏≠‡∏ü‡πÄ‡∏ü‡∏Å‡∏ï‡πå‡πÄ‡∏™‡∏µ‡∏¢‡∏á (Non-Looping)
 
     [Header("Default Audio Clips")]
     public AudioClip defaultButtonClick;
     public AudioClip defaultBackgroundMusic;
 
-    // 3. Singleton Initialization
+    [Header("Volume")]
+    [Range(0f, 1f)] public float musicVolume = 0.5f;
+    [Range(0f, 1f)] public float sfxVolume = 0.5f;
+
     private void Awake()
     {
         if (_instance == null)
@@ -38,12 +33,12 @@ public sealed class SoundManager : MonoBehaviour
             _instance = this;
             DontDestroyOnLoad(gameObject);
 
-            // µ√«® Õ∫·≈–‡æ‘Ë¡ Audio Source À“°¬—ß‰¡Ë¡’
             if (musicSource == null) musicSource = gameObject.AddComponent<AudioSource>();
             if (sfxSource == null) sfxSource = gameObject.AddComponent<AudioSource>();
 
-            // µ—Èß§Ë“æ◊Èπ∞“π
-            musicSource.loop = true; // ‡æ≈ßª√–°Õ∫¡—°®–«π´È”
+            musicSource.loop = true;
+            musicSource.volume = musicVolume;
+            sfxSource.volume = sfxVolume;
 
             PlayMusic(defaultBackgroundMusic);
         }
@@ -53,61 +48,47 @@ public sealed class SoundManager : MonoBehaviour
         }
     }
 
-    // ------------------- Music Controls -------------------
+    // ------------------- Music -------------------
 
-    /// <summary>
-    /// ‡≈Ëπ‡æ≈ßª√–°Õ∫„À¡Ë
-    /// </summary>
     public void PlayMusic(AudioClip clip)
     {
         if (clip == null || musicSource == null) return;
-
         musicSource.clip = clip;
         musicSource.Play();
     }
 
     public void StopMusic()
     {
-        if (musicSource != null)
-        {
-            musicSource.Stop();
-        }
+        if (musicSource != null) musicSource.Stop();
     }
 
-    // ------------------- SFX Controls -------------------
+    // ------------------- SFX -------------------
 
-    /// <summary>
-    /// ‡≈Ëπ‡Õø‡ø°µÏ‡ ’¬ß·∫∫§√—Èß‡¥’¬«®∫ (One-Shot)
-    /// </summary>
+    /// <summary>PlayOneShot ‚Äî ‡πÄ‡∏•‡πà‡∏ô‡∏ó‡∏±‡∏ö‡∏ã‡πâ‡∏≠‡∏ô‡∏Å‡∏±‡∏ô‡πÑ‡∏î‡πâ</summary>
     public void PlaySFX(AudioClip clip)
     {
         if (clip == null || sfxSource == null) return;
-
-        // „™È PlayOneShot ‡æ◊ËÕ„ÀÈ‡≈ËπÀ≈“¬‡ ’¬ß∑—∫´ÈÕπ°—π‰¥È
-        sfxSource.PlayOneShot(clip);
+        sfxSource.PlayOneShot(clip, sfxVolume);
     }
 
-    // ------------------- Volume Controls -------------------
+    public void PlayButtonClick()
+    {
+        PlaySFX(defaultButtonClick);
+    }
 
-    /// <summary>
-    /// °”Àπ¥√–¥—∫‡ ’¬ßÀ≈—°¢Õß‡æ≈ßª√–°Õ∫ (0.0 ∂÷ß 1.0)
-    /// </summary>
+    // ------------------- Volume -------------------
+
+    /// <summary>‡∏ï‡∏±‡πâ‡∏á‡∏£‡∏∞‡∏î‡∏±‡∏ö‡πÄ‡∏™‡∏µ‡∏¢‡∏á‡πÄ‡∏û‡∏•‡∏á‡∏õ‡∏£‡∏∞‡∏Å‡∏≠‡∏ö (0.0 ‡∏ñ‡∏∂‡∏á 1.0)</summary>
     public void SetMusicVolume(float volume)
     {
-        if (musicSource != null)
-        {
-            musicSource.volume = volume;
-        }
+        musicVolume = Mathf.Clamp01(volume);
+        if (musicSource != null) musicSource.volume = musicVolume;
     }
 
-    /// <summary>
-    /// °”Àπ¥√–¥—∫‡ ’¬ßÀ≈—°¢Õß‡Õø‡ø°µÏ‡ ’¬ß (0.0 ∂÷ß 1.0)
-    /// </summary>
+    /// <summary>‡∏ï‡∏±‡πâ‡∏á‡∏£‡∏∞‡∏î‡∏±‡∏ö‡πÄ‡∏™‡∏µ‡∏¢‡∏á‡πÄ‡∏≠‡∏ü‡πÄ‡∏ü‡∏Å‡∏ï‡πå (0.0 ‡∏ñ‡∏∂‡∏á 1.0)</summary>
     public void SetSFXVolume(float volume)
     {
-        if (sfxSource != null)
-        {
-            sfxSource.volume = volume;
-        }
+        sfxVolume = Mathf.Clamp01(volume);
+        if (sfxSource != null) sfxSource.volume = sfxVolume;
     }
 }
