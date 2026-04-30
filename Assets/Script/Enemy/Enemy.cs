@@ -12,8 +12,8 @@ public class Enemy : Character
     protected enum State { Idel, Chase, Attack, Death }
 
     [Header("Attack Settings")]
-    [SerializeField] protected float TimeToAttack = 1f;
-    [SerializeField] protected float AttackRange = 1.5f;
+    protected float TimeToAttack = 1f;
+    protected float AttackRange = 1.5f;
     protected bool isRun = false;
 
     protected State currentState = State.Idel;
@@ -28,12 +28,15 @@ public class Enemy : Character
 
     public override void OnNetworkSpawn()
     {
-        this._initialMaxHealth = enemyType._initialMaxHealth;
+        this._initialMaxHealth = enemyType.initialMaxHealth;
         this.Name = enemyType.enemyName;
-        this.Defence = enemyType.Defence;
-        this.Damage = enemyType.Damage;
+        this.Defence = enemyType.defence;
+        this.Damage = enemyType.damage;
         this.movementSpeed = enemyType.movementSpeed;
         this.xpValue = enemyType.experience;
+        this.xpShareRadius = enemyType.xpShareRadius;
+        this.AttackRange = enemyType.attackRange;
+        this.TimeToAttack = enemyType.attackCooldown;
         base.OnNetworkSpawn();
     }
 

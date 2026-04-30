@@ -3,7 +3,14 @@ using UnityEngine;
 
 public class EnemyMovetoPlayer : Enemy
 {
-    public float searchRadius = 5f;
+    private float searchRadius = 5f;
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        this.searchRadius = enemyType.searchRadius;
+    }
+
     private void Update()
     {
         // 🚨 สำคัญ: ตรวจสอบเฉพาะบน Server/Host เท่านั้นที่ควรประมวลผล AI และการโจมตี

@@ -14,11 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyType
   enemyName: ChestM
   enemyId: 2
-  _initialMaxHealth: 1000
-  Damage: 5
-  Defence: 10
+  enemyPrefab: {fileID: 0}
+  initialMaxHealth: 100
+  damage: 0
+  defence: 0
   movementSpeed: 3
-  experience: 100000
+  aiType: 0
+  searchRadius: 5
+  attackRange: 1.5
+  attackCooldown: 1
+  experience: 9999
+  xpShareRadius: 15
   dropTable:
   - prefab: {fileID: 5500088467180248298, guid: c70af2939d69c47e980f417537e34740, type: 3}
     weight: 81

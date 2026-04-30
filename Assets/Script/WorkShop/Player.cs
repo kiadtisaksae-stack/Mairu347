@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -27,9 +27,7 @@ public class Player : Character
     bool _isAttacking = false;
     bool _isInteract = false;
 
-    [Header("Movement Settings")]
-    [SerializeField] private float jumpForce = 8f;
-    [SerializeField] private float gravity = -20f;
+    // Movement settings are read from playerSO
 
     private Vector3 velocity;
     private InputSystem_Actions inputActions;
@@ -51,8 +49,6 @@ public class Player : Character
 
     private void Awake()
     {
-        var b = A();
-
         characterController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
         if (NetworkManager.Singleton != null)
@@ -61,15 +57,7 @@ public class Player : Character
         }
         inputActions = new InputSystem_Actions();
     }
-    public GameManager A()
-    {
-        return GameManager.Instance;
-    }
-    public GameManager A(int a)
-    {
-        return GameManager.Instance;
-        
-    }
+
 
     private void OnEnable()
     {
@@ -92,13 +80,13 @@ public class Player : Character
 
     public override void OnNetworkSpawn()
     {
-        this.Damage = playerSO.Damage;
+        this.Damage = playerSO.baseDamage;
         this.baseDamage = playerSO.baseDamage;
-        this.Defence = playerSO.Defence;
+        this.Defence = playerSO.baseDefence;
         this.baseDefence = playerSO.baseDefence;
-        this.movementSpeed = playerSO.movementSpeed;
-        this.sprintSpeed = playerSO.sprint;
-        this._initialMaxHealth = playerSO._initialMaxHealth;
+        this.movementSpeed = playerSO.walkSpeed;
+        this.sprintSpeed = playerSO.sprintSpeed;
+        this._initialMaxHealth = playerSO.initialMaxHealth;
         base.OnNetworkSpawn();
         GameManager.Instance.UpdateStatus(Damage, Defence);
 
@@ -218,8 +206,8 @@ public class Player : Character
     #region --- interactable Logic ---
     public override RaycastHit GetClosestInfornt()
     {
-        float playerSphereRadius = 0.8f;
-        float playerMaxDistance = 2.0f;
+        float playerSphereRadius = playerSO.interactSphereRadius;
+        float playerMaxDistance = playerSO.interactMaxDistance;
         Vector3 origin = transform.position + Vector3.up * 0.5f;
         Vector3 direction = transform.forward;
         RaycastHit[] hits = Physics.SphereCastAll(origin, playerSphereRadius, direction, playerMaxDistance);
@@ -516,7 +504,7 @@ public class Player : Character
         if (_uiMoveInput != Vector2.zero)
             moveInput = _uiMoveInput;
         Vector3 inputDir = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
-        float speed = _uiSprintInput ? sprintSpeed : movementSpeed;
+        float speed = _uiSprintInput ? playerSO.sprintSpeed : playerSO.walkSpeed;
         MoveLocally(inputDir, speed);
     }
 
@@ -525,7 +513,7 @@ public class Player : Character
         if (inputDirection.sqrMagnitude > 0.01f)
         {
             float targetAngle = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg;
-            float smoothAngle = Mathf.LerpAngle(transform.eulerAngles.y, targetAngle, 15f * Time.deltaTime);
+            float smoothAngle = Mathf.LerpAngle(transform.eulerAngles.y, targetAngle, playerSO.rotationSmoothing * Time.deltaTime);
             transform.rotation = Quaternion.Euler(0f, smoothAngle, 0f);
             Vector3 moveDir = transform.forward;
             characterController.Move(moveDir * currentSpeed * Time.deltaTime);
@@ -544,7 +532,7 @@ public class Player : Character
         bool isGrounded = characterController.isGrounded;
         if (isGrounded && velocity.y < 0)
             velocity.y = -0.5f;
-        velocity.y += gravity * Time.deltaTime;
+        velocity.y += playerSO.gravity * Time.deltaTime;
         characterController.Move(velocity * Time.deltaTime);
     }
 
@@ -552,7 +540,7 @@ public class Player : Character
     {
         if (!IsOwner) return;
         if (jump && characterController.isGrounded)
-            velocity.y = jumpForce;
+            velocity.y = playerSO.jumpForce;
     }
     #endregion
 
@@ -681,10 +669,10 @@ public class Player : Character
 
     public void OnLevelUp()
     {
-        _initialMaxHealth = Mathf.RoundToInt(maxHealth * 1.2f);
+        _initialMaxHealth = Mathf.RoundToInt(maxHealth * playerSO.healthMultiplier);
         health = maxHealth;
-        baseDamage = Mathf.RoundToInt(baseDamage * 1.1f);
-        baseDefence = Mathf.RoundToInt(baseDefence * 1.1f);
+        baseDamage = Mathf.RoundToInt(baseDamage * playerSO.damageMultiplier);
+        baseDefence = Mathf.RoundToInt(baseDefence * playerSO.defenceMultiplier);
         Damage = baseDamage;
         Defence = baseDefence;
         GameManager.Instance.UpdateHealthBar(health, maxHealth);

@@ -2,7 +2,13 @@ using UnityEngine;
 
 public class EnemyRange : Enemy
 {
-    public float attackRange = 5f; // Range within which the enemy can attack
+    private float rangedAttackRange = 5f;
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        this.rangedAttackRange = enemyType.attackRange;
+    }
 
     private void Update()
     {
@@ -19,7 +25,7 @@ public class EnemyRange : Enemy
         Turn(directionToTarget);
         timer -= Time.fixedDeltaTime;
 
-        if (GetDistanClosestPlayer() < attackRange)
+        if (GetDistanClosestPlayer() < rangedAttackRange)
         {
             Attack(_targetPlayer);
             currentState = State.Attack;

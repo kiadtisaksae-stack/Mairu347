@@ -1,29 +1,46 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "EnemyType", menuName = "Game/EnemyType")]
+public enum EnemyAIType
+{
+    Melee,
+    Ranged,
+    Boss,
+    Passive
+}
+
+[CreateAssetMenu(fileName = "EnemyType", menuName = "Game/Enemy Config")]
 public class EnemyType : ScriptableObject
 {
+    [Header("Identity")]
     public string enemyName;
     public int enemyId;
+    public GameObject enemyPrefab;
 
-    [Header("Status")]
-    public int _initialMaxHealth = 100;
-    public int Damage;
-    public int Defence;
+    [Header("Stats")]
+    public int initialMaxHealth = 100;
+    public int damage;
+    public int defence;
     public float movementSpeed;
+
+    [Header("AI Behavior")]
+    public EnemyAIType aiType = EnemyAIType.Melee;
+    public float searchRadius = 5f;
+    public float attackRange = 1.5f;
+    public float attackCooldown = 1f;
+
+    [Header("XP")]
     public int experience;
+    public float xpShareRadius = 15f;
 
     [Header("Drop Items")]
     public List<DropEntry> dropTable = new List<DropEntry>();
-
-    // จำนวนไอเทมที่ drop ต่อครั้ง
     public int dropCount = 1;
 
     [System.Serializable]
     public class DropEntry
     {
         public GameObject prefab;
-        [Range(0, 100)] public int weight = 33; // น้ำหนักโอกาส drop
+        [Range(0, 100)] public int weight = 33;
     }
 }
