@@ -18,7 +18,7 @@ MonoBehaviour:
   Damage: 5
   Defence: 5
   movementSpeed: 3
-  experience: 750
+  experience: 6000
   dropTable:
   - prefab: {fileID: 2746531701947380368, guid: b37d03b109d3249258d6353fd6903dab, type: 3}
     weight: 88

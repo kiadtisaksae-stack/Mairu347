@@ -145,6 +145,7 @@ public class Item : Identity
         }
 
     }
+    
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void RandomAmountServerRpc()
     {

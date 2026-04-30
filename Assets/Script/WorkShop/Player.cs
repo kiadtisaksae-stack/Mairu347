@@ -51,6 +51,8 @@ public class Player : Character
 
     private void Awake()
     {
+        var b = A();
+
         characterController = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
         if (NetworkManager.Singleton != null)
@@ -58,6 +60,15 @@ public class Player : Character
             NetworkManager.Singleton.OnServerStarted += OnServerStarted;
         }
         inputActions = new InputSystem_Actions();
+    }
+    public GameManager A()
+    {
+        return GameManager.Instance;
+    }
+    public GameManager A(int a)
+    {
+        return GameManager.Instance;
+        
     }
 
     private void OnEnable()

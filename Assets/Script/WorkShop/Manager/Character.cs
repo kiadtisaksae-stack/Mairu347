@@ -5,7 +5,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(NetworkTransform))]
 [RequireComponent(typeof(NetworkAnimator))]
-public class Character : Identity, Idestoryable
+public class Character : Identity, Idestoryable 
 {
     private readonly NetworkVariable<int> _networkHealth = new(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private readonly NetworkVariable<int> _networkMaxHealth = new(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
